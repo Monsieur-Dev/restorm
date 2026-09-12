@@ -300,7 +300,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         logger.info('SOAP request completed', { url: res.requestUrl, status: res.statusCode })
       })
       .catch((err: unknown) => {
-        logger.error('SOAP request failed', { error: String(err) })
+        logger.warn('SOAP request failed', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)

@@ -1,0 +1,106 @@
+/* Read-only, grouped listing of an API's design-validation issues. Rendered in
+ * the env-folder "Issues" tab today, and reused verbatim in the post-import
+ * recap modal. Non-interactive: no hover, no cursor, no click affordance. */
+.api-design-issues-list {
+  padding: 12px 16px;
+}
+
+.api-design-issues-list-callout {
+  margin: 0 0 12px;
+}
+
+.api-design-issues-groups {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.api-design-issue-group {
+  border: 1px solid var(--widget-border, var(--panel-border, rgba(128, 128, 128, 0.25)));
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: var(--editorWidget-background, rgba(128, 128, 128, 0.06));
+}
+
+.api-design-issue-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.api-design-issue-icon {
+  color: var(--editorError-foreground, #f48771);
+  flex: 0 0 auto;
+}
+
+.api-design-issue-label {
+  font-weight: 600;
+}
+
+.api-design-issue-count {
+  color: var(--descriptionForeground, #999);
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.api-design-issue-offenders {
+  margin: 8px 0 0;
+  padding: 0 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.api-design-offender-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.api-design-offender-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--foreground, #ccc);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.api-design-offender-toggle:hover {
+  background: var(--list-hoverBackground, rgba(128, 128, 128, 0.12));
+}
+
+.api-design-offender-static {
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.api-design-offender-chevron {
+  flex: 0 0 auto;
+  opacity: 0.7;
+}
+
+.api-design-offender-label {
+  font-family: var(--monospace-font, ui-monospace, monospace);
+  font-size: 0.9em;
+  word-break: break-word;
+}
+
+.api-design-offender-doc {
+  margin: 4px 0 8px 22px;
+  padding: 8px 12px;
+  border: 1px solid var(--widget-border, var(--panel-border, rgba(128, 128, 128, 0.25)));
+  border-radius: 6px;
+  background: var(--editor-background, rgba(0, 0, 0, 0.12));
+  overflow-x: auto;
+}

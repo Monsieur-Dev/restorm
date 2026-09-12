@@ -359,7 +359,8 @@
       "docs": "Doku",
       "environments": "Umgebungen",
       "notes": "Notizen",
-      "customValues": "Benutzerdefinierte Aufzählungen"
+      "customValues": "Benutzerdefinierte Aufzählungen",
+      "issues": "Probleme"
     },
     "home": {
       "configureEnvs": "Umgebungen konfigurieren",
@@ -1976,6 +1977,14 @@
         "version": "Version",
         "versionPlaceholder": "Version",
         "add": "Paket hinzufügen"
+      },
+      "tab": {
+        "code": "Code",
+        "help": "Brauchen Sie Hilfe?"
+      },
+      "help": {
+        "intro": "Der verkabelte Wert kommt als `input` an, die Laufzeitvariablen als `vars`, und die kuratierte Standardbibliothek steht als globale Variablen bereit. Geben Sie das Ergebnis mit `return` zurück (oder lassen Sie es in Python / Ruby / R / C# als letzten Ausdruck stehen), um es über den Ausgang `result` zu senden.",
+        "exampleFor": "Beispiel in {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Kurzlebig (TTL)"
     },
     "issue": {
+      "collidesWith": "Kollidiert mit:",
       "propertyNameEmpty": "Die Eigenschaft hat keinen Namen",
       "propertyNameDuplicate": "Doppelter Eigenschaftsname",
       "propertyShadowsParent": "Überdeckt eine geerbte Eigenschaft",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Ein Antwortmodell existiert nicht mehr",
       "responseExampleUnknown": "Eine Antwort serviert ein fehlendes Beispiel",
       "routeResponsesMissing": "Die Route deklariert keine Antwort",
-      "routePathDuplicate": "Eine andere Route beantwortet diese Methode und diesen Pfad bereits",
+      "routePathDuplicate": "Mindestens eine andere Route beantwortet diese Methode und diesen Pfad bereits",
       "routePathReserved": "Der Design-Server reserviert diesen Pfad — die Route würde nie antworten"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Liste",
         "graph": "Graph"
+      }
+    },
+    "issuesList": {
+      "intro": "Wir haben diese API analysiert und einige mögliche Designprobleme gefunden.",
+      "badgeTooltip": "Design-Probleme ({{count}})",
+      "badgeAria": "Design-Probleme",
+      "code": {
+        "propertyNameEmpty": "Einige Eigenschaften haben keinen Namen",
+        "propertyNameDuplicate": "Einige Eigenschaften tragen innerhalb ihres Modells denselben Namen",
+        "propertyShadowsParent": "Einige Eigenschaften überdecken eine geerbte Eigenschaft",
+        "modelNameEmpty": "Einige Modelle haben keinen Namen",
+        "enumNameEmpty": "Einige Enums haben keinen Namen",
+        "groupNameEmpty": "Einige Routengruppen haben keinen Namen",
+        "modelNameDuplicate": "Mehrere Modelle tragen denselben Namen",
+        "enumNameDuplicate": "Mehrere Enums tragen denselben Namen",
+        "componentNameCollision": "Ein Modell und ein Enum tragen denselben Namen",
+        "groupNameDuplicate": "Mehrere Routengruppen tragen denselben Namen",
+        "inheritanceTargetUnknown": "Einige Modelle erben von einem Modell, das nicht mehr existiert",
+        "inheritanceCycle": "Einige Modelle bilden eine zirkuläre Vererbungskette",
+        "referenceTargetUnknown": "Einige Eigenschaften verweisen auf einen Typ, der nicht mehr existiert",
+        "identifierPropertyUnknown": "Einige Modelle verweisen mit ihrem Bezeichner auf eine Eigenschaft, die nicht mehr existiert",
+        "paramLinkTargetUnknown": "Einige Routenparameter verweisen auf ein Modell oder eine Eigenschaft, die nicht mehr existieren",
+        "paramEnumRefUnknown": "Einige Routenparameter verweisen auf ein Enum, das nicht mehr existiert",
+        "bodyModelUnknown": "Einige Routen verwenden ein Body-Modell, das nicht mehr existiert",
+        "responseModelUnknown": "Einige Antworten verwenden ein Modell, das nicht mehr existiert",
+        "responseExampleUnknown": "Einige Antworten liefern ein Beispiel, das ihr Modell nicht deklariert",
+        "constraintPatternInvalid": "Einige Eigenschaftsbedingungen verwenden ein ungültiges Muster (regulärer Ausdruck)",
+        "constraintMinAboveMax": "Einige Eigenschaftsbedingungen haben ein Minimum über ihrem Maximum",
+        "routeResponsesMissing": "Einige Routen deklarieren keine Antwort",
+        "routePathDuplicate": "Mehrere Routen beantworten dieselbe Methode und denselben Pfad",
+        "routePathReserved": "Einige Routen liegen auf einem Pfad, den der Design-Server reserviert"
       }
     }
   },

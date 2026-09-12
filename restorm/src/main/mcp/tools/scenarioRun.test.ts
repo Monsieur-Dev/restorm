@@ -113,3 +113,28 @@ describe('waitMs — persisted wait-node duration', () => {
     expect(waitMs(node({ durationMs: -5 }) as never)).toBe(1000)
   })
 })
+
+// A JSON-path picker asking for the result of a node that was deleted / rewired
+// must get `null`, NOT an exception: the throw surfaces as an Electron
+// `console.error` from the `scenario:node-result` handler and gets captured as
+// crash-report noise, even though the renderer already treats null as "no
+// result". Guards against a regression back to the throwing `locateNode` path.
+describe('getScenarioNodeResult — a stale reference resolves to null, never throws', () => {
+  beforeEach(() => {
+    findByIdMock.mockReset()
+  })
+
+  it('returns null when the scenario no longer holds the node', async () => {
+    findByIdMock.mockImplementation((id: string) =>
+      id === 's1' ? { id: 's1', type: 'scenario', nodes: [{ id: 'other', kind: 'code', config: {} }] } : null
+    )
+    const { getScenarioNodeResult } = await import('./scenarioRun')
+    await expect(getScenarioNodeResult('s1', 'deleted-node')).resolves.toBeNull()
+  })
+
+  it('returns null when the scenario itself is gone', async () => {
+    findByIdMock.mockReturnValue(null)
+    const { getScenarioNodeResult } = await import('./scenarioRun')
+    await expect(getScenarioNodeResult('missing', 'n1')).resolves.toBeNull()
+  })
+})

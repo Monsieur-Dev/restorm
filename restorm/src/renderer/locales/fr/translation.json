@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Environnements",
       "notes": "Notes",
-      "customValues": "Énumérations personnalisées"
+      "customValues": "Énumérations personnalisées",
+      "issues": "Problèmes"
     },
     "home": {
       "configureEnvs": "Configurer les environnements",
@@ -1960,6 +1961,14 @@
       "language": "Langage",
       "code": "code",
       "modalTitle": "Éditer le code",
+      "tab": {
+        "code": "Code",
+        "help": "Besoin d’aide ?"
+      },
+      "help": {
+        "intro": "La valeur câblée arrive dans `input`, les variables du run dans `vars`, et la bibliothèque standard est disponible sous forme de variables globales. Renvoyez le résultat avec `return` (ou, en Python / Ruby / R / C#, laissez-le en dernière expression) pour l’envoyer vers la sortie `result`.",
+        "exampleFor": "Exemple en {{language}}"
+      },
       "result": "résultat",
       "timeout": "Délai max (s)",
       "deps": {
@@ -2505,7 +2514,39 @@
       "archivable": "Archivable",
       "ephemeral": "Éphémère (TTL)"
     },
+    "issuesList": {
+      "intro": "Nous avons analysé votre API et détecté de potentiels problèmes de conception.",
+      "badgeTooltip": "Problèmes de design ({{count}})",
+      "badgeAria": "Problèmes de design",
+      "code": {
+        "propertyNameEmpty": "Certaines propriétés n'ont pas de nom",
+        "propertyNameDuplicate": "Des propriétés portent le même nom au sein de leur modèle",
+        "propertyShadowsParent": "Des propriétés masquent une propriété héritée",
+        "modelNameEmpty": "Certains modèles n'ont pas de nom",
+        "enumNameEmpty": "Certaines énumérations n'ont pas de nom",
+        "groupNameEmpty": "Certains groupes de routes n'ont pas de nom",
+        "modelNameDuplicate": "Plusieurs modèles portent le même nom",
+        "enumNameDuplicate": "Plusieurs énumérations portent le même nom",
+        "componentNameCollision": "Un modèle et une énumération portent le même nom",
+        "groupNameDuplicate": "Plusieurs groupes de routes portent le même nom",
+        "inheritanceTargetUnknown": "Des modèles héritent d'un modèle qui n'existe plus",
+        "inheritanceCycle": "Des modèles forment une chaîne d'héritage circulaire",
+        "referenceTargetUnknown": "Des propriétés référencent un type qui n'existe plus",
+        "identifierPropertyUnknown": "Des modèles désignent comme identifiant une propriété qui n'existe plus",
+        "paramLinkTargetUnknown": "Des paramètres de route pointent vers un modèle ou une propriété qui n'existe plus",
+        "paramEnumRefUnknown": "Des paramètres de route référencent une énumération qui n'existe plus",
+        "bodyModelUnknown": "Des routes utilisent un modèle de corps qui n'existe plus",
+        "responseModelUnknown": "Des réponses utilisent un modèle qui n'existe plus",
+        "responseExampleUnknown": "Des réponses renvoient un exemple non déclaré par leur modèle",
+        "constraintPatternInvalid": "Des contraintes de propriété utilisent un motif (expression régulière) invalide",
+        "constraintMinAboveMax": "Des contraintes de propriété ont un minimum supérieur à leur maximum",
+        "routeResponsesMissing": "Des routes ne déclarent aucune réponse",
+        "routePathDuplicate": "Plusieurs routes répondent à la même méthode et au même chemin",
+        "routePathReserved": "Des routes occupent un chemin réservé par le serveur de design"
+      }
+    },
     "issue": {
+      "collidesWith": "En conflit avec :",
       "propertyNameEmpty": "La propriété n’a pas de nom",
       "propertyNameDuplicate": "Nom de propriété en doublon",
       "propertyShadowsParent": "Masque une propriété héritée",
@@ -2527,7 +2568,7 @@
       "responseModelUnknown": "Un modèle de réponse n’existe plus",
       "responseExampleUnknown": "Une réponse sert un exemple disparu",
       "routeResponsesMissing": "La route ne déclare aucune réponse",
-      "routePathDuplicate": "Une autre route répond déjà à cette méthode et ce chemin",
+      "routePathDuplicate": "Au moins une autre route répond déjà à cette méthode et ce chemin",
       "routePathReserved": "Le serveur de design réserve ce chemin — la route ne répondrait jamais"
     },
     "routes": {

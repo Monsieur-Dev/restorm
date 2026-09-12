@@ -296,6 +296,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
             issues={issues}
             selectedEnumId={selectedEnumId}
             onSelectEnum={setSelectedEnumId}
+            onJumpTo={jumpTo}
             pendingAction={entityAction?.section === 'enums' ? entityAction : null}
           />
         )}
@@ -305,6 +306,7 @@ export const DesignTabView: React.FC<DesignTabViewProps> = ({ design, tabId }) =
             issues={issues}
             selectedEntityId={selectedRouteEntityId}
             onSelectEntity={setSelectedRouteEntityId}
+            onJumpTo={jumpTo}
             pendingAction={entityAction?.section === 'routes' ? entityAction : null}
           />
         )}

@@ -91,7 +91,7 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { spawn, execFile } from 'node:child_process'
-import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
+import { searchIndexService, contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
@@ -493,7 +493,7 @@ function createWindow(): MainWindow | undefined {
       const openPathOnStart = (targetPath: string): void => {
         if (existsSync(targetPath) && statSync(targetPath).isDirectory()) {
           // A project is a single `.restorm` file; a directory is never one.
-          logger.error('Cannot open a directory as a project', { path: targetPath })
+          logger.warn('Cannot open a directory as a project', { path: targetPath })
         } else if (isFileServiceInitialized()) {
           // FileService stamps `_projectUuid` before broadcasting `file:opened`
           // (configured via `uuidKey` on init), so this stays a simple open +
@@ -508,7 +508,7 @@ function createWindow(): MainWindow | undefined {
               // single-file projects can be something else.
               await attachDraftStoreForFile(targetPath, 'yaml')
             } else {
-              logger.error('Failed to open file on startup:', { path: targetPath })
+              logger.warn('Failed to open file on startup:', { path: targetPath })
             }
           })
         } else {
@@ -898,6 +898,12 @@ logger.info('Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('Context Service initialized')
+
+// Validate each API's design (env folders carrying an apiDocumentation) on load
+// / import / update, and push the issues to the renderer for the sidebar "!" +
+// the env-folder "Issues" tab.
+apiDesignValidationService.initialize()
+logger.info('API Design Validation Service initialized')
 
 // Mirror the renderer's per-env-folder active-environment selection into the
 // main process — unconditionally, NOT only when MCP is on. ContextService needs it

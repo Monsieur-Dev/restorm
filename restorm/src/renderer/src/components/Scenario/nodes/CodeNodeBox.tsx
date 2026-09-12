@@ -31,12 +31,12 @@ const MAX_TIMEOUT_SEC = 60
 /** Display labels parallel to {@link CODE_LANGUAGES}, for the language radio. */
 const CODE_LANGUAGE_LABEL_LIST = CODE_LANGUAGES.map((l) => CODE_LANGUAGE_LABELS[l])
 
-const DEFAULT_CODE = '// `input` = wired value, `vars` = run variables\n// curated stdlib: _, lodash, moment, uuid, nanoid, CryptoJS, Ajv\nreturn input'
-
 /**
  * `code` — runs user TypeScript/JavaScript in the QuickJS sandbox. The wired
  * `value` input is exposed as `input`, run variables as `vars`, and the curated
  * standard library as globals; whatever the script returns flows out of `result`.
+ * The usage help (input / vars / stdlib / return) lives in the editor modal's
+ * "Need help?" tab (`showHelp`), so the node's code preview stays clutter-free.
  */
 export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()
@@ -82,9 +82,9 @@ export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
           language={language}
           caption={t('scenario.code.code', 'code')}
           modalTitle={t('scenario.code.modalTitle', 'Edit code')}
-          placeholder={DEFAULT_CODE}
           dataTestId={`scn-code-${id}`}
           packageNames={packages.map((p) => p.name)}
+          showHelp
         />
       )
     },

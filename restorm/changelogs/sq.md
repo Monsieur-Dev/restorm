@@ -6,6 +6,8 @@
 
 - **Rregullim: Claude Desktop dhe Cursor në macOS.** Lidhja e një asistenti AI ngarkonte veglat e Restorm, por më pas çdo thirrje dështonte me «asnjë instancë në ekzekutim», edhe me Restorm-in hapur — aplikacioni dhe lidhësi kërkonin njëri-tjetrin në dosje të përkohshme të ndryshme. Tani takohen në mënyrë të besueshme, pavarësisht se çfarë e nisi lidhësin.
 - **Formulim formal në italisht, polonisht dhe finlandisht.** Ndërfaqja tani ju drejtohet në regjistrin formal në këto tri gjuhë, në përputhje me pjesën tjetër.
+- **Veprimi Code në skenarë — më i pastër, me shembuj të integruar.** Nyja Code nuk zgjatet më kur skripti është i gjatë, dhe redaktori i saj fiton një skedë **Ju duhet ndihmë?** që tregon një shembull gati për ekzekutim në gjuhën që zgjodhët (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Ngjitja me redaktorin e hapur nuk lë më një nyje Code të humbur në kanavacë.
+- **Zbuloni problemet e dizajnit në API-të tuaja të importuara.** Pas importimit të një API — ose kur rihapni një skedar — Restorm kontrollon në heshtje çdo API për probleme strukturore (rrugë të dyfishta, përgjigje që mungojnë, shtigje që përplasen me Mock Serverin…), e shënon në shiritin anësor me një «!» dhe shton një skedë «Probleme» që liston çdo problem dhe rrugët pikërisht të prekura, ku çdo rrugë mund të zgjerohet te dokumentimi i saj.
 
 ## v1.1.3
 

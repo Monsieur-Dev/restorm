@@ -6,6 +6,8 @@
 
 - **Đã sửa: Claude Desktop và Cursor trên macOS.** Việc kết nối một trợ lý AI vẫn tải các công cụ của Restorm nhưng sau đó mọi lệnh gọi đều thất bại với “không có phiên bản đang chạy”, ngay cả khi Restorm đang mở — ứng dụng và trình kết nối tìm nhau ở các thư mục tạm khác nhau. Giờ đây chúng gặp nhau một cách đáng tin cậy, bất kể thứ gì đã khởi chạy trình kết nối.
 - **Cách xưng hô trang trọng trong tiếng Ý, tiếng Ba Lan và tiếng Phần Lan.** Giao diện giờ đây xưng hô với bạn theo lối trang trọng trong ba ngôn ngữ này, nhất quán với phần còn lại.
+- **Hành động Code trong kịch bản — gọn hơn, có ví dụ tích hợp.** Nút Code không còn bị kéo giãn khi mã dài, và trình chỉnh sửa của nó có thêm tab **Cần trợ giúp?** hiển thị ví dụ sẵn sàng chạy bằng ngôn ngữ bạn đã chọn (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Dán khi trình chỉnh sửa đang mở không còn tạo ra nút Code thừa trên canvas.
+- **Phát hiện các vấn đề thiết kế trong các API đã nhập của bạn.** Sau khi nhập một API — hoặc khi mở lại một tệp — Restorm lặng lẽ kiểm tra từng API để tìm các vấn đề cấu trúc (route trùng lặp, thiếu phản hồi, đường dẫn xung đột với Mock Server…), đánh dấu nó trên thanh bên bằng “!”, và thêm một tab “Vấn đề” liệt kê từng vấn đề cùng các route bị ảnh hưởng chính xác, mỗi route có thể mở rộng tới tài liệu của nó.
 
 ## v1.1.3
 

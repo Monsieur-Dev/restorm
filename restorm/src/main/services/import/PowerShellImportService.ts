@@ -176,7 +176,7 @@ function parsePowerShellCommand(psCommand: string): HTTPRequest | null {
     return request
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err)
-    logger.error('[PowerShellImportService] Error parsing PowerShell command', { message: errorMessage })
+    logger.warn('[PowerShellImportService] Error parsing PowerShell command', { message: errorMessage })
     return null
   }
 }

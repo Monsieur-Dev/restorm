@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Entornos",
       "notes": "Notas",
-      "customValues": "Enumeraciones personalizadas"
+      "customValues": "Enumeraciones personalizadas",
+      "issues": "Problemas"
     },
     "home": {
       "configureEnvs": "Configurar entornos",
@@ -1976,6 +1977,14 @@
         "version": "Versión",
         "versionPlaceholder": "versión",
         "add": "Añadir paquete"
+      },
+      "tab": {
+        "code": "Código",
+        "help": "¿Necesita ayuda?"
+      },
+      "help": {
+        "intro": "El valor cableado llega como `input`, las variables de la ejecución como `vars`, y la biblioteca estándar seleccionada está disponible como variables globales. Devuelva el resultado con `return` (o, en Python / Ruby / R / C#, déjelo como última expresión) para enviarlo por la salida `result`.",
+        "exampleFor": "Ejemplo en {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Efímero (TTL)"
     },
     "issue": {
+      "collidesWith": "En conflicto con:",
       "propertyNameEmpty": "La propiedad no tiene nombre",
       "propertyNameDuplicate": "Nombre de propiedad duplicado",
       "propertyShadowsParent": "Oculta una propiedad heredada",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Un modelo de respuesta ya no existe",
       "responseExampleUnknown": "Una respuesta sirve un ejemplo inexistente",
       "routeResponsesMissing": "La ruta no declara ninguna respuesta",
-      "routePathDuplicate": "Otra ruta ya responde a este método y ruta",
+      "routePathDuplicate": "Al menos otra ruta ya responde a este método y ruta",
       "routePathReserved": "El servidor de diseño reserva esta ruta — la ruta nunca respondería"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Gráfico"
+      }
+    },
+    "issuesList": {
+      "intro": "Hemos analizado esta API y detectado algunos posibles problemas de diseño.",
+      "badgeTooltip": "Problemas de diseño ({{count}})",
+      "badgeAria": "Problemas de diseño",
+      "code": {
+        "propertyNameEmpty": "Algunas propiedades no tienen nombre",
+        "propertyNameDuplicate": "Algunas propiedades comparten nombre dentro de su modelo",
+        "propertyShadowsParent": "Algunas propiedades ocultan una propiedad heredada",
+        "modelNameEmpty": "Algunos modelos no tienen nombre",
+        "enumNameEmpty": "Algunos enums no tienen nombre",
+        "groupNameEmpty": "Algunos grupos de rutas no tienen nombre",
+        "modelNameDuplicate": "Varios modelos tienen el mismo nombre",
+        "enumNameDuplicate": "Varios enums tienen el mismo nombre",
+        "componentNameCollision": "Un modelo y un enum tienen el mismo nombre",
+        "groupNameDuplicate": "Varios grupos de rutas tienen el mismo nombre",
+        "inheritanceTargetUnknown": "Algunos modelos heredan de un modelo que ya no existe",
+        "inheritanceCycle": "Algunos modelos forman una cadena de herencia circular",
+        "referenceTargetUnknown": "Algunas propiedades referencian un tipo que ya no existe",
+        "identifierPropertyUnknown": "Algunos modelos apuntan su identificador a una propiedad que ya no existe",
+        "paramLinkTargetUnknown": "Algunos parámetros de ruta enlazan con un modelo o propiedad que ya no existe",
+        "paramEnumRefUnknown": "Algunos parámetros de ruta referencian un enum que ya no existe",
+        "bodyModelUnknown": "Algunas rutas usan un modelo de cuerpo que ya no existe",
+        "responseModelUnknown": "Algunas respuestas usan un modelo que ya no existe",
+        "responseExampleUnknown": "Algunas respuestas devuelven un ejemplo que su modelo no declara",
+        "constraintPatternInvalid": "Algunas restricciones de propiedad usan un patrón (expresión regular) no válido",
+        "constraintMinAboveMax": "Algunas restricciones de propiedad tienen un mínimo superior a su máximo",
+        "routeResponsesMissing": "Algunas rutas no declaran ninguna respuesta",
+        "routePathDuplicate": "Varias rutas responden al mismo método y ruta",
+        "routePathReserved": "Algunas rutas ocupan una ruta que el servidor de diseño reserva"
       }
     }
   },

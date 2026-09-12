@@ -6,6 +6,8 @@
 
 - **Ispravljeno: Claude Desktop i Cursor na macOS-u.** Povezivanje AI asistenta učitalo bi Restormove alate, ali bi zatim svaki poziv završio pogreškom „nema pokrenute instance“, čak i uz otvoren Restorm — aplikacija i konektor tražili su se u različitim privremenim mapama. Sada se pouzdano pronalaze, bez obzira na to što je pokrenulo konektor.
 - **Formalno oslovljavanje na talijanskom, poljskom i finskom.** Sučelje vam se sada na tim trima jezicima obraća u formalnom obliku, u skladu s ostatkom.
+- **Radnja Code u scenarijima — urednija, s ugrađenim primjerima.** Čvor Code više se ne rasteže kada je skripta duga, a njegov uređivač dobiva karticu **Trebate pomoć?** s primjerom spremnim za pokretanje u odabranom jeziku (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Lijepljenje dok je uređivač otvoren više ne ostavlja zalutali čvor Code na platnu.
+- **Uočite probleme u dizajnu svojih uvezenih API-ja.** Nakon uvoza API-ja — ili pri ponovnom otvaranju datoteke — Restorm nenametljivo provjerava svaki API na strukturne probleme (dvostruke rute, nedostajuće odgovore, putanje koje se sukobljavaju s Mock Serverom…), označava ga u bočnoj traci znakom „!“ i dodaje karticu „Problemi“ koja navodi svaki problem i točno pogođene rute, pri čemu se svaka ruta može razviti do svoje dokumentacije.
 
 ## v1.1.3
 

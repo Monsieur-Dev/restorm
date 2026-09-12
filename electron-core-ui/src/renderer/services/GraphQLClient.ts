@@ -360,7 +360,14 @@ class GraphQLClient {
     if (next === 'reconnecting') {
       logger.warn('[GraphQLClient] Subscription link reconnecting')
     } else if (next === 'failed') {
-      logger.error('[GraphQLClient] Subscription link still down after repeated retries', {
+      // The subscription endpoint stayed unreachable past the retry window — an
+      // EXTERNAL connectivity condition (the peer is down / offline), not a
+      // fault in this client, which retried and gave up cleanly. Logged at
+      // `warn` so a host that bridges error-level logs to crash reporting does
+      // not treat a peer being offline as a crash. Genuine subscription errors
+      // are still logged at `error` on the exception paths above; consumers
+      // surface this state to the user through `linkStatusListeners`.
+      logger.warn('[GraphQLClient] Subscription link still down after repeated retries', {
         reconnectingForMs: this.reconnectingSince !== null ? this.now() - this.reconnectingSince : 0
       })
     }

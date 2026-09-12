@@ -359,7 +359,8 @@
       "docs": "Dokumentation",
       "environments": "Miljøer",
       "notes": "Noter",
-      "customValues": "Brugerdefinerede enumerationer"
+      "customValues": "Brugerdefinerede enumerationer",
+      "issues": "Problemer"
     },
     "home": {
       "configureEnvs": "Konfigurér miljøer",
@@ -1976,6 +1977,14 @@
         "version": "Version",
         "versionPlaceholder": "version",
         "add": "Tilføj pakke"
+      },
+      "tab": {
+        "code": "Kode",
+        "help": "Brug for hjælp?"
+      },
+      "help": {
+        "intro": "Den tilkoblede værdi ankommer som `input`, kørslens variabler som `vars`, og det kuraterede standardbibliotek er tilgængeligt som globale variabler. Returnér resultatet med `return` (eller lad det i Python / Ruby / R / C# være det sidste udtryk) for at sende det ud ad `result`-udgangen.",
+        "exampleFor": "Eksempel i {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Kortvarig (TTL)"
     },
     "issue": {
+      "collidesWith": "Kolliderer med:",
       "propertyNameEmpty": "Egenskaben har intet navn",
       "propertyNameDuplicate": "Duplikeret egenskabsnavn",
       "propertyShadowsParent": "Skygger for en nedarvet egenskab",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "En svarmodel findes ikke længere",
       "responseExampleUnknown": "Et svar serverer et manglende eksempel",
       "routeResponsesMissing": "Ruten erklærer intet svar",
-      "routePathDuplicate": "En anden rute besvarer allerede denne metode og sti",
+      "routePathDuplicate": "Mindst én anden rute besvarer allerede denne metode og sti",
       "routePathReserved": "Designserveren reserverer denne sti — ruten ville aldrig svare"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Liste",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Vi analyserede denne API og fandt nogle mulige designproblemer.",
+      "badgeTooltip": "Designproblemer ({{count}})",
+      "badgeAria": "Designproblemer",
+      "code": {
+        "propertyNameEmpty": "Nogle egenskaber har intet navn",
+        "propertyNameDuplicate": "Nogle egenskaber deler navn inden for deres model",
+        "propertyShadowsParent": "Nogle egenskaber skygger for en nedarvet egenskab",
+        "modelNameEmpty": "Nogle modeller har intet navn",
+        "enumNameEmpty": "Nogle enums har intet navn",
+        "groupNameEmpty": "Nogle rutegrupper har intet navn",
+        "modelNameDuplicate": "Flere modeller har samme navn",
+        "enumNameDuplicate": "Flere enums har samme navn",
+        "componentNameCollision": "En model og en enum har samme navn",
+        "groupNameDuplicate": "Flere rutegrupper har samme navn",
+        "inheritanceTargetUnknown": "Nogle modeller nedarver fra en model, der ikke længere findes",
+        "inheritanceCycle": "Nogle modeller danner en cirkulær nedarvningskæde",
+        "referenceTargetUnknown": "Nogle egenskaber refererer til en type, der ikke længere findes",
+        "identifierPropertyUnknown": "Nogle modeller peger deres identifikator på en egenskab, der ikke længere findes",
+        "paramLinkTargetUnknown": "Nogle ruteparametre linker til en model eller egenskab, der ikke længere findes",
+        "paramEnumRefUnknown": "Nogle ruteparametre refererer til en enum, der ikke længere findes",
+        "bodyModelUnknown": "Nogle ruter bruger en body-model, der ikke længere findes",
+        "responseModelUnknown": "Nogle svar bruger en model, der ikke længere findes",
+        "responseExampleUnknown": "Nogle svar leverer et eksempel, som deres model ikke erklærer",
+        "constraintPatternInvalid": "Nogle egenskabsbegrænsninger bruger et ugyldigt mønster (regulært udtryk)",
+        "constraintMinAboveMax": "Nogle egenskabsbegrænsninger har et minimum over deres maksimum",
+        "routeResponsesMissing": "Nogle ruter erklærer intet svar",
+        "routePathDuplicate": "Flere ruter besvarer samme metode og sti",
+        "routePathReserved": "Nogle ruter ligger på en sti, som designserveren reserverer"
       }
     }
   },

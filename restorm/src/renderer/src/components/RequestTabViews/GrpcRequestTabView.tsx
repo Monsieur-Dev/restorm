@@ -434,7 +434,7 @@ const GrpcClientTabView: React.FC<GrpcRequestTabViewProps> = ({
         logger.info('gRPC request completed', { method: res.requestMethod, status: res.statusCode })
       })
       .catch((err: unknown) => {
-        logger.error('gRPC request failed', { error: String(err) })
+        logger.warn('gRPC request failed', { error: String(err) })
       })
       .finally(() => {
         setIsSending(false)

@@ -1,5 +1,6 @@
 export { searchIndexService } from './SearchIndexService'
 export { contextService } from './ContextService'
+export { apiDesignValidationService } from './ApiDesignValidationService'
 export { responseHistoryService } from './ResponseHistoryService'
 export { requestUsageService } from './RequestUsageService'
 export { scenarioUsageService } from './ScenarioUsageService'

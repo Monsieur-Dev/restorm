@@ -361,7 +361,8 @@
       "docs": "Dokumentace",
       "environments": "Prostředí",
       "notes": "Poznámky",
-      "customValues": "Vlastní výčty"
+      "customValues": "Vlastní výčty",
+      "issues": "Problémy"
     },
     "home": {
       "configureEnvs": "Nakonfigurovat prostředí",
@@ -1978,6 +1979,14 @@
         "version": "Verze",
         "versionPlaceholder": "verze",
         "add": "Přidat balíček"
+      },
+      "tab": {
+        "code": "Kód",
+        "help": "Potřebujete pomoc?"
+      },
+      "help": {
+        "intro": "Připojená hodnota přichází jako `input`, proměnné běhu jako `vars` a kurátorovaná standardní knihovna je k dispozici jako globální proměnné. Vraťte výsledek pomocí `return` (nebo jej v Pythonu / Ruby / R / C# ponechte jako poslední výraz), aby odešel výstupem `result`.",
+        "exampleFor": "Příklad v jazyce {{language}}"
       }
     },
     "help": {
@@ -2508,6 +2517,7 @@
       "ephemeral": "Dočasné (TTL)"
     },
     "issue": {
+      "collidesWith": "V konfliktu s:",
       "propertyNameEmpty": "Vlastnost nemá název",
       "propertyNameDuplicate": "Duplicitní název vlastnosti",
       "propertyShadowsParent": "Zastiňuje zděděnou vlastnost",
@@ -2529,7 +2539,7 @@
       "responseModelUnknown": "Model odpovědi už neexistuje",
       "responseExampleUnknown": "Odpověď servíruje chybějící příklad",
       "routeResponsesMissing": "Trasa nedeklaruje žádnou odpověď",
-      "routePathDuplicate": "Jiná trasa již odpovídá na tuto metodu a cestu",
+      "routePathDuplicate": "Nejméně jedna jiná trasa již odpovídá na tuto metodu a cestu",
       "routePathReserved": "Design server si tuto cestu vyhrazuje — trasa by nikdy neodpověděla"
     },
     "routes": {
@@ -2702,6 +2712,37 @@
       "tabs": {
         "list": "Seznam",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Analyzovali jsme toto API a našli několik možných problémů návrhu.",
+      "badgeTooltip": "Problémy návrhu ({{count}})",
+      "badgeAria": "Problémy návrhu",
+      "code": {
+        "propertyNameEmpty": "Některé vlastnosti nemají název",
+        "propertyNameDuplicate": "Některé vlastnosti mají stejný název v rámci svého modelu",
+        "propertyShadowsParent": "Některé vlastnosti zakrývají zděděnou vlastnost",
+        "modelNameEmpty": "Některé modely nemají název",
+        "enumNameEmpty": "Některé enumy nemají název",
+        "groupNameEmpty": "Některé skupiny tras nemají název",
+        "modelNameDuplicate": "Několik modelů má stejný název",
+        "enumNameDuplicate": "Několik enumů má stejný název",
+        "componentNameCollision": "Model a enum mají stejný název",
+        "groupNameDuplicate": "Několik skupin tras má stejný název",
+        "inheritanceTargetUnknown": "Některé modely dědí z modelu, který již neexistuje",
+        "inheritanceCycle": "Některé modely tvoří kruhový řetězec dědičnosti",
+        "referenceTargetUnknown": "Některé vlastnosti odkazují na typ, který již neexistuje",
+        "identifierPropertyUnknown": "Některé modely označují jako identifikátor vlastnost, která již neexistuje",
+        "paramLinkTargetUnknown": "Některé parametry tras odkazují na model nebo vlastnost, které již neexistují",
+        "paramEnumRefUnknown": "Některé parametry tras odkazují na enum, který již neexistuje",
+        "bodyModelUnknown": "Některé trasy používají model těla, který již neexistuje",
+        "responseModelUnknown": "Některé odpovědi používají model, který již neexistuje",
+        "responseExampleUnknown": "Některé odpovědi vracejí příklad, který jejich model nedeklaruje",
+        "constraintPatternInvalid": "Některá omezení vlastností používají neplatný vzor (regulární výraz)",
+        "constraintMinAboveMax": "Některá omezení vlastností mají minimum vyšší než jejich maximum",
+        "routeResponsesMissing": "Některé trasy nedeklarují žádnou odpověď",
+        "routePathDuplicate": "Několik tras odpovídá na stejnou metodu a cestu",
+        "routePathReserved": "Některé trasy se nacházejí na cestě, kterou si vyhrazuje design server"
       }
     }
   },

@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Environments",
       "notes": "Notes",
-      "customValues": "Custom enumerations"
+      "customValues": "Custom enumerations",
+      "issues": "Issues"
     },
     "home": {
       "configureEnvs": "Configure environments",
@@ -1960,6 +1961,14 @@
       "language": "Language",
       "code": "code",
       "modalTitle": "Edit code",
+      "tab": {
+        "code": "Code",
+        "help": "Need help?"
+      },
+      "help": {
+        "intro": "The wired value arrives as `input`, the run variables as `vars`, and the curated standard library is available as globals. Return the result (or, in Python / Ruby / R / C#, leave it as the last expression) to send it out of the `result` port.",
+        "exampleFor": "Example in {{language}}"
+      },
       "result": "result",
       "timeout": "Timeout (s)",
       "deps": {
@@ -2505,7 +2514,39 @@
       "archivable": "Archivable",
       "ephemeral": "Ephemeral (TTL)"
     },
+    "issuesList": {
+      "intro": "We analyzed this API and found some potential design problems.",
+      "badgeTooltip": "Design problems ({{count}})",
+      "badgeAria": "Design problems",
+      "code": {
+        "propertyNameEmpty": "Some properties have no name",
+        "propertyNameDuplicate": "Some properties share a name within their model",
+        "propertyShadowsParent": "Some properties shadow an inherited property",
+        "modelNameEmpty": "Some models have no name",
+        "enumNameEmpty": "Some enums have no name",
+        "groupNameEmpty": "Some route groups have no name",
+        "modelNameDuplicate": "Several models share the same name",
+        "enumNameDuplicate": "Several enums share the same name",
+        "componentNameCollision": "A model and an enum share the same name",
+        "groupNameDuplicate": "Several route groups share the same name",
+        "inheritanceTargetUnknown": "Some models inherit from a model that no longer exists",
+        "inheritanceCycle": "Some models form a circular inheritance chain",
+        "referenceTargetUnknown": "Some properties reference a type that no longer exists",
+        "identifierPropertyUnknown": "Some models point their identifier at a property that no longer exists",
+        "paramLinkTargetUnknown": "Some route parameters link to a model or property that no longer exists",
+        "paramEnumRefUnknown": "Some route parameters reference an enum that no longer exists",
+        "bodyModelUnknown": "Some routes use a body model that no longer exists",
+        "responseModelUnknown": "Some responses use a model that no longer exists",
+        "responseExampleUnknown": "Some responses serve an example their model does not declare",
+        "constraintPatternInvalid": "Some property constraints use an invalid pattern (regular expression)",
+        "constraintMinAboveMax": "Some property constraints have a minimum above their maximum",
+        "routeResponsesMissing": "Some routes declare no response",
+        "routePathDuplicate": "Several routes answer the same method and path",
+        "routePathReserved": "Some routes sit on a path the design server reserves"
+      }
+    },
     "issue": {
+      "collidesWith": "Collides with:",
       "propertyNameEmpty": "The property has no name",
       "propertyNameDuplicate": "Duplicate property name",
       "propertyShadowsParent": "Shadows an inherited property",
@@ -2527,7 +2568,7 @@
       "responseModelUnknown": "A response model no longer exists",
       "responseExampleUnknown": "A response serves a missing example",
       "routeResponsesMissing": "The route declares no response",
-      "routePathDuplicate": "Another route already answers this method and path",
+      "routePathDuplicate": "At least one other route already answers this method and path",
       "routePathReserved": "The design server reserves this path — the route would never answer"
     },
     "routes": {

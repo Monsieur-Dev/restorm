@@ -80,20 +80,26 @@ describe('validateApiDesign', () => {
     expect(codes(withModels(grandParent, parent, child))).toEqual(['propertyShadowsParent'])
   })
 
-  it('reports duplicate model and enum names', () => {
+  it('flags EVERY member of a duplicate model / enum name group, each listing the others', () => {
     const design = withModels(model('m1', 'User'), model('m2', 'User'))
     design.enums = [
       { id: 'e1', doc: { name: 'Status', properties: [], enumValues: ['a'] } },
       { id: 'e2', doc: { name: 'Status', properties: [], enumValues: ['b'] } }
     ]
-    expect(codes(design).sort()).toEqual(['enumNameDuplicate', 'modelNameDuplicate'])
+    expect(validateApiDesign(design)).toEqual([
+      { code: 'modelNameDuplicate', path: ['d', 'm1'], subject: 'User', collisionWith: ['m2'] },
+      { code: 'modelNameDuplicate', path: ['d', 'm2'], subject: 'User', collisionWith: ['m1'] },
+      { code: 'enumNameDuplicate', path: ['d', 'e1'], subject: 'Status', collisionWith: ['e2'] },
+      { code: 'enumNameDuplicate', path: ['d', 'e2'], subject: 'Status', collisionWith: ['e1'] }
+    ])
   })
 
-  it('reports a model and an enum sharing a name — one component namespace', () => {
+  it('flags BOTH a model and an enum sharing a name — one component namespace', () => {
     const design = withModels(model('m1', 'Status'))
     design.enums = [{ id: 'e1', doc: { name: 'Status', properties: [], enumValues: ['a'] } }]
     expect(validateApiDesign(design)).toEqual([
-      { code: 'componentNameCollision', path: ['d', 'e1'], subject: 'Status' }
+      { code: 'componentNameCollision', path: ['d', 'm1'], subject: 'Status', collisionWith: ['e1'] },
+      { code: 'componentNameCollision', path: ['d', 'e1'], subject: 'Status', collisionWith: ['m1'] }
     ])
   })
 
@@ -104,14 +110,15 @@ describe('validateApiDesign', () => {
     expect(codes(design).sort()).toEqual(['enumNameEmpty', 'groupNameEmpty', 'modelNameEmpty'])
   })
 
-  it('reports duplicate route group names', () => {
+  it('flags BOTH duplicate route groups, each listing the other', () => {
     const design = withModels()
     design.routeGroups = [
       { id: 'g1', doc: { name: 'Users' }, routes: [] },
       { id: 'g2', doc: { name: 'Users' }, routes: [] }
     ]
     expect(validateApiDesign(design)).toEqual([
-      { code: 'groupNameDuplicate', path: ['d', 'g2'], subject: 'Users' }
+      { code: 'groupNameDuplicate', path: ['d', 'g1'], subject: 'Users', collisionWith: ['g2'] },
+      { code: 'groupNameDuplicate', path: ['d', 'g2'], subject: 'Users', collisionWith: ['g1'] }
     ])
   })
 
@@ -205,7 +212,7 @@ describe('validateApiDesign', () => {
         doc: { name: 'PowerUsers' },
         design: { basePath: '/users' },
         routes: [
-          // Same surface as g1's list route — flagged on the SECOND claimant.
+          // Same surface as g1's list route — BOTH claimants are flagged.
           { id: 'r2', doc: { match: { urlPattern: '/', method: 'GET' }, responses: { '200': {} } } },
           // Same path, different METHOD — legal.
           { id: 'r3', doc: { match: { urlPattern: '/', method: 'POST' }, responses: { '201': {} } } }
@@ -213,7 +220,8 @@ describe('validateApiDesign', () => {
       }
     ]
     expect(validateApiDesign(design)).toEqual([
-      { code: 'routePathDuplicate', path: ['d', 'g2', 'r2'], subject: 'GET /users' }
+      { code: 'routePathDuplicate', path: ['d', 'g1', 'r1'], subject: 'GET /users', collisionWith: ['r2'] },
+      { code: 'routePathDuplicate', path: ['d', 'g2', 'r2'], subject: 'GET /users', collisionWith: ['r1'] }
     ])
   })
 
@@ -229,7 +237,8 @@ describe('validateApiDesign', () => {
       ]
     }]
     expect(validateApiDesign(design)).toEqual([
-      { code: 'routePathDuplicate', path: ['d', 'g1', 'r2'], subject: 'GET /users/{*}' }
+      { code: 'routePathDuplicate', path: ['d', 'g1', 'r1'], subject: 'GET /users/{*}', collisionWith: ['r2'] },
+      { code: 'routePathDuplicate', path: ['d', 'g1', 'r2'], subject: 'GET /users/{*}', collisionWith: ['r1'] }
     ])
   })
 

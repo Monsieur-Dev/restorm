@@ -6,6 +6,8 @@
 
 - **Correction : Claude Desktop et Cursor sur macOS.** Brancher un assistant IA chargeait bien les outils de Restorm mais chaque appel échouait avec « aucune instance en cours », même avec Restorm ouvert — l'application et le connecteur se cherchaient dans des dossiers temporaires différents. Ils se retrouvent maintenant de façon fiable, quel que soit ce qui a lancé le connecteur.
 - **Formulation vouvoyée en italien, polonais et finnois.** L'interface s'adresse désormais à vous au registre formel dans ces trois langues, en cohérence avec le reste.
+- **Action Code des scénarios — plus nette, avec des exemples intégrés.** Le nœud Code ne s'étire plus quand le script est long, et son éditeur gagne un onglet **Besoin d'aide ?** qui montre un exemple prêt à l'emploi dans le langage choisi (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Coller pendant que l'éditeur est ouvert ne crée plus de nœud Code parasite sur le canevas.
+- **Repérez les problèmes de conception de vos APIs importées.** À l'import d'une API — ou à la réouverture d'un fichier —, Restorm analyse discrètement chaque API (routes en double, réponses manquantes, chemins en conflit avec le serveur de mock…), la signale dans la barre latérale par un « ! », et ajoute un onglet « Problèmes » qui liste chaque problème et les routes exactement concernées, chaque route étant dépliable vers sa documentation.
 
 ## v1.1.3
 

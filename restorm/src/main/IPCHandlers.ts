@@ -4,7 +4,7 @@ import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname, isAbsolute, resolve as resolvePath } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
-import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
+import { contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
@@ -582,7 +582,7 @@ export function registerRestormIPC(deps: {
       return { success: true }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
-      logger.error('Failed to reveal path in folder', { path, error: errorMsg })
+      logger.warn('Failed to reveal path in folder', { path, error: errorMsg })
       return { success: false, error: errorMsg }
     }
   })
@@ -638,7 +638,7 @@ export function registerRestormIPC(deps: {
       const content = await fs.readFile(safePath, 'utf8')
       return content
     } catch (error) {
-      logger.error('Failed to read project file', { relPath, error: String(error) })
+      logger.warn('Failed to read project file', { relPath, error: String(error) })
       return ''
     }
   })
@@ -674,6 +674,13 @@ export function registerRestormIPC(deps: {
   // for the next `context:item-secrets-status` broadcast.
   ipcMain.handle('context:get-item-secret-statuses', () => {
     return contextService.getItemSecretStatuses()
+  })
+
+  // Snapshot of every API's design-validation issues, keyed by env-folder id —
+  // seeds the renderer store so a UI mounting mid-session shows the "!" + Issues
+  // tab immediately (the per-folder push is `design:folder-issues-changed`).
+  ipcMain.handle('design:get-folder-issues', () => {
+    return apiDesignValidationService.getFolderIssues()
   })
 
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
@@ -1058,7 +1065,7 @@ export function registerRestormIPC(deps: {
         responseBody: result.body ?? ''
       }
     } catch (err) {
-      logger.error('[IPC] auth:prefetch error', err)
+      logger.warn('[IPC] auth:prefetch error', err)
       return {
         success: false,
         statusCode: 0,
@@ -1833,7 +1840,7 @@ export function registerRestormIPC(deps: {
       logger.info('[IPC] Import preview result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
-      logger.error('[IPC] Import preview error:', error)
+      logger.warn('[IPC] Import preview error:', error)
       return {
         success: false,
         items: [],
@@ -1924,7 +1931,7 @@ export function registerRestormIPC(deps: {
       logger.info('[IPC] Import result:', { success: result.success, itemsCount: result.items.length })
       return result
     } catch (error) {
-      logger.error('[IPC] Import error:', error)
+      logger.warn('[IPC] Import error:', error)
       return {
         success: false,
         items: [],

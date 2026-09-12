@@ -31,6 +31,7 @@ function withListeningBeam(requestId: string, badge: ReactNode): ReactNode {
 }
 import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
+import { DesignIssuesIndicator } from '../components/common/DesignIssuesIndicator'
 import { ItemSecretBadges } from '../components/common/ItemSecretBadges'
 
 /** Collect every environment id under a folder (own + nested sub-environments). */
@@ -444,10 +445,15 @@ function designToListViewItem(
 
   const children: ListViewItemData[] = SIDEBAR_DESIGN_SECTIONS.map((section) => {
     const count = section.count(design)
-    const parts: ReactNode[] = []
-    if (sectionsInError.has(section.key)) parts.push(errorDot(`design-section-error-${section.key}`))
-    if (count !== null && count > 0) parts.push(String(count))
     const rowId = designSectionRowId(design.id, section.key)
+    // The item count rides right after the label in dimmed parentheses
+    // ("Routes (2)"), NOT in rightActions — so the error dot stays flush right
+    // and the dots line up across every section row.
+    const label: ReactNode = count !== null && count > 0
+      ? React.createElement(React.Fragment, null,
+        i18n.t(section.labelKey),
+        React.createElement('span', { className: 'design-section-count' }, ` (${count})`))
+      : i18n.t(section.labelKey)
     // Three sections grow their entities as real, draggable nodes (Models,
     // Enums, Routes); Clients grows the transient per-protocol client requests
     // while the design is served. Every other section row is a bare shortcut.
@@ -464,7 +470,7 @@ function designToListViewItem(
       : []
     return {
       id: rowId,
-      title: i18n.t(section.labelKey),
+      title: label,
       icon: toListViewIcon(section.icon, ''),
       // Virtual section rows are navigation shortcuts, not movable entities —
       // never draggable (a drag would carry no meaningful item id).
@@ -473,8 +479,8 @@ function designToListViewItem(
       ...(sectionChildren.length > 0
         ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: sectionChildren }
         : {}),
-      ...(parts.length > 0
-        ? { rightActions: React.createElement('span', { className: 'design-section-count' }, ...parts) }
+      ...(sectionsInError.has(section.key)
+        ? { rightActions: errorDot(`design-section-error-${section.key}`) }
         : {})
     }
   })
@@ -559,13 +565,15 @@ function environmentFolderToListViewItem(
     isExpandable: children.length > 0,
     isExpanded,
     icon: toListViewIcon(folder.icon, 'folder-library'),
-    // Spinner (while any env resolves) + error badge (if any env's resolution
-    // failed) just after the env-folder name.
+    // Spinner (while any env resolves) + secret-error badge (if any env's
+    // resolution failed) + a design-issues "!" (if the API's projected design
+    // failed background validation), just after the env-folder name.
     rightActions: React.createElement(
       React.Fragment,
       null,
       React.createElement(SecretResolvingSpinner, { environmentIds: collectFolderEnvIds(folder.environments) }),
-      React.createElement(SecretErrorIndicator, { environmentIds: collectFolderEnvIds(folder.environments) })
+      React.createElement(SecretErrorIndicator, { environmentIds: collectFolderEnvIds(folder.environments) }),
+      React.createElement(DesignIssuesIndicator, { folderId: folder.id })
     ),
     children
   }

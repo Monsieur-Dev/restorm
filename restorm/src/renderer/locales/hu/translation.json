@@ -359,7 +359,8 @@
       "docs": "Dokumentáció",
       "environments": "Környezetek",
       "notes": "Jegyzetek",
-      "customValues": "Egyéni felsorolások"
+      "customValues": "Egyéni felsorolások",
+      "issues": "Problémák"
     },
     "home": {
       "configureEnvs": "Környezetek konfigurálása",
@@ -1976,6 +1977,14 @@
         "version": "Verzió",
         "versionPlaceholder": "verzió",
         "add": "Csomag hozzáadása"
+      },
+      "tab": {
+        "code": "Kód",
+        "help": "Segítségre van szüksége?"
+      },
+      "help": {
+        "intro": "A bekötött érték `input` néven, a futás változói `vars` néven érkeznek, a válogatott standard könyvtár pedig globális változóként érhető el. Adja vissza az eredményt a `return` utasítással (vagy Python / Ruby / R / C# esetén hagyja az utolsó kifejezésként), hogy a `result` kimeneten távozzon.",
+        "exampleFor": "Példa a következő nyelven: {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Ideiglenes (TTL)"
     },
     "issue": {
+      "collidesWith": "Ütközik ezzel:",
       "propertyNameEmpty": "A tulajdonságnak nincs neve",
       "propertyNameDuplicate": "Ismétlődő tulajdonságnév",
       "propertyShadowsParent": "Elfed egy örökölt tulajdonságot",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Egy válaszmodell már nem létezik",
       "responseExampleUnknown": "Egy válasz hiányzó példát szolgál ki",
       "routeResponsesMissing": "Az útvonal nem deklarál választ",
-      "routePathDuplicate": "Egy másik útvonal már válaszol erre a metódusra és útvonalra",
+      "routePathDuplicate": "Legalább egy másik útvonal már válaszol erre a metódusra és útvonalra",
       "routePathReserved": "A design szerver fenntartja ezt az útvonalat — a route soha nem válaszolna"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Gráf"
+      }
+    },
+    "issuesList": {
+      "intro": "Elemeztük ezt az API-t, és néhány lehetséges tervezési problémát találtunk.",
+      "badgeTooltip": "Tervezési problémák ({{count}})",
+      "badgeAria": "Tervezési problémák",
+      "code": {
+        "propertyNameEmpty": "Néhány tulajdonságnak nincs neve",
+        "propertyNameDuplicate": "Néhány tulajdonság azonos nevet visel a modelljén belül",
+        "propertyShadowsParent": "Néhány tulajdonság elfed egy örökölt tulajdonságot",
+        "modelNameEmpty": "Néhány modellnek nincs neve",
+        "enumNameEmpty": "Néhány enumnak nincs neve",
+        "groupNameEmpty": "Néhány útvonalcsoportnak nincs neve",
+        "modelNameDuplicate": "Több modell azonos nevet visel",
+        "enumNameDuplicate": "Több enum azonos nevet visel",
+        "componentNameCollision": "Egy modell és egy enum azonos nevet visel",
+        "groupNameDuplicate": "Több útvonalcsoport azonos nevet visel",
+        "inheritanceTargetUnknown": "Néhány modell olyan modellből öröklődik, amely már nem létezik",
+        "inheritanceCycle": "Néhány modell körkörös öröklési láncot alkot",
+        "referenceTargetUnknown": "Néhány tulajdonság olyan típusra hivatkozik, amely már nem létezik",
+        "identifierPropertyUnknown": "Néhány modell azonosítója olyan tulajdonságra mutat, amely már nem létezik",
+        "paramLinkTargetUnknown": "Néhány útvonalparaméter olyan modellhez vagy tulajdonsághoz kapcsolódik, amely már nem létezik",
+        "paramEnumRefUnknown": "Néhány útvonalparaméter olyan enumra hivatkozik, amely már nem létezik",
+        "bodyModelUnknown": "Néhány útvonal olyan törzsmodellt használ, amely már nem létezik",
+        "responseModelUnknown": "Néhány válasz olyan modellt használ, amely már nem létezik",
+        "responseExampleUnknown": "Néhány válasz olyan példát ad vissza, amelyet a modellje nem deklarál",
+        "constraintPatternInvalid": "Néhány tulajdonságkorlátozás érvénytelen mintát (reguláris kifejezést) használ",
+        "constraintMinAboveMax": "Néhány tulajdonságkorlátozás minimuma nagyobb a maximumánál",
+        "routeResponsesMissing": "Néhány útvonal nem deklarál választ",
+        "routePathDuplicate": "Több útvonal ugyanarra a metódusra és útvonalra válaszol",
+        "routePathReserved": "Néhány útvonal olyan útvonalon található, amelyet a design szerver fenntart"
       }
     }
   },

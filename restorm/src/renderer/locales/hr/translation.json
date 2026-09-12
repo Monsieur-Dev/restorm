@@ -360,7 +360,8 @@
       "docs": "Dokumentacija",
       "environments": "Okruženja",
       "notes": "Bilješke",
-      "customValues": "Prilagođene enumeracije"
+      "customValues": "Prilagođene enumeracije",
+      "issues": "Problemi"
     },
     "home": {
       "configureEnvs": "Konfiguriraj okruženja",
@@ -1977,6 +1978,14 @@
         "version": "Verzija",
         "versionPlaceholder": "verzija",
         "add": "Dodaj paket"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Trebate pomoć?"
+      },
+      "help": {
+        "intro": "Spojena vrijednost stiže kao `input`, varijable izvođenja kao `vars`, a odabrana standardna biblioteka dostupna je kao globalne varijable. Vratite rezultat pomoću `return` (ili ga u Pythonu / Ruby / R / C# ostavite kao posljednji izraz) kako biste ga poslali izlazom `result`.",
+        "exampleFor": "Primjer na jeziku {{language}}"
       }
     },
     "help": {
@@ -2507,6 +2516,7 @@
       "ephemeral": "Kratkotrajno (TTL)"
     },
     "issue": {
+      "collidesWith": "U sukobu s:",
       "propertyNameEmpty": "Svojstvo nema ime",
       "propertyNameDuplicate": "Duplicirano ime svojstva",
       "propertyShadowsParent": "Zasjenjuje naslijeđeno svojstvo",
@@ -2528,7 +2538,7 @@
       "responseModelUnknown": "Model odgovora više ne postoji",
       "responseExampleUnknown": "Odgovor poslužuje nepostojeći primjer",
       "routeResponsesMissing": "Ruta ne deklarira nijedan odgovor",
-      "routePathDuplicate": "Druga ruta već odgovara na ovu metodu i putanju",
+      "routePathDuplicate": "Barem jedna druga ruta već odgovara na ovu metodu i putanju",
       "routePathReserved": "Dizajnerski poslužitelj rezervira ovu putanju — ruta nikada ne bi odgovorila"
     },
     "routes": {
@@ -2701,6 +2711,37 @@
       "tabs": {
         "list": "Popis",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Analizirali smo ovaj API i pronašli nekoliko mogućih problema u dizajnu.",
+      "badgeTooltip": "Problemi u dizajnu ({{count}})",
+      "badgeAria": "Problemi u dizajnu",
+      "code": {
+        "propertyNameEmpty": "Neka svojstva nemaju naziv",
+        "propertyNameDuplicate": "Neka svojstva dijele naziv unutar svog modela",
+        "propertyShadowsParent": "Neka svojstva zasjenjuju naslijeđeno svojstvo",
+        "modelNameEmpty": "Neki modeli nemaju naziv",
+        "enumNameEmpty": "Neki enumi nemaju naziv",
+        "groupNameEmpty": "Neke grupe ruta nemaju naziv",
+        "modelNameDuplicate": "Nekoliko modela ima isti naziv",
+        "enumNameDuplicate": "Nekoliko enuma ima isti naziv",
+        "componentNameCollision": "Model i enum imaju isti naziv",
+        "groupNameDuplicate": "Nekoliko grupa ruta ima isti naziv",
+        "inheritanceTargetUnknown": "Neki modeli nasljeđuju od modela koji više ne postoji",
+        "inheritanceCycle": "Neki modeli tvore kružni lanac nasljeđivanja",
+        "referenceTargetUnknown": "Neka svojstva upućuju na tip koji više ne postoji",
+        "identifierPropertyUnknown": "Neki modeli kao identifikator označavaju svojstvo koje više ne postoji",
+        "paramLinkTargetUnknown": "Neki parametri ruta povezuju se s modelom ili svojstvom koje više ne postoji",
+        "paramEnumRefUnknown": "Neki parametri ruta upućuju na enum koji više ne postoji",
+        "bodyModelUnknown": "Neke rute koriste model tijela koji više ne postoji",
+        "responseModelUnknown": "Neki odgovori koriste model koji više ne postoji",
+        "responseExampleUnknown": "Neki odgovori vraćaju primjer koji njihov model ne deklarira",
+        "constraintPatternInvalid": "Neka ograničenja svojstava koriste nevažeći uzorak (regularni izraz)",
+        "constraintMinAboveMax": "Neka ograničenja svojstava imaju minimum veći od maksimuma",
+        "routeResponsesMissing": "Neke rute ne deklariraju nijedan odgovor",
+        "routePathDuplicate": "Nekoliko ruta odgovara na istu metodu i putanju",
+        "routePathReserved": "Neke rute nalaze se na putanji koju rezervira dizajnerski poslužitelj"
       }
     }
   },

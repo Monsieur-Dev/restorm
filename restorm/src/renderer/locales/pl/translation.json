@@ -361,7 +361,8 @@
       "docs": "Dokumentacja",
       "environments": "Środowiska",
       "notes": "Notatki",
-      "customValues": "Niestandardowe wyliczenia"
+      "customValues": "Niestandardowe wyliczenia",
+      "issues": "Problemy"
     },
     "home": {
       "configureEnvs": "Skonfiguruj środowiska",
@@ -1978,6 +1979,14 @@
         "version": "Wersja",
         "versionPlaceholder": "wersja",
         "add": "Dodaj pakiet"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Potrzebna pomoc?"
+      },
+      "help": {
+        "intro": "Podłączona wartość trafia jako `input`, zmienne przebiegu jako `vars`, a wyselekcjonowana biblioteka standardowa jest dostępna jako zmienne globalne. Aby wysłać wynik przez wyjście `result`, proszę zwrócić go za pomocą `return` (albo w Pythonie / Ruby / R / C# pozostawić jako ostatnie wyrażenie).",
+        "exampleFor": "Przykład w języku {{language}}"
       }
     },
     "help": {
@@ -2508,6 +2517,7 @@
       "ephemeral": "Ulotne (TTL)"
     },
     "issue": {
+      "collidesWith": "Koliduje z:",
       "propertyNameEmpty": "Właściwość nie ma nazwy",
       "propertyNameDuplicate": "Zduplikowana nazwa właściwości",
       "propertyShadowsParent": "Przesłania odziedziczoną właściwość",
@@ -2529,7 +2539,7 @@
       "responseModelUnknown": "Model odpowiedzi już nie istnieje",
       "responseExampleUnknown": "Odpowiedź serwuje brakujący przykład",
       "routeResponsesMissing": "Trasa nie deklaruje żadnej odpowiedzi",
-      "routePathDuplicate": "Inna trasa już odpowiada na tę metodę i ścieżkę",
+      "routePathDuplicate": "Co najmniej jedna inna trasa już odpowiada na tę metodę i ścieżkę",
       "routePathReserved": "Serwer projektu rezerwuje tę ścieżkę — trasa nigdy by nie odpowiedziała"
     },
     "routes": {
@@ -2702,6 +2712,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Przeanalizowaliśmy to API i wykryliśmy kilka potencjalnych problemów projektowych.",
+      "badgeTooltip": "Problemy projektu ({{count}})",
+      "badgeAria": "Problemy projektu",
+      "code": {
+        "propertyNameEmpty": "Niektóre właściwości nie mają nazwy",
+        "propertyNameDuplicate": "Niektóre właściwości mają tę samą nazwę w obrębie swojego modelu",
+        "propertyShadowsParent": "Niektóre właściwości przesłaniają odziedziczoną właściwość",
+        "modelNameEmpty": "Niektóre modele nie mają nazwy",
+        "enumNameEmpty": "Niektóre enumy nie mają nazwy",
+        "groupNameEmpty": "Niektóre grupy tras nie mają nazwy",
+        "modelNameDuplicate": "Kilka modeli ma tę samą nazwę",
+        "enumNameDuplicate": "Kilka enumów ma tę samą nazwę",
+        "componentNameCollision": "Model i enum mają tę samą nazwę",
+        "groupNameDuplicate": "Kilka grup tras ma tę samą nazwę",
+        "inheritanceTargetUnknown": "Niektóre modele dziedziczą po modelu, który już nie istnieje",
+        "inheritanceCycle": "Niektóre modele tworzą cykliczny łańcuch dziedziczenia",
+        "referenceTargetUnknown": "Niektóre właściwości odwołują się do typu, który już nie istnieje",
+        "identifierPropertyUnknown": "Niektóre modele wskazują jako identyfikator właściwość, która już nie istnieje",
+        "paramLinkTargetUnknown": "Niektóre parametry tras łączą się z modelem lub właściwością, które już nie istnieją",
+        "paramEnumRefUnknown": "Niektóre parametry tras odwołują się do enuma, który już nie istnieje",
+        "bodyModelUnknown": "Niektóre trasy używają modelu treści, który już nie istnieje",
+        "responseModelUnknown": "Niektóre odpowiedzi używają modelu, który już nie istnieje",
+        "responseExampleUnknown": "Niektóre odpowiedzi zwracają przykład, którego ich model nie deklaruje",
+        "constraintPatternInvalid": "Niektóre ograniczenia właściwości używają nieprawidłowego wzorca (wyrażenia regularnego)",
+        "constraintMinAboveMax": "Niektóre ograniczenia właściwości mają minimum większe niż maksimum",
+        "routeResponsesMissing": "Niektóre trasy nie deklarują żadnej odpowiedzi",
+        "routePathDuplicate": "Kilka tras odpowiada na tę samą metodę i ścieżkę",
+        "routePathReserved": "Niektóre trasy znajdują się na ścieżce zarezerwowanej przez serwer projektu"
       }
     }
   },

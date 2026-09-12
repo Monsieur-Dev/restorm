@@ -360,7 +360,8 @@
       "docs": "Documentație",
       "environments": "Medii",
       "notes": "Notițe",
-      "customValues": "Enumerări personalizate"
+      "customValues": "Enumerări personalizate",
+      "issues": "Probleme"
     },
     "home": {
       "configureEnvs": "Configurează mediile",
@@ -1977,6 +1978,14 @@
         "version": "Versiune",
         "versionPlaceholder": "versiune",
         "add": "Adaugă pachet"
+      },
+      "tab": {
+        "code": "Cod",
+        "help": "Aveți nevoie de ajutor?"
+      },
+      "help": {
+        "intro": "Valoarea conectată sosește ca `input`, variabilele rulării ca `vars`, iar biblioteca standard selectată este disponibilă ca variabile globale. Returnați rezultatul cu `return` (sau, în Python / Ruby / R / C#, lăsați-l ca ultimă expresie) pentru a-l trimite prin ieșirea `result`.",
+        "exampleFor": "Exemplu în {{language}}"
       }
     },
     "help": {
@@ -2507,6 +2516,7 @@
       "ephemeral": "Efemer (TTL)"
     },
     "issue": {
+      "collidesWith": "În conflict cu:",
       "propertyNameEmpty": "Proprietatea nu are nume",
       "propertyNameDuplicate": "Nume de proprietate duplicat",
       "propertyShadowsParent": "Ascunde o proprietate moștenită",
@@ -2528,7 +2538,7 @@
       "responseModelUnknown": "Un model de răspuns nu mai există",
       "responseExampleUnknown": "Un răspuns servește un exemplu lipsă",
       "routeResponsesMissing": "Ruta nu declară niciun răspuns",
-      "routePathDuplicate": "O altă rută răspunde deja acestei metode și căi",
+      "routePathDuplicate": "Cel puțin o altă rută răspunde deja acestei metode și căi",
       "routePathReserved": "Serverul de design rezervă această cale — ruta nu ar răspunde niciodată"
     },
     "routes": {
@@ -2701,6 +2711,37 @@
       "tabs": {
         "list": "Listă",
         "graph": "Grafic"
+      }
+    },
+    "issuesList": {
+      "intro": "Am analizat acest API și am detectat câteva posibile probleme de proiectare.",
+      "badgeTooltip": "Probleme de proiectare ({{count}})",
+      "badgeAria": "Probleme de proiectare",
+      "code": {
+        "propertyNameEmpty": "Unele proprietăți nu au nume",
+        "propertyNameDuplicate": "Unele proprietăți au același nume în cadrul modelului lor",
+        "propertyShadowsParent": "Unele proprietăți maschează o proprietate moștenită",
+        "modelNameEmpty": "Unele modele nu au nume",
+        "enumNameEmpty": "Unele enum-uri nu au nume",
+        "groupNameEmpty": "Unele grupuri de rute nu au nume",
+        "modelNameDuplicate": "Mai multe modele au același nume",
+        "enumNameDuplicate": "Mai multe enum-uri au același nume",
+        "componentNameCollision": "Un model și un enum au același nume",
+        "groupNameDuplicate": "Mai multe grupuri de rute au același nume",
+        "inheritanceTargetUnknown": "Unele modele moștenesc dintr-un model care nu mai există",
+        "inheritanceCycle": "Unele modele formează un lanț de moștenire circular",
+        "referenceTargetUnknown": "Unele proprietăți referențiază un tip care nu mai există",
+        "identifierPropertyUnknown": "Unele modele indică drept identificator o proprietate care nu mai există",
+        "paramLinkTargetUnknown": "Unii parametri de rută se leagă de un model sau o proprietate care nu mai există",
+        "paramEnumRefUnknown": "Unii parametri de rută referențiază un enum care nu mai există",
+        "bodyModelUnknown": "Unele rute folosesc un model de corp care nu mai există",
+        "responseModelUnknown": "Unele răspunsuri folosesc un model care nu mai există",
+        "responseExampleUnknown": "Unele răspunsuri returnează un exemplu pe care modelul lor nu îl declară",
+        "constraintPatternInvalid": "Unele constrângeri de proprietate folosesc un tipar (expresie regulată) invalid",
+        "constraintMinAboveMax": "Unele constrângeri de proprietate au un minim mai mare decât maximul",
+        "routeResponsesMissing": "Unele rute nu declară niciun răspuns",
+        "routePathDuplicate": "Mai multe rute răspund aceleiași metode și căi",
+        "routePathReserved": "Unele rute se află pe o cale rezervată de serverul de design"
       }
     }
   },

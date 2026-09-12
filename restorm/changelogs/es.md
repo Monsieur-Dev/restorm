@@ -6,6 +6,8 @@
 
 - **Corregido: Claude Desktop y Cursor en macOS.** Conectar un asistente de IA cargaba las herramientas de Restorm, pero luego cada llamada fallaba con «no hay ninguna instancia en ejecución», incluso con Restorm abierto — la app y el conector se buscaban en carpetas temporales distintas. Ahora se encuentran de forma fiable, sea cual sea lo que haya iniciado el conector.
 - **Tratamiento formal en italiano, polaco y finés.** La interfaz ahora se dirige a usted en el registro formal en estos tres idiomas, en coherencia con el resto.
+- **Acción Code en escenarios — más limpia, con ejemplos integrados.** El nodo Code ya no se estira cuando el script es largo, y su editor gana una pestaña **¿Necesita ayuda?** que muestra un ejemplo listo para ejecutar en el lenguaje que haya elegido (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Pegar con el editor abierto ya no deja un nodo Code suelto en el lienzo.
+- **Detecte problemas de diseño en sus API importadas.** Tras importar una API — o al reabrir un archivo —, Restorm comprueba discretamente cada API en busca de problemas estructurales (rutas duplicadas, respuestas ausentes, rutas que entran en conflicto con el Mock Server…), la señala en la barra lateral con un «!» y añade una pestaña «Problemas» que enumera cada problema y las rutas exactamente afectadas, con cada ruta desplegable hacia su documentación.
 
 ## v1.1.3
 

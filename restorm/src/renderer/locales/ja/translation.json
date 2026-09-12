@@ -358,7 +358,8 @@
       "docs": "ドキュメント",
       "environments": "環境",
       "notes": "メモ",
-      "customValues": "カスタム列挙"
+      "customValues": "カスタム列挙",
+      "issues": "問題"
     },
     "home": {
       "configureEnvs": "環境を設定",
@@ -1975,6 +1976,14 @@
         "version": "バージョン",
         "versionPlaceholder": "バージョン",
         "add": "パッケージを追加"
+      },
+      "tab": {
+        "code": "コード",
+        "help": "ヘルプが必要ですか？"
+      },
+      "help": {
+        "intro": "接続された値は `input`、実行時の変数は `vars` として渡され、厳選された標準ライブラリはグローバル変数として利用できます。結果を `result` 出力へ送るには、`return` で返してください（Python / Ruby / R / C# では最後の式として残してください）。",
+        "exampleFor": "{{language}} の例"
       }
     },
     "help": {
@@ -2505,6 +2514,7 @@
       "ephemeral": "一時的（TTL）"
     },
     "issue": {
+      "collidesWith": "次と競合:",
       "propertyNameEmpty": "プロパティに名前がありません",
       "propertyNameDuplicate": "プロパティ名が重複しています",
       "propertyShadowsParent": "継承したプロパティを隠しています",
@@ -2526,7 +2536,7 @@
       "responseModelUnknown": "レスポンスのモデルが存在しません",
       "responseExampleUnknown": "レスポンスが存在しない例を提供しています",
       "routeResponsesMissing": "ルートがレスポンスを宣言していません",
-      "routePathDuplicate": "別のルートが既にこのメソッドとパスに応答しています",
+      "routePathDuplicate": "少なくとも 1 つの別のルートが既にこのメソッドとパスに応答しています",
       "routePathReserved": "デザインサーバーがこのパスを予約しています — ルートは決して応答しません"
     },
     "routes": {
@@ -2699,6 +2709,37 @@
       "tabs": {
         "list": "リスト",
         "graph": "グラフ"
+      }
+    },
+    "issuesList": {
+      "intro": "この API を分析したところ、設計上の潜在的な問題がいくつか見つかりました。",
+      "badgeTooltip": "設計上の問題 ({{count}})",
+      "badgeAria": "設計上の問題",
+      "code": {
+        "propertyNameEmpty": "一部のプロパティに名前がありません",
+        "propertyNameDuplicate": "一部のプロパティがモデル内で同じ名前を共有しています",
+        "propertyShadowsParent": "一部のプロパティが継承したプロパティを隠しています",
+        "modelNameEmpty": "一部のモデルに名前がありません",
+        "enumNameEmpty": "一部の enum に名前がありません",
+        "groupNameEmpty": "一部のルートグループに名前がありません",
+        "modelNameDuplicate": "複数のモデルが同じ名前を持っています",
+        "enumNameDuplicate": "複数の enum が同じ名前を持っています",
+        "componentNameCollision": "モデルと enum が同じ名前を持っています",
+        "groupNameDuplicate": "複数のルートグループが同じ名前を持っています",
+        "inheritanceTargetUnknown": "一部のモデルが、すでに存在しないモデルを継承しています",
+        "inheritanceCycle": "一部のモデルが循環的な継承チェーンを形成しています",
+        "referenceTargetUnknown": "一部のプロパティが、すでに存在しない型を参照しています",
+        "identifierPropertyUnknown": "一部のモデルが、すでに存在しないプロパティを識別子に指定しています",
+        "paramLinkTargetUnknown": "一部のルートパラメーターが、すでに存在しないモデルまたはプロパティにリンクしています",
+        "paramEnumRefUnknown": "一部のルートパラメーターが、すでに存在しない enum を参照しています",
+        "bodyModelUnknown": "一部のルートが、すでに存在しないボディモデルを使用しています",
+        "responseModelUnknown": "一部のレスポンスが、すでに存在しないモデルを使用しています",
+        "responseExampleUnknown": "一部のレスポンスが、モデルで宣言されていない例を返しています",
+        "constraintPatternInvalid": "一部のプロパティ制約が無効なパターン（正規表現）を使用しています",
+        "constraintMinAboveMax": "一部のプロパティ制約で最小値が最大値を上回っています",
+        "routeResponsesMissing": "一部のルートがレスポンスを宣言していません",
+        "routePathDuplicate": "複数のルートが同じメソッドとパスに応答しています",
+        "routePathReserved": "一部のルートが、デザインサーバーが予約しているパス上にあります"
       }
     }
   },

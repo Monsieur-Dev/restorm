@@ -308,7 +308,7 @@ export const StompRequestTabView: React.FC<StompRequestTabViewProps> = ({
         logger.info('STOMP connection closed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
-        logger.error('STOMP connection failed', { error: String(err) })
+        logger.warn('STOMP connection failed', { error: String(err) })
       })
   }
   const handleSend = (): void => {

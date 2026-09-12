@@ -6,6 +6,8 @@
 
 - **Diperbaiki: Claude Desktop dan Cursor di macOS.** Menghubungkan asisten AI memuat alat-alat Restorm, tetapi kemudian setiap panggilan gagal dengan “tidak ada instansi yang berjalan”, bahkan saat Restorm terbuka — aplikasi dan konektor saling mencari di folder sementara yang berbeda. Kini keduanya bertemu dengan andal, apa pun yang menjalankan konektor.
 - **Sapaan formal dalam bahasa Italia, Polandia, dan Finlandia.** Antarmuka kini menyapa Anda dalam register formal dalam ketiga bahasa ini, selaras dengan yang lain.
+- **Aksi Code di skenario — lebih rapi, dengan contoh bawaan.** Node Code tidak lagi melebar saat skrip panjang, dan editornya mendapat tab **Butuh bantuan?** yang menampilkan contoh siap jalan dalam bahasa yang Anda pilih (TypeScript, JavaScript, Python, Lua, Ruby, R, C#). Menempel saat editor terbuka tidak lagi menaruh node Code liar di kanvas.
+- **Temukan masalah desain pada API impor Anda.** Setelah mengimpor API — atau saat membuka kembali sebuah berkas — Restorm diam-diam memeriksa setiap API untuk masalah struktural (rute duplikat, respons yang hilang, jalur yang berbenturan dengan Mock Server…), menandainya di bilah sisi dengan “!”, dan menambahkan tab “Masalah” yang mencantumkan setiap masalah dan rute yang tepat terpengaruh, dengan setiap rute dapat dibentangkan ke dokumentasinya.
 
 ## v1.1.3
 

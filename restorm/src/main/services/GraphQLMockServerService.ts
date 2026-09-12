@@ -187,7 +187,7 @@ class GraphQLMockServerService {
         debug: () => { /* dropped */ },
         info: () => { /* dropped */ },
         warn: (...args: unknown[]) => { logger.warn('[GraphQLMockServer]', { args }) },
-        error: (...args: unknown[]) => { logger.error('[GraphQLMockServer]', { args }) }
+        error: (...args: unknown[]) => { logger.warn('[GraphQLMockServer]', { args }) }
       }
     })
   }

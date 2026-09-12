@@ -359,7 +359,8 @@
       "docs": "Dokumentacioni",
       "environments": "Mjedise",
       "notes": "Shënimet",
-      "customValues": "Enumerime të personalizuara"
+      "customValues": "Enumerime të personalizuara",
+      "issues": "Problemet"
     },
     "home": {
       "configureEnvs": "Konfiguro mjediset",
@@ -1976,6 +1977,14 @@
         "version": "Versioni",
         "versionPlaceholder": "versioni",
         "add": "Shto paketë"
+      },
+      "tab": {
+        "code": "Kodi",
+        "help": "Ju duhet ndihmë?"
+      },
+      "help": {
+        "intro": "Vlera e lidhur mbërrin si `input`, variablat e ekzekutimit si `vars`, dhe biblioteka standarde e përzgjedhur është e disponueshme si variabla globale. Ktheni rezultatin me `return` (ose, në Python / Ruby / R / C#, lëreni si shprehjen e fundit) për ta dërguar nga dalja `result`.",
+        "exampleFor": "Shembull në {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Kalimtar (TTL)"
     },
     "issue": {
+      "collidesWith": "Në konflikt me:",
       "propertyNameEmpty": "Vetia nuk ka emër",
       "propertyNameDuplicate": "Emër vetie i dublikuar",
       "propertyShadowsParent": "Mbulon një veti të trashëguar",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Një model përgjigjeje nuk ekziston më",
       "responseExampleUnknown": "Një përgjigje shërben një shembull që mungon",
       "routeResponsesMissing": "Rruga nuk deklaron asnjë përgjigje",
-      "routePathDuplicate": "Një rrugë tjetër i përgjigjet tashmë kësaj metode dhe shtegu",
+      "routePathDuplicate": "Të paktën një rrugë tjetër i përgjigjet tashmë kësaj metode dhe shtegu",
       "routePathReserved": "Serveri i dizajnit e rezervon këtë shteg — rruga nuk do të përgjigjej kurrë"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Listë",
         "graph": "Grafik"
+      }
+    },
+    "issuesList": {
+      "intro": "E analizuam këtë API dhe gjetëm disa probleme të mundshme dizajni.",
+      "badgeTooltip": "Probleme dizajni ({{count}})",
+      "badgeAria": "Probleme dizajni",
+      "code": {
+        "propertyNameEmpty": "Disa veti nuk kanë emër",
+        "propertyNameDuplicate": "Disa veti ndajnë të njëjtin emër brenda modelit të tyre",
+        "propertyShadowsParent": "Disa veti mbulojnë një veti të trashëguar",
+        "modelNameEmpty": "Disa modele nuk kanë emër",
+        "enumNameEmpty": "Disa enum nuk kanë emër",
+        "groupNameEmpty": "Disa grupe rrugësh nuk kanë emër",
+        "modelNameDuplicate": "Disa modele kanë të njëjtin emër",
+        "enumNameDuplicate": "Disa enum kanë të njëjtin emër",
+        "componentNameCollision": "Një model dhe një enum kanë të njëjtin emër",
+        "groupNameDuplicate": "Disa grupe rrugësh kanë të njëjtin emër",
+        "inheritanceTargetUnknown": "Disa modele trashëgojnë nga një model që nuk ekziston më",
+        "inheritanceCycle": "Disa modele formojnë një zinxhir trashëgimie rrethor",
+        "referenceTargetUnknown": "Disa veti i referohen një tipi që nuk ekziston më",
+        "identifierPropertyUnknown": "Disa modele caktojnë si identifikues një veti që nuk ekziston më",
+        "paramLinkTargetUnknown": "Disa parametra rrugësh lidhen me një model ose veti që nuk ekziston më",
+        "paramEnumRefUnknown": "Disa parametra rrugësh i referohen një enumi që nuk ekziston më",
+        "bodyModelUnknown": "Disa rrugë përdorin një model trupi që nuk ekziston më",
+        "responseModelUnknown": "Disa përgjigje përdorin një model që nuk ekziston më",
+        "responseExampleUnknown": "Disa përgjigje kthejnë një shembull që modeli i tyre nuk e deklaron",
+        "constraintPatternInvalid": "Disa kufizime vetish përdorin një shabllon (shprehje të rregullt) të pavlefshëm",
+        "constraintMinAboveMax": "Disa kufizime vetish kanë një minimum më të madh se maksimumi",
+        "routeResponsesMissing": "Disa rrugë nuk deklarojnë asnjë përgjigje",
+        "routePathDuplicate": "Disa rrugë i përgjigjen së njëjtës metodë dhe shteg",
+        "routePathReserved": "Disa rrugë ndodhen në një shteg të rezervuar nga serveri i dizajnit"
       }
     }
   },

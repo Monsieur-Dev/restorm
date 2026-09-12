@@ -358,7 +358,8 @@
       "docs": "文件",
       "environments": "環境",
       "notes": "備註",
-      "customValues": "自訂列舉"
+      "customValues": "自訂列舉",
+      "issues": "問題"
     },
     "home": {
       "configureEnvs": "設定環境",
@@ -1975,6 +1976,14 @@
         "version": "版本",
         "versionPlaceholder": "版本",
         "add": "新增套件"
+      },
+      "tab": {
+        "code": "程式碼",
+        "help": "需要協助嗎？"
+      },
+      "help": {
+        "intro": "連線傳入的值會以 `input` 形式抵達，執行變數以 `vars` 形式提供，精選的標準函式庫則以全域變數的形式可用。請使用 `return` 回傳結果（或在 Python / Ruby / R / C# 中將其作為最後一個運算式），以便透過 `result` 輸出埠傳送。",
+        "exampleFor": "{{language}} 範例"
       }
     },
     "help": {
@@ -2505,6 +2514,7 @@
       "ephemeral": "臨時（TTL）"
     },
     "issue": {
+      "collidesWith": "與以下項目衝突：",
       "propertyNameEmpty": "屬性沒有名稱",
       "propertyNameDuplicate": "屬性名稱重複",
       "propertyShadowsParent": "遮蔽了繼承的屬性",
@@ -2526,7 +2536,7 @@
       "responseModelUnknown": "回應模型已不存在",
       "responseExampleUnknown": "回應提供了缺失的範例",
       "routeResponsesMissing": "該路由未宣告任何回應",
-      "routePathDuplicate": "另一條路由已回應此方法與路徑",
+      "routePathDuplicate": "至少有另一條路由已回應此方法與路徑",
       "routePathReserved": "設計伺服器保留此路徑 — 該路由將永遠不會回應"
     },
     "routes": {
@@ -2699,6 +2709,37 @@
       "tabs": {
         "list": "清單",
         "graph": "圖"
+      }
+    },
+    "issuesList": {
+      "intro": "我們分析了此 API，發現了一些潛在的設計問題。",
+      "badgeTooltip": "設計問題 ({{count}})",
+      "badgeAria": "設計問題",
+      "code": {
+        "propertyNameEmpty": "部分屬性沒有名稱",
+        "propertyNameDuplicate": "部分屬性在其模型內使用了相同的名稱",
+        "propertyShadowsParent": "部分屬性遮蔽了繼承的屬性",
+        "modelNameEmpty": "部分模型沒有名稱",
+        "enumNameEmpty": "部分列舉沒有名稱",
+        "groupNameEmpty": "部分路由群組沒有名稱",
+        "modelNameDuplicate": "多個模型使用了相同的名稱",
+        "enumNameDuplicate": "多個列舉使用了相同的名稱",
+        "componentNameCollision": "一個模型與一個列舉使用了相同的名稱",
+        "groupNameDuplicate": "多個路由群組使用了相同的名稱",
+        "inheritanceTargetUnknown": "部分模型繼承自一個已不存在的模型",
+        "inheritanceCycle": "部分模型形成了循環繼承鏈",
+        "referenceTargetUnknown": "部分屬性參照了一個已不存在的型別",
+        "identifierPropertyUnknown": "部分模型將其識別碼指向一個已不存在的屬性",
+        "paramLinkTargetUnknown": "部分路由參數連結到一個已不存在的模型或屬性",
+        "paramEnumRefUnknown": "部分路由參數參照了一個已不存在的列舉",
+        "bodyModelUnknown": "部分路由使用了一個已不存在的主體模型",
+        "responseModelUnknown": "部分回應使用了一個已不存在的模型",
+        "responseExampleUnknown": "部分回應回傳了其模型未宣告的範例",
+        "constraintPatternInvalid": "部分屬性約束使用了無效的模式（正規表示式）",
+        "constraintMinAboveMax": "部分屬性約束的最小值大於最大值",
+        "routeResponsesMissing": "部分路由未宣告任何回應",
+        "routePathDuplicate": "多個路由回應相同的方法與路徑",
+        "routePathReserved": "部分路由位於設計伺服器保留的路徑上"
       }
     }
   },

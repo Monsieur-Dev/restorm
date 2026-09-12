@@ -359,7 +359,8 @@
       "docs": "Dokumentation",
       "environments": "Miljöer",
       "notes": "Anteckningar",
-      "customValues": "Anpassade uppräkningar"
+      "customValues": "Anpassade uppräkningar",
+      "issues": "Problem"
     },
     "home": {
       "configureEnvs": "Konfigurera miljöer",
@@ -1976,6 +1977,14 @@
         "version": "Version",
         "versionPlaceholder": "version",
         "add": "Lägg till paket"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Behöver du hjälp?"
+      },
+      "help": {
+        "intro": "Det kopplade värdet kommer in som `input`, körningens variabler som `vars`, och det kurerade standardbiblioteket är tillgängligt som globala variabler. Returnera resultatet med `return` (eller låt det i Python / Ruby / R / C# vara det sista uttrycket) för att skicka ut det via `result`-utgången.",
+        "exampleFor": "Exempel i {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Tillfällig (TTL)"
     },
     "issue": {
+      "collidesWith": "Krockar med:",
       "propertyNameEmpty": "Egenskapen saknar namn",
       "propertyNameDuplicate": "Duplicerat egenskapsnamn",
       "propertyShadowsParent": "Skuggar en ärvd egenskap",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "En svarsmodell finns inte längre",
       "responseExampleUnknown": "Ett svar serverar ett saknat exempel",
       "routeResponsesMissing": "Rutten deklarerar inget svar",
-      "routePathDuplicate": "En annan rutt besvarar redan denna metod och sökväg",
+      "routePathDuplicate": "Minst en annan rutt besvarar redan denna metod och sökväg",
       "routePathReserved": "Designservern reserverar denna sökväg — rutten skulle aldrig svara"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Lista",
         "graph": "Graf"
+      }
+    },
+    "issuesList": {
+      "intro": "Vi analyserade det här API:et och hittade några möjliga designproblem.",
+      "badgeTooltip": "Designproblem ({{count}})",
+      "badgeAria": "Designproblem",
+      "code": {
+        "propertyNameEmpty": "Vissa egenskaper har inget namn",
+        "propertyNameDuplicate": "Vissa egenskaper delar namn inom sin modell",
+        "propertyShadowsParent": "Vissa egenskaper skuggar en ärvd egenskap",
+        "modelNameEmpty": "Vissa modeller har inget namn",
+        "enumNameEmpty": "Vissa enums har inget namn",
+        "groupNameEmpty": "Vissa ruttgrupper har inget namn",
+        "modelNameDuplicate": "Flera modeller har samma namn",
+        "enumNameDuplicate": "Flera enums har samma namn",
+        "componentNameCollision": "En modell och en enum har samma namn",
+        "groupNameDuplicate": "Flera ruttgrupper har samma namn",
+        "inheritanceTargetUnknown": "Vissa modeller ärver från en modell som inte längre finns",
+        "inheritanceCycle": "Vissa modeller bildar en cirkulär arvskedja",
+        "referenceTargetUnknown": "Vissa egenskaper refererar till en typ som inte längre finns",
+        "identifierPropertyUnknown": "Vissa modeller pekar sin identifierare mot en egenskap som inte längre finns",
+        "paramLinkTargetUnknown": "Vissa ruttparametrar länkar till en modell eller egenskap som inte längre finns",
+        "paramEnumRefUnknown": "Vissa ruttparametrar refererar till en enum som inte längre finns",
+        "bodyModelUnknown": "Vissa rutter använder en body-modell som inte längre finns",
+        "responseModelUnknown": "Vissa svar använder en modell som inte längre finns",
+        "responseExampleUnknown": "Vissa svar levererar ett exempel som deras modell inte deklarerar",
+        "constraintPatternInvalid": "Vissa egenskapsbegränsningar använder ett ogiltigt mönster (reguljärt uttryck)",
+        "constraintMinAboveMax": "Vissa egenskapsbegränsningar har ett minimum över sitt maximum",
+        "routeResponsesMissing": "Vissa rutter deklarerar inget svar",
+        "routePathDuplicate": "Flera rutter besvarar samma metod och sökväg",
+        "routePathReserved": "Vissa rutter ligger på en sökväg som designservern reserverar"
       }
     }
   },

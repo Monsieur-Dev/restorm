@@ -359,7 +359,8 @@
       "docs": "Belgeler",
       "environments": "Ortamlar",
       "notes": "Notlar",
-      "customValues": "Özel numaralandırmalar"
+      "customValues": "Özel numaralandırmalar",
+      "issues": "Sorunlar"
     },
     "home": {
       "configureEnvs": "Ortamları yapılandır",
@@ -1976,6 +1977,14 @@
         "version": "Sürüm",
         "versionPlaceholder": "sürüm",
         "add": "Paket ekle"
+      },
+      "tab": {
+        "code": "Kod",
+        "help": "Yardıma mı ihtiyacınız var?"
+      },
+      "help": {
+        "intro": "Bağlanan değer `input`, çalıştırma değişkenleri `vars` olarak gelir ve seçilmiş standart kütüphane genel değişkenler olarak kullanılabilir. Sonucu `result` çıkışından göndermek için `return` ile döndürün (ya da Python / Ruby / R / C# içinde son ifade olarak bırakın).",
+        "exampleFor": "{{language}} dilinde örnek"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Geçici (TTL)"
     },
     "issue": {
+      "collidesWith": "Şununla çakışıyor:",
       "propertyNameEmpty": "Özelliğin adı yok",
       "propertyNameDuplicate": "Yinelenen özellik adı",
       "propertyShadowsParent": "Kalıtılan bir özelliği gölgeliyor",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Bir yanıt modeli artık yok",
       "responseExampleUnknown": "Bir yanıt eksik bir örnek sunuyor",
       "routeResponsesMissing": "Rota hiçbir yanıt bildirmiyor",
-      "routePathDuplicate": "Başka bir rota bu yöntem ve yola zaten yanıt veriyor",
+      "routePathDuplicate": "En az bir başka rota bu yöntem ve yola zaten yanıt veriyor",
       "routePathReserved": "Tasarım sunucusu bu yolu ayırıyor — rota asla yanıt vermez"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Liste",
         "graph": "Grafik"
+      }
+    },
+    "issuesList": {
+      "intro": "Bu API'yi analiz ettik ve bazı olası tasarım sorunları tespit ettik.",
+      "badgeTooltip": "Tasarım sorunları ({{count}})",
+      "badgeAria": "Tasarım sorunları",
+      "code": {
+        "propertyNameEmpty": "Bazı özelliklerin adı yok",
+        "propertyNameDuplicate": "Bazı özellikler modelleri içinde aynı adı paylaşıyor",
+        "propertyShadowsParent": "Bazı özellikler devralınan bir özelliği gölgeliyor",
+        "modelNameEmpty": "Bazı modellerin adı yok",
+        "enumNameEmpty": "Bazı enum'ların adı yok",
+        "groupNameEmpty": "Bazı rota gruplarının adı yok",
+        "modelNameDuplicate": "Birkaç model aynı adı taşıyor",
+        "enumNameDuplicate": "Birkaç enum aynı adı taşıyor",
+        "componentNameCollision": "Bir model ile bir enum aynı adı taşıyor",
+        "groupNameDuplicate": "Birkaç rota grubu aynı adı taşıyor",
+        "inheritanceTargetUnknown": "Bazı modeller artık var olmayan bir modelden devralıyor",
+        "inheritanceCycle": "Bazı modeller döngüsel bir kalıtım zinciri oluşturuyor",
+        "referenceTargetUnknown": "Bazı özellikler artık var olmayan bir türe başvuruyor",
+        "identifierPropertyUnknown": "Bazı modeller tanımlayıcılarını artık var olmayan bir özelliğe yönlendiriyor",
+        "paramLinkTargetUnknown": "Bazı rota parametreleri artık var olmayan bir modele veya özelliğe bağlanıyor",
+        "paramEnumRefUnknown": "Bazı rota parametreleri artık var olmayan bir enum'a başvuruyor",
+        "bodyModelUnknown": "Bazı rotalar artık var olmayan bir gövde modeli kullanıyor",
+        "responseModelUnknown": "Bazı yanıtlar artık var olmayan bir model kullanıyor",
+        "responseExampleUnknown": "Bazı yanıtlar, modellerinin bildirmediği bir örnek sunuyor",
+        "constraintPatternInvalid": "Bazı özellik kısıtlamaları geçersiz bir desen (düzenli ifade) kullanıyor",
+        "constraintMinAboveMax": "Bazı özellik kısıtlamalarının minimumu maksimumundan büyük",
+        "routeResponsesMissing": "Bazı rotalar hiçbir yanıt bildirmiyor",
+        "routePathDuplicate": "Birkaç rota aynı yönteme ve yola yanıt veriyor",
+        "routePathReserved": "Bazı rotalar tasarım sunucusunun ayırdığı bir yolda bulunuyor"
       }
     }
   },

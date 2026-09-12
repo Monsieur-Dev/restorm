@@ -1037,6 +1037,38 @@
   background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
 }
 
+/* ── Collision twins: the clickable "collides with" links under an entity's
+   error callout, so every member of a name/path collision can reach the others. */
+.design-collision-twins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 8px;
+}
+
+.design-collision-twins-label {
+  font-size: 0.85em;
+  color: var(--descriptionForeground, #999);
+}
+
+.design-collision-twin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--inputValidation-errorBorder, rgba(190, 17, 0, 0.6));
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.design-collision-twin-chip:hover {
+  background-color: var(--toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
 /* ── Notes tab of a model ─────────────────────────────────────────── */
 
 .design-model-notes {
@@ -1054,6 +1086,13 @@
   font-size: 0.9em;
   margin-right: 4px;
   vertical-align: middle;
+}
+
+/* Item count that trails a design section label ("Routes (2)"): smaller and
+   dimmed so the label reads first and the error dot stays flush right. */
+.design-section-count {
+  font-size: 0.85em;
+  opacity: 0.55;
 }
 
 /* ── Delete-impact modal ──────────────────────────────────────────── */

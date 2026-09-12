@@ -29,7 +29,7 @@ export interface DesignModelsSectionProps {
   issues: readonly DesignIssue[]
   selectedModelId: string | null
   onSelectModel: (modelId: string | null) => void
-  onJumpTo: (section: 'models' | 'routes', entityId: string) => void
+  onJumpTo: (section: 'models' | 'routes' | 'enums', entityId: string) => void
   /** A one-shot action fired from a sidebar model node's context menu. */
   pendingAction?: PendingEntityAction | null
 }
@@ -124,7 +124,7 @@ export const DesignModelsSection: React.FC<DesignModelsSectionProps> = ({ design
       ) : (
         <div className="design-entity-detail design-model-card" data-testid="design-models-detail">
           <>
-            <DesignIssuesCallout issues={issues} entityId={selected.id} />
+            <DesignIssuesCallout issues={issues} entityId={selected.id} design={design} onJumpTo={onJumpTo} />
             <label className="design-field design-field-full design-model-description">
               <span className="design-field-label">{t('design.models.description', 'Description')}</span>
               <InputBox

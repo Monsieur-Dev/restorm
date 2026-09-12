@@ -530,7 +530,7 @@ export function ImportModal({
           // a separate diagnostic line — the user needs it intact to
           // report the bug.
           const displayed = describeImportError(t, { raw: rawMessage })
-          logger.error('[ImportModal] apiUpdate.apply failed', { error: rawMessage })
+          logger.warn('[ImportModal] apiUpdate.apply failed', { error: rawMessage })
           setError(displayed)
           toasterService.push('app', {
             title: t('import.applyFailedTitle', 'Refresh from source failed'),

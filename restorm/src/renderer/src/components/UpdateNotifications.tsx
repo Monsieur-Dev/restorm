@@ -91,7 +91,7 @@ export function UpdateNotifications(): React.JSX.Element {
       // The modal is already open by then and settles into its empty state, so
       // a rejected IPC only needs logging — not an unhandled rejection.
       openReleaseNotes(mode).catch((err: unknown) => {
-        logger.error('Failed to load release notes', { error: String(err) })
+        logger.warn('Failed to load release notes', { error: String(err) })
       })
     }
   })

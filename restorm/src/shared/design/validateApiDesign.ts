@@ -77,6 +77,24 @@ export interface DesignIssue {
   /** The contested name/value, when one exists (duplicate names,
    * dangling reference IDs). */
   subject?: string
+  /** For a NAME/PATH collision: the entity IDs of the OTHER members of the
+   * same collision group (same component name, same route surface). Every
+   * member of the group carries an issue — each listing the others — so the
+   * sidebar marks all of them and the editor can render a clickable "collides
+   * with" list without recomputing. Absent for non-collision issues. */
+  collisionWith?: string[]
+}
+
+/** Group items by a string key, preserving first-seen order of the groups. */
+function groupByKey<T>(items: readonly T[], key: (item: T) => string): T[][] {
+  const groups = new Map<string, T[]>()
+  for (const item of items) {
+    const k = key(item)
+    const bucket = groups.get(k)
+    if (bucket !== undefined) bucket.push(item)
+    else groups.set(k, [item])
+  }
+  return [...groups.values()]
 }
 
 /** `true` when the design has no blocking issues — the gate the design
@@ -110,11 +128,11 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   const modelById = new Map(design.models.map((m) => [m.id, m]))
   const enumIds = new Set(design.enums.map((e) => e.id))
 
-  // Models and enums share ONE component namespace (both project under
-  // the spec's model names), so the sweep runs over their union: a
-  // within-kind duplicate keeps its specific code, a cross-kind clash
-  // gets its own.
-  const componentNames = new Map<string, 'model' | 'enum'>()
+  // Models and enums share ONE component namespace (both project under the
+  // spec's model names). Every member of a same-name group is flagged (not just
+  // the trailing ones), each carrying the others' ids: a same-kind group keeps
+  // its specific duplicate code, a cross-kind group (a model AND an enum share a
+  // name — one would silently overwrite the other) gets `componentNameCollision`.
   const componentEntries: { id: string; name: string; kind: 'model' | 'enum' }[] = [
     ...design.models.map((m) => ({ id: m.id, name: m.doc.name, kind: 'model' as const })),
     ...design.enums.map((e) => ({ id: e.id, name: e.doc.name, kind: 'enum' as const }))
@@ -122,32 +140,34 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   for (const entry of componentEntries) {
     if (entry.name === '') {
       issues.push({ code: entry.kind === 'model' ? 'modelNameEmpty' : 'enumNameEmpty', path: [design.id, entry.id] })
-      continue
     }
-    const holder = componentNames.get(entry.name)
-    if (holder === undefined) {
-      componentNames.set(entry.name, entry.kind)
-    } else if (holder === entry.kind) {
+  }
+  for (const group of groupByKey(componentEntries.filter((e) => e.name !== ''), (e) => e.name)) {
+    if (group.length < 2) continue
+    const mixed = group.some((e) => e.kind === 'model') && group.some((e) => e.kind === 'enum')
+    for (const entry of group) {
       issues.push({
-        code: entry.kind === 'model' ? 'modelNameDuplicate' : 'enumNameDuplicate',
+        code: mixed ? 'componentNameCollision' : (entry.kind === 'model' ? 'modelNameDuplicate' : 'enumNameDuplicate'),
         path: [design.id, entry.id],
-        subject: entry.name
+        subject: entry.name,
+        collisionWith: group.filter((o) => o.id !== entry.id).map((o) => o.id)
       })
-    } else {
-      issues.push({ code: 'componentNameCollision', path: [design.id, entry.id], subject: entry.name })
     }
   }
 
-  const groupNames = new Set<string>()
   for (const group of design.routeGroups) {
-    if (group.doc.name === '') {
-      issues.push({ code: 'groupNameEmpty', path: [design.id, group.id] })
-      continue
+    if (group.doc.name === '') issues.push({ code: 'groupNameEmpty', path: [design.id, group.id] })
+  }
+  for (const named of groupByKey(design.routeGroups.filter((g) => g.doc.name !== ''), (g) => g.doc.name)) {
+    if (named.length < 2) continue
+    for (const group of named) {
+      issues.push({
+        code: 'groupNameDuplicate',
+        path: [design.id, group.id],
+        subject: group.doc.name,
+        collisionWith: named.filter((o) => o.id !== group.id).map((o) => o.id)
+      })
     }
-    if (groupNames.has(group.doc.name)) {
-      issues.push({ code: 'groupNameDuplicate', path: [design.id, group.id], subject: group.doc.name })
-    }
-    groupNames.add(group.doc.name)
   }
 
   for (const model of design.models) {
@@ -209,30 +229,38 @@ export function validateApiDesign(design: ApiDesign): DesignIssue[] {
   }
 
   // One HTTP surface per METHOD + composed path across ALL groups: the
-  // exported `paths[path][method]` and the served route table both key
-  // on it, and would silently drop the second claimant. The design
-  // base path is omitted — it prefixes every route equally.
-  const routeSurfaces = new Set<string>()
+  // exported `paths[path][method]` and the served route table both key on it,
+  // and would silently drop the second claimant. The design base path is
+  // omitted — it prefixes every route equally. Parameter names are NOT part of
+  // the surface (`/u/{{id}}` and `/u/{{userId}}` are the same templated path,
+  // which OpenAPI forbids), so they normalize to a fixed token. Every route in
+  // a colliding surface group is flagged (each listing the others), so all get
+  // the sidebar mark + the editor's twin list — not just the trailing claimant.
+  const routeSurfaceEntries = design.routeGroups.flatMap((group) =>
+    group.routes.map((route) => ({
+      id: route.id,
+      groupId: group.id,
+      surface: `${route.doc.match.method ?? 'GET'} ${composeRoutePath({ groupBasePath: groupChainBasePath(design, group) }, route.doc.match.urlPattern).replace(/\{\{[^{}]*\}\}/g, '{*}')}`
+    }))
+  )
+  for (const surfaceGroup of groupByKey(routeSurfaceEntries, (r) => r.surface)) {
+    if (surfaceGroup.length < 2) continue
+    for (const entry of surfaceGroup) {
+      issues.push({
+        code: 'routePathDuplicate',
+        path: [design.id, entry.groupId, entry.id],
+        subject: entry.surface,
+        collisionWith: surfaceGroup.filter((o) => o.id !== entry.id).map((o) => o.id)
+      })
+    }
+  }
+
   for (const group of design.routeGroups) {
     for (const route of group.routes) {
       const path = [design.id, group.id, route.id]
 
       if (Object.keys(route.doc.responses ?? {}).length === 0) {
         issues.push({ code: 'routeResponsesMissing', path })
-      }
-
-      // Parameter names are NOT part of the HTTP surface: `/u/{{id}}`
-      // and `/u/{{userId}}` are the same templated path (OpenAPI
-      // forbids the pair, and the served route table would leave the
-      // second one unreachable) — normalize them to a fixed token.
-      const composed = composeRoutePath({
-        groupBasePath: groupChainBasePath(design, group)
-      }, route.doc.match.urlPattern).replace(/\{\{[^{}]*\}\}/g, '{*}')
-      const surface = `${route.doc.match.method ?? 'GET'} ${composed}`
-      if (routeSurfaces.has(surface)) {
-        issues.push({ code: 'routePathDuplicate', path, subject: surface })
-      } else {
-        routeSurfaces.add(surface)
       }
 
       // The design server owns some paths on the port: the descriptor

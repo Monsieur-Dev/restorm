@@ -358,7 +358,8 @@
       "docs": "Dokumen",
       "environments": "Lingkungan",
       "notes": "Catatan",
-      "customValues": "Enumerasi kustom"
+      "customValues": "Enumerasi kustom",
+      "issues": "Masalah"
     },
     "home": {
       "configureEnvs": "Konfigurasi lingkungan",
@@ -1975,6 +1976,14 @@
         "version": "Versi",
         "versionPlaceholder": "versi",
         "add": "Tambah paket"
+      },
+      "tab": {
+        "code": "Kode",
+        "help": "Butuh bantuan?"
+      },
+      "help": {
+        "intro": "Nilai yang terhubung tiba sebagai `input`, variabel run sebagai `vars`, dan pustaka standar terkurasi tersedia sebagai variabel global. Kembalikan hasilnya dengan `return` (atau, pada Python / Ruby / R / C#, biarkan sebagai ekspresi terakhir) untuk mengirimkannya melalui keluaran `result`.",
+        "exampleFor": "Contoh dalam {{language}}"
       }
     },
     "help": {
@@ -2505,6 +2514,7 @@
       "ephemeral": "Sementara (TTL)"
     },
     "issue": {
+      "collidesWith": "Berkonflik dengan:",
       "propertyNameEmpty": "Properti tidak memiliki nama",
       "propertyNameDuplicate": "Nama properti duplikat",
       "propertyShadowsParent": "Menutupi properti warisan",
@@ -2526,7 +2536,7 @@
       "responseModelUnknown": "Model respons sudah tidak ada",
       "responseExampleUnknown": "Respons menyajikan contoh yang hilang",
       "routeResponsesMissing": "Rute tidak mendeklarasikan respons apa pun",
-      "routePathDuplicate": "Rute lain sudah menjawab metode dan jalur ini",
+      "routePathDuplicate": "Setidaknya satu rute lain sudah menjawab metode dan jalur ini",
       "routePathReserved": "Server desain mencadangkan jalur ini — rute tidak akan pernah menjawab"
     },
     "routes": {
@@ -2699,6 +2709,37 @@
       "tabs": {
         "list": "Daftar",
         "graph": "Grafik"
+      }
+    },
+    "issuesList": {
+      "intro": "Kami menganalisis API ini dan menemukan beberapa kemungkinan masalah desain.",
+      "badgeTooltip": "Masalah desain ({{count}})",
+      "badgeAria": "Masalah desain",
+      "code": {
+        "propertyNameEmpty": "Beberapa properti tidak memiliki nama",
+        "propertyNameDuplicate": "Beberapa properti memiliki nama yang sama dalam modelnya",
+        "propertyShadowsParent": "Beberapa properti menutupi properti warisan",
+        "modelNameEmpty": "Beberapa model tidak memiliki nama",
+        "enumNameEmpty": "Beberapa enum tidak memiliki nama",
+        "groupNameEmpty": "Beberapa grup rute tidak memiliki nama",
+        "modelNameDuplicate": "Beberapa model memiliki nama yang sama",
+        "enumNameDuplicate": "Beberapa enum memiliki nama yang sama",
+        "componentNameCollision": "Sebuah model dan sebuah enum memiliki nama yang sama",
+        "groupNameDuplicate": "Beberapa grup rute memiliki nama yang sama",
+        "inheritanceTargetUnknown": "Beberapa model mewarisi dari model yang sudah tidak ada",
+        "inheritanceCycle": "Beberapa model membentuk rantai pewarisan melingkar",
+        "referenceTargetUnknown": "Beberapa properti mereferensikan tipe yang sudah tidak ada",
+        "identifierPropertyUnknown": "Beberapa model mengarahkan pengenalnya ke properti yang sudah tidak ada",
+        "paramLinkTargetUnknown": "Beberapa parameter rute tertaut ke model atau properti yang sudah tidak ada",
+        "paramEnumRefUnknown": "Beberapa parameter rute mereferensikan enum yang sudah tidak ada",
+        "bodyModelUnknown": "Beberapa rute menggunakan model body yang sudah tidak ada",
+        "responseModelUnknown": "Beberapa respons menggunakan model yang sudah tidak ada",
+        "responseExampleUnknown": "Beberapa respons menyajikan contoh yang tidak dideklarasikan oleh modelnya",
+        "constraintPatternInvalid": "Beberapa batasan properti menggunakan pola (ekspresi reguler) yang tidak valid",
+        "constraintMinAboveMax": "Beberapa batasan properti memiliki nilai minimum di atas maksimumnya",
+        "routeResponsesMissing": "Beberapa rute tidak mendeklarasikan respons",
+        "routePathDuplicate": "Beberapa rute menjawab metode dan jalur yang sama",
+        "routePathReserved": "Beberapa rute berada di jalur yang dicadangkan server desain"
       }
     }
   },

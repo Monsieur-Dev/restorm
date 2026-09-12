@@ -250,7 +250,7 @@ export const SseRequestTabView: React.FC<SseRequestTabViewProps> = ({ request })
         logger.info('SSE connection closed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
-        logger.error('SSE connection failed', { error: String(err) })
+        logger.warn('SSE connection failed', { error: String(err) })
       })
   }
 

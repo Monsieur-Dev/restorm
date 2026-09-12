@@ -1,0 +1,9 @@
+/* The design-issues "!" is a Phosphor `ExclamationMark` via IconView (an SVG
+ * that inherits `currentColor`), painted a warning colour so it reads apart from
+ * the red secret-error badge that can sit next to it on the same env-folder row. */
+.design-issues-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: var(--notificationsWarningIcon-foreground, var(--editorWarning-foreground, #cca700));
+  flex: 0 0 auto;
+}

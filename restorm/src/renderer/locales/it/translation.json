@@ -359,7 +359,8 @@
       "docs": "Docs",
       "environments": "Ambienti",
       "notes": "Note",
-      "customValues": "Enumerazioni personalizzate"
+      "customValues": "Enumerazioni personalizzate",
+      "issues": "Problemi"
     },
     "home": {
       "configureEnvs": "Configura gli ambienti",
@@ -1976,6 +1977,14 @@
         "version": "Versione",
         "versionPlaceholder": "versione",
         "add": "Aggiungi pacchetto"
+      },
+      "tab": {
+        "code": "Codice",
+        "help": "Serve aiuto?"
+      },
+      "help": {
+        "intro": "Il valore cablato arriva come `input`, le variabili dell’esecuzione come `vars`, e la libreria standard curata è disponibile come variabili globali. Restituisca il risultato con `return` (oppure, in Python / Ruby / R / C#, lo lasci come ultima espressione) per inviarlo all’uscita `result`.",
+        "exampleFor": "Esempio in {{language}}"
       }
     },
     "help": {
@@ -2506,6 +2515,7 @@
       "ephemeral": "Effimero (TTL)"
     },
     "issue": {
+      "collidesWith": "In conflitto con:",
       "propertyNameEmpty": "La proprietà non ha nome",
       "propertyNameDuplicate": "Nome di proprietà duplicato",
       "propertyShadowsParent": "Nasconde una proprietà ereditata",
@@ -2527,7 +2537,7 @@
       "responseModelUnknown": "Un modello di risposta non esiste più",
       "responseExampleUnknown": "Una risposta serve un esempio mancante",
       "routeResponsesMissing": "La rotta non dichiara alcuna risposta",
-      "routePathDuplicate": "Un’altra rotta risponde già a questo metodo e percorso",
+      "routePathDuplicate": "Almeno un'altra rotta risponde già a questo metodo e percorso",
       "routePathReserved": "Il server di design riserva questo percorso — la rotta non risponderebbe mai"
     },
     "routes": {
@@ -2700,6 +2710,37 @@
       "tabs": {
         "list": "Elenco",
         "graph": "Grafico"
+      }
+    },
+    "issuesList": {
+      "intro": "Abbiamo analizzato questa API e rilevato alcuni possibili problemi di design.",
+      "badgeTooltip": "Problemi di progettazione ({{count}})",
+      "badgeAria": "Problemi di progettazione",
+      "code": {
+        "propertyNameEmpty": "Alcune proprietà non hanno nome",
+        "propertyNameDuplicate": "Alcune proprietà condividono il nome all'interno del loro modello",
+        "propertyShadowsParent": "Alcune proprietà nascondono una proprietà ereditata",
+        "modelNameEmpty": "Alcuni modelli non hanno nome",
+        "enumNameEmpty": "Alcuni enum non hanno nome",
+        "groupNameEmpty": "Alcuni gruppi di rotte non hanno nome",
+        "modelNameDuplicate": "Diversi modelli hanno lo stesso nome",
+        "enumNameDuplicate": "Diversi enum hanno lo stesso nome",
+        "componentNameCollision": "Un modello e un enum hanno lo stesso nome",
+        "groupNameDuplicate": "Diversi gruppi di rotte hanno lo stesso nome",
+        "inheritanceTargetUnknown": "Alcuni modelli ereditano da un modello che non esiste più",
+        "inheritanceCycle": "Alcuni modelli formano una catena di ereditarietà circolare",
+        "referenceTargetUnknown": "Alcune proprietà fanno riferimento a un tipo che non esiste più",
+        "identifierPropertyUnknown": "Alcuni modelli puntano il loro identificatore a una proprietà che non esiste più",
+        "paramLinkTargetUnknown": "Alcuni parametri di rotta collegano a un modello o a una proprietà che non esiste più",
+        "paramEnumRefUnknown": "Alcuni parametri di rotta fanno riferimento a un enum che non esiste più",
+        "bodyModelUnknown": "Alcune rotte usano un modello di corpo che non esiste più",
+        "responseModelUnknown": "Alcune risposte usano un modello che non esiste più",
+        "responseExampleUnknown": "Alcune risposte forniscono un esempio che il loro modello non dichiara",
+        "constraintPatternInvalid": "Alcuni vincoli di proprietà usano un pattern (espressione regolare) non valido",
+        "constraintMinAboveMax": "Alcuni vincoli di proprietà hanno un minimo superiore al loro massimo",
+        "routeResponsesMissing": "Alcune rotte non dichiarano alcuna risposta",
+        "routePathDuplicate": "Diverse rotte rispondono allo stesso metodo e percorso",
+        "routePathReserved": "Alcune rotte si trovano su un percorso riservato dal server di design"
       }
     }
   },

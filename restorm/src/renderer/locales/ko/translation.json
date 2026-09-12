@@ -358,7 +358,8 @@
       "docs": "문서",
       "environments": "환경",
       "notes": "메모",
-      "customValues": "사용자 지정 열거형"
+      "customValues": "사용자 지정 열거형",
+      "issues": "문제"
     },
     "home": {
       "configureEnvs": "환경 구성",
@@ -1975,6 +1976,14 @@
         "version": "버전",
         "versionPlaceholder": "버전",
         "add": "패키지 추가"
+      },
+      "tab": {
+        "code": "코드",
+        "help": "도움이 필요하신가요?"
+      },
+      "help": {
+        "intro": "연결된 값은 `input`으로, 실행 변수는 `vars`로 전달되며, 선별된 표준 라이브러리는 전역 변수로 제공됩니다. 결과를 `result` 출력으로 보내려면 `return`으로 반환하십시오(또는 Python / Ruby / R / C#에서는 마지막 표현식으로 두십시오).",
+        "exampleFor": "{{language}} 예제"
       }
     },
     "help": {
@@ -2505,6 +2514,7 @@
       "ephemeral": "임시(TTL)"
     },
     "issue": {
+      "collidesWith": "충돌 대상:",
       "propertyNameEmpty": "속성에 이름이 없습니다",
       "propertyNameDuplicate": "속성 이름이 중복되었습니다",
       "propertyShadowsParent": "상속된 속성을 가립니다",
@@ -2526,7 +2536,7 @@
       "responseModelUnknown": "응답 모델이 더 이상 없습니다",
       "responseExampleUnknown": "응답이 없는 예시를 제공합니다",
       "routeResponsesMissing": "라우트가 응답을 선언하지 않았습니다",
-      "routePathDuplicate": "다른 라우트가 이미 이 메서드와 경로에 응답합니다",
+      "routePathDuplicate": "다른 라우트가 최소 하나 이미 이 메서드와 경로에 응답합니다",
       "routePathReserved": "디자인 서버가 이 경로를 예약합니다 — 라우트는 응답하지 않습니다"
     },
     "routes": {
@@ -2699,6 +2709,37 @@
       "tabs": {
         "list": "목록",
         "graph": "그래프"
+      }
+    },
+    "issuesList": {
+      "intro": "이 API를 분석한 결과 몇 가지 잠재적인 디자인 문제를 발견했습니다.",
+      "badgeTooltip": "디자인 문제 ({{count}})",
+      "badgeAria": "디자인 문제",
+      "code": {
+        "propertyNameEmpty": "일부 속성에 이름이 없습니다",
+        "propertyNameDuplicate": "일부 속성이 해당 모델 내에서 같은 이름을 공유합니다",
+        "propertyShadowsParent": "일부 속성이 상속된 속성을 가립니다",
+        "modelNameEmpty": "일부 모델에 이름이 없습니다",
+        "enumNameEmpty": "일부 enum에 이름이 없습니다",
+        "groupNameEmpty": "일부 라우트 그룹에 이름이 없습니다",
+        "modelNameDuplicate": "여러 모델이 같은 이름을 가집니다",
+        "enumNameDuplicate": "여러 enum이 같은 이름을 가집니다",
+        "componentNameCollision": "모델과 enum이 같은 이름을 가집니다",
+        "groupNameDuplicate": "여러 라우트 그룹이 같은 이름을 가집니다",
+        "inheritanceTargetUnknown": "일부 모델이 더 이상 존재하지 않는 모델을 상속합니다",
+        "inheritanceCycle": "일부 모델이 순환 상속 체인을 형성합니다",
+        "referenceTargetUnknown": "일부 속성이 더 이상 존재하지 않는 타입을 참조합니다",
+        "identifierPropertyUnknown": "일부 모델이 더 이상 존재하지 않는 속성을 식별자로 지정합니다",
+        "paramLinkTargetUnknown": "일부 라우트 매개변수가 더 이상 존재하지 않는 모델 또는 속성에 연결됩니다",
+        "paramEnumRefUnknown": "일부 라우트 매개변수가 더 이상 존재하지 않는 enum을 참조합니다",
+        "bodyModelUnknown": "일부 라우트가 더 이상 존재하지 않는 본문 모델을 사용합니다",
+        "responseModelUnknown": "일부 응답이 더 이상 존재하지 않는 모델을 사용합니다",
+        "responseExampleUnknown": "일부 응답이 해당 모델에 선언되지 않은 예시를 제공합니다",
+        "constraintPatternInvalid": "일부 속성 제약이 잘못된 패턴(정규 표현식)을 사용합니다",
+        "constraintMinAboveMax": "일부 속성 제약의 최솟값이 최댓값보다 큽니다",
+        "routeResponsesMissing": "일부 라우트가 응답을 선언하지 않습니다",
+        "routePathDuplicate": "여러 라우트가 같은 메서드와 경로에 응답합니다",
+        "routePathReserved": "일부 라우트가 디자인 서버가 예약한 경로에 있습니다"
       }
     }
   },

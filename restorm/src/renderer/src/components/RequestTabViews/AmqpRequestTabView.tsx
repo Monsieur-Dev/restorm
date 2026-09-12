@@ -348,7 +348,7 @@ export const AmqpRequestTabView: React.FC<AmqpRequestTabViewProps> = ({ request 
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
       })
       .catch((err: unknown) => {
-        logger.error('AMQP execution failed', { error: String(err) })
+        logger.warn('AMQP execution failed', { error: String(err) })
       })
   }, [request.id])
 

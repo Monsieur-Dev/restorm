@@ -27,7 +27,8 @@ export const DesignEnumsSection: React.FC<{
   pendingAction?: PendingEntityAction | null
   selectedEnumId?: string | null
   onSelectEnum?: (id: string | null) => void
-}> = ({ design, issues = [], pendingAction, selectedEnumId = null, onSelectEnum }) => {
+  onJumpTo?: ((section: 'models' | 'routes' | 'enums', entityId: string) => void) | undefined
+}> = ({ design, issues = [], pendingAction, selectedEnumId = null, onSelectEnum, onJumpTo }) => {
   const { t } = useTranslation()
   const [pendingDeleteEnum, setPendingDeleteEnum] = useState<DesignEnum | null>(null)
 
@@ -152,7 +153,7 @@ export const DesignEnumsSection: React.FC<{
     const current = design.enums.find((e) => e.id === enumId)?.doc.description ?? ''
     return (
       <>
-        <DesignIssuesCallout issues={issues} entityId={enumId} />
+        <DesignIssuesCallout issues={issues} entityId={enumId} design={design} onJumpTo={onJumpTo} />
         <label className="design-field design-enum-description">
           <span className="design-field-label">{t('design.enums.description', 'Description')}</span>
           <InputBox
@@ -164,7 +165,7 @@ export const DesignEnumsSection: React.FC<{
         </label>
       </>
     )
-  }, [design.enums, setEnumDescription, t, issues])
+  }, [design, setEnumDescription, t, issues, onJumpTo])
 
   return (
     <div className="design-section design-enums-section" data-testid="design-enums-section">

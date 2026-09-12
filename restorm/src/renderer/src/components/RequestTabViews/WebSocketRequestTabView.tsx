@@ -436,7 +436,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         logger.info('WebSocket connection closed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
-        logger.error('WebSocket connection failed', { error: String(err) })
+        logger.warn('WebSocket connection failed', { error: String(err) })
       })
   }
 

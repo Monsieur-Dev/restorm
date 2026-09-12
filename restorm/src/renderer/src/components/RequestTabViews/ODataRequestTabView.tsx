@@ -25,7 +25,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { pushServerListenErrorToast } from '../../services/serverListenErrorToast'
+import { pushServerListenErrorToast, logServerListenFailure } from '../../services/serverListenErrorToast'
 import { useIsActiveWorkbenchTab, useServerMenuPublisher } from '../../services/serverMenuStore'
 import type { SidebarContextMenuItem } from '../MainView/Sidebar/contextMenuBuilder'
 import { useRequestReset } from '../../hooks/useRequestReset'
@@ -974,10 +974,10 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       .then((res) => {
         if (res.error) {
           pushServerListenErrorToast(t, t('odata.server.listenFailed', 'OData mock server failed to start'), res.error, serverPort)
-          logger.error('OData mock server failed to listen', { error: res.error })
+          logServerListenFailure('OData mock server failed to listen', res.error)
         }
       })
-      .catch((err: unknown) => { logger.error('OData mock server listen error', { error: String(err) }) })
+      .catch((err: unknown) => { logServerListenFailure('OData mock server listen error', err) })
   }, [request.id, isListening, conflictMode, t, serverPort])
 
   const handleStop = useCallback((): void => {
@@ -1538,7 +1538,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       setHistoryRefreshKey((prev) => prev + 1)
       eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
     } catch (err) {
-      logger.error('OData load-next-page failed', { error: String(err) })
+      logger.warn('OData load-next-page failed', { error: String(err) })
     } finally {
       setIsSending(false)
     }
@@ -1596,7 +1596,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({
       setHistoryRefreshKey((prev) => prev + 1)
       eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
     } catch (err) {
-      logger.error('OData load-delta failed', { error: String(err) })
+      logger.warn('OData load-delta failed', { error: String(err) })
     } finally {
       setIsSending(false)
     }
