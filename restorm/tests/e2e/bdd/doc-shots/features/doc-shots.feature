@@ -44,6 +44,8 @@ Feature: Documentation screenshots
     # The settings page (User/Workspace tabs, search, groups table of contents).
     And I open the settings page
     Then I capture the settings page for every locale to "{locale}/reference-parametres-page.png"
+    # The theme selector (theme preview carousel) on the User settings tab.
+    Then I capture the theme carousel for every locale to "{locale}/reference-themes-carrousel.png"
     # The Favorites pane at the top of the sidebar, with a few pinned requests.
     And I mark the requests "Action Move,Get Server Details,Get Bank Details" as favorites
     Then I capture the favorites pane for every locale to "{locale}/favoris-volet-lateral.png"
@@ -63,6 +65,19 @@ Feature: Documentation screenshots
     And I set example environment variables on the ArtifactsMMO folder
     And I open the ArtifactsMMO environment folder on its "environments" sub-tab
     Then I capture the environment folder view for every locale to "{locale}/secrets-variables-environnement.png"
+    # The resolved-URL preview under a request's URL bar (variables substituted
+    # by the active environment now that baseUrl is set).
+    And I open the imported request "Get Server Details" on its "request" sub-tab
+    Then I capture the resolved URL preview for every locale to "{locale}/variables-en-ligne-valeur-resolue.png"
+    # The response-history modal, after running the request a few times.
+    And I run the open request 6 times
+    And I open the response history of the open request
+    Then I capture the response history modal for every locale to "{locale}/historique-des-reponses-modale.png"
+    # The console rendering the captured calls as cURL commands (run the request
+    # a few more times AFTER opening it so the calls are captured live).
+    And I open the console
+    And I run the open request 6 times
+    Then I capture the console for every locale to "{locale}/console-appels-curl.png"
     # The global "search everything" palette, unfolded with a query typed.
     And I open the global search and type "account"
     Then I capture the global search for every locale to "{locale}/moteur-de-recherche.png"

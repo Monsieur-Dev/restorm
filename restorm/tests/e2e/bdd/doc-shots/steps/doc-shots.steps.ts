@@ -1317,3 +1317,134 @@ Then('I capture the global search for every locale to {string}', async ({ restor
   await p.keyboard.press('Escape')
   await p.waitForTimeout(300)
 })
+
+// ---- resolved URL preview -------------------------------------------------
+
+Then('I capture the resolved URL preview for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      await reselectRequestSubTab(p)
+    },
+    // A tight crop of the URL bar plus the resolved-value line rendered beneath
+    // it (variables substituted by the active environment). Every OPENED request
+    // renders its own hidden url-container, so pick the visible one (non-zero box).
+    clip: async () => await p.evaluate(() => {
+      const visible = (sel: string): DOMRect | null => {
+        for (const el of Array.from(document.querySelectorAll(sel))) {
+          const r = el.getBoundingClientRect()
+          if (r.width > 0 && r.height > 0) return r
+        }
+        return null
+      }
+      // Anchor on the whole URL section (method badge + url input), then grow the
+      // box down and out to include the resolved-value line beneath it.
+      const sec = visible('[data-testid="http-request-url-section"]') ?? visible('[data-testid="url-container"]')
+      if (sec === null) throw new Error('no visible url section for the clip')
+      const prev = visible('[data-testid="url-resolved-preview"]')
+      const left = prev !== null ? Math.min(sec.x, prev.x) : sec.x
+      const right = prev !== null ? Math.max(sec.right, prev.right) : sec.right
+      const bottom = prev !== null ? Math.max(sec.bottom, prev.bottom) : sec.bottom
+      const pad = 10
+      return { x: Math.max(0, left - pad), y: Math.max(0, sec.y - pad), width: (right - left) + pad * 2, height: (bottom - sec.y) + pad * 2 }
+    })
+  })
+})
+
+// ---- response history + console (after running the request a few times) ----
+
+When('I run the open request {int} times', async ({}, times: number) => {
+  if (openRequestId === null) throw new Error('open a request first')
+  const p = requirePage()
+  const mcp = requireMcp()
+  for (let i = 0; i < times; i++) {
+    await callEmbeddedMcpTool(mcp, 'run_request', { id: openRequestId }).catch(() => undefined)
+    await p.waitForTimeout(700)
+  }
+  await p.waitForTimeout(500)
+})
+
+When('I open the response history of the open request', async () => {
+  if (openRequestId === null) throw new Error('open a request first')
+  const p = requirePage()
+  const button = p.locator(`[data-testid="request-header-history-button-${openRequestId}"]`)
+  await expect(button).toBeVisible({ timeout: 8000 })
+  await button.click()
+  await expect(p.locator('[data-testid="response-history-modal"]')).toBeVisible({ timeout: 8000 })
+  await p.waitForTimeout(600)
+})
+
+Then('I capture the response history modal for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      // A language switch can close the modal — re-open it if needed.
+      if (!(await p.locator('[data-testid="response-history-modal"]').isVisible().catch(() => false))) {
+        const button = p.locator(`[data-testid="request-header-history-button-${openRequestId ?? ''}"]`)
+        if (await button.isVisible().catch(() => false)) await button.click()
+      }
+      await p.waitForTimeout(300)
+    },
+    clipTo: () => p.locator('[data-testid="response-history-modal"]')
+  })
+  // Close the modal so it stops covering the workbench for later steps.
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+})
+
+When('I open the console', async () => {
+  const p = requirePage()
+  await callEmbeddedMcpTool(requireMcp(), 'open_console', {})
+  await expect(p.locator('[data-testid="console-panel"]')).toBeVisible({ timeout: 8000 })
+  // Render the captured calls as cURL (vs PowerShell).
+  const curl = p.locator('[data-testid="console-toolbar-shell-curl"]')
+  if (await curl.isVisible().catch(() => false)) await curl.click()
+  await p.waitForTimeout(600)
+})
+
+Then('I capture the console for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      const curl = p.locator('[data-testid="console-toolbar-shell-curl"]')
+      if (await curl.isVisible().catch(() => false)) await curl.click()
+      await p.waitForTimeout(300)
+    }
+    // Full window: the console tab with the captured calls + curl/powershell toggle.
+  })
+})
+
+// ---- settings groups (theme carousel on User, updates on Workspace) --------
+
+/** Ensure the settings page is open and the given scope tab ('user' | 'workspace')
+ * is selected — the theme lives under User, the app groups under Workspace. */
+async function ensureSettingsScope(p: Page, scope: string): Promise<void> {
+  if (!(await p.locator('[data-testid="settings-tab-content"]').isVisible().catch(() => false))) {
+    await p.locator('[data-testid="titlebar-settings-button"]').click()
+    await expect(p.locator('[data-testid="settings-tab-content"]')).toBeVisible({ timeout: 5000 })
+  }
+  const tab = p.locator(`[data-testid="settings-page-tab-${scope}"]`)
+  if (await tab.isVisible().catch(() => false)) await tab.click()
+  await p.waitForTimeout(300)
+}
+
+Then('I capture the theme carousel for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      await ensureSettingsScope(p, 'user')
+      await p.locator('[data-testid="theme-carousel"]').scrollIntoViewIfNeeded().catch(() => undefined)
+      await p.mouse.move(640, 450)
+      await p.waitForTimeout(300)
+    },
+    clipTo: () => p.locator('[data-testid="theme-carousel"]')
+  })
+})
