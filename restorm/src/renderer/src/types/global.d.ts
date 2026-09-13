@@ -291,6 +291,7 @@ declare global {
         onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void) => (() => void)
         onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void) => (() => void)
         onRunChanged: (callback: (run: RecordingRun) => void) => (() => void)
+        onRunRemoved: (callback: (payload: { sessionId: string; runId: string }) => void) => (() => void)
         onStatusChanged: (callback: (status: RecordingStatus) => void) => (() => void)
       }
       miniBrowser: {

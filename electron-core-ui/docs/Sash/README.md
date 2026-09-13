@@ -150,7 +150,8 @@ When `data-testid` is provided, the components expose stable hooks for E2E tests
 
 - `initialWidth` — absolute pixel width for the left panel at first mount. Defaults to `200`.
 - `initialLeftRatio` — optional share of the container (0–1) given to the left panel at first mount. When set, it overrides `initialWidth` once the container has been measured (one-shot; the user's drags still take effect afterwards). Ignored when `storageKey` is present so a persisted value wins. Useful when the absolute pixel width depends on the modal / viewport — e.g. a 50/50 split inside a resizable modal.
-- `minLeftWidth` / `minRightWidth` — floors enforced during drag and during ratio initialization.
+- `keepRatio` — when `true`, a container resize keeps the split **proportional**: the left panel keeps the share of the container it last had (the user's drags update that share) instead of its absolute pixel width, clamped by the min widths. Off by default: the left panel keeps its pixel width and only the right panel absorbs the resize. Use it for master/detail layouts that live in a resizable window or tab, where a 50/50 split should stay 50/50.
+- `minLeftWidth` / `minRightWidth` — floors enforced during drag, during ratio initialization and during a proportional resize.
 
 ### `VerticalSashContainer` data-testid conventions
 

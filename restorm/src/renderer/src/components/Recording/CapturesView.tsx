@@ -62,7 +62,9 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
       list.push(capture)
       byRun.set(capture.runId, list)
     }
-    const orderedRuns: RecordingRun[] = [...runs].sort((a, b) => b.startedAt - a.startedAt)
+    // Oldest run first, like the calls inside a run: the list reads top to
+    // bottom in time order, so a live recording grows at the bottom.
+    const orderedRuns: RecordingRun[] = [...runs].sort((a, b) => a.startedAt - b.startedAt)
     return orderedRuns.flatMap((run): ListViewItemData[] => {
       const calls = byRun.get(run.id) ?? []
       if (calls.length === 0 && filterRegex !== null) return []
@@ -195,8 +197,9 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
         <VerticalSashContainer
           data-testid="recording-captures-sash"
           initialLeftRatio={0.5}
+          keepRatio
           minLeftWidth={240}
-          minRightWidth={240}
+          minRightWidth={500}
           sashConfig={{ size: 4 }}
           Left={
             <div className="recording-captures-list">

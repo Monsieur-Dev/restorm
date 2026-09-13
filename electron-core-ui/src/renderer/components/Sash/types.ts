@@ -149,6 +149,11 @@ export interface VerticalSashContainerProps {
 	 * width depends on the modal / viewport size, e.g. a 50/50 split).
 	 * A persisted `storageKey` value overrides this. */
 	initialLeftRatio?: number;
+	/** Keep the split PROPORTIONAL when the container is resized: the
+	 * left panel keeps its share of the container (the share the user
+	 * last dragged to) instead of its absolute pixel width, within the
+	 * min widths. Off by default — the absolute width is kept. */
+	keepRatio?: boolean;
 	/** Minimum width for the left panel */
 	minLeftWidth?: number;
 	/** Minimum width for the right panel */

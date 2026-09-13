@@ -326,6 +326,25 @@ Then('the captures list shows a live run row', async () => {
   await expect(p.locator('[data-testid^="recording-run-row-"]').first()).toBeVisible({ timeout: 5000 })
 })
 
+let clearedRunId = ''
+
+When('I clear the live run with its trash button', async () => {
+  const p = requirePage()
+  const row = p.locator('[data-testid^="recording-run-row-"]').first()
+  clearedRunId = (await row.getAttribute('data-testid'))?.replace('recording-run-row-', '') ?? ''
+  expect(clearedRunId).not.toBe('')
+  await p.locator(`[data-testid="recording-run-clear-${clearedRunId}"]`).click()
+})
+
+Then('the cleared run row is gone and a fresh live run row shows', async () => {
+  const p = requirePage()
+  await expect(p.locator(`[data-testid="recording-run-row-${clearedRunId}"]`)).toHaveCount(0, { timeout: 5000 })
+  // The recording goes on: a fresh run row (another id) opens with the next call.
+  const fresh = p.locator('[data-testid^="recording-run-row-"]').first()
+  await expect(fresh).toBeVisible({ timeout: 10000 })
+  expect(await fresh.getAttribute('data-testid')).not.toBe(`recording-run-row-${clearedRunId}`)
+})
+
 When('I filter the captures with {string}', async ({}, pattern: string) => {
   const p = requirePage()
   const input = p.locator('[data-testid="recording-captures-filter-input"]')
@@ -378,6 +397,23 @@ Then('the recording routes tab lists {int} deduced request', async ({}, count: n
   await expect(p.locator('[data-testid="recording-routes-summary"]')).toContainText(String(count), { timeout: 5000 })
 })
 
+When('I click the deduced request {string} in the routes tab', async ({}, name: string) => {
+  const p = requirePage()
+  const row = p.locator('[data-testid="recording-routes-list"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click()
+  await p.waitForTimeout(400)
+})
+
+Then('the request {string} is open in a tab', async ({}, name: string) => {
+  const p = requirePage()
+  // The request tab replaced the Routes tab in the active pane: its url bar is
+  // visible and the recording tab is not.
+  await expect(p.locator('[data-testid="http-request-url-input"]:visible').first()).toBeVisible({ timeout: 10000 })
+  await expect(p.locator('[data-testid="recording-tab-routes"]:visible')).toHaveCount(0)
+  await expect(p.locator('.restorm-workbench-tab-title:visible, h1:visible').filter({ hasText: name }).first()).toBeVisible({ timeout: 5000 })
+})
+
 Then('the Routes row of the session lists the request {string} in the folder {string}', async ({}, name: string, folders: string) => {
   const p = requirePage()
   const id = await sessionId(p)
@@ -394,6 +430,18 @@ Then('the Routes row of the session lists the request {string} in the folder {st
     await expandRowIfCollapsed(folderRow)
   }
   const row = rows.filter({ has: p.getByText(name, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 10000 })
+})
+
+// The WebSocket route's name carries the first sent text frame ("WS /ws ·
+// hello") only when that frame was captured — under load the socket can
+// open before the recorder is attached to the reloaded page — so the name is
+// matched by its stable prefix.
+Then('the Routes row of the session lists a request starting with {string}', async ({}, prefix: string) => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expandRowIfCollapsed(sidebarRow(p, nodeRowId(id, 'routes')))
+  const row = p.locator('[data-testid="sidebar-listview"] .list-view-row').filter({ hasText: prefix }).first()
   await expect(row).toBeVisible({ timeout: 10000 })
 })
 
@@ -604,7 +652,7 @@ When('I run the recording servers scenario', async () => {
   const response = await fetch(HARNESS_PAGE_URL)
   expect(response.status).toBe(200)
   expect(response.headers.get('content-type') ?? '').toContain('text/html')
-  expect(await response.text()).toContain('Recording harness')
+  expect(await response.text()).toContain('Petstore demo')
 })
 
 When('I stop the recording servers scenario', async () => {

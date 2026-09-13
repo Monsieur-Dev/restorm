@@ -46,6 +46,7 @@ function bridge(runs: RecordingRun[], captures: RecordedCallSummary[]): { added:
       onCaptureUpdated: () => () => undefined,
       onCapturesRemoved: () => () => undefined,
       onRunChanged: () => () => undefined,
+      onRunRemoved: () => () => undefined,
       clearRun: vi.fn(() => Promise.resolve({ removed: [] })),
       setFilters: vi.fn(() => Promise.resolve({ ok: true })),
       applyFilters: vi.fn(() => Promise.resolve({ removed: [] }))

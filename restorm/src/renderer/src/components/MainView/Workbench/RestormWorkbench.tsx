@@ -1187,6 +1187,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           onStartRecording={onStartRecordingSession}
           onStopRecording={onStopRecordingSession}
           onDeduceRoutes={onDeduceRecordingRoutes}
+          onOpenRequest={onRequestClick}
         />
       )
     }

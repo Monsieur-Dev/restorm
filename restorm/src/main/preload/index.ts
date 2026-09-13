@@ -882,6 +882,11 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('recording:run-changed', handler)
       return () => { ipcRenderer.removeListener('recording:run-changed', handler) }
     },
+    onRunRemoved: (callback: (payload: { sessionId: string; runId: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { sessionId: string; runId: string }): void => { callback(payload) }
+      ipcRenderer.on('recording:run-removed', handler)
+      return () => { ipcRenderer.removeListener('recording:run-removed', handler) }
+    },
     onStatusChanged: (callback: (status: RecordingStatus) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, status: RecordingStatus): void => { callback(status) }
       ipcRenderer.on('recording:status-changed', handler)

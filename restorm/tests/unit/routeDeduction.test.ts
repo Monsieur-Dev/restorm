@@ -242,8 +242,12 @@ describe('route deduction — protocols without a REST path', () => {
     })
     const tree = deduceRoutes([ws('chat.message'), ws('chat.message'), ws('presence'), ws(null)])
     const routes = flattenRoutes(tree)
-    expect(routes.map((r) => r.name).sort()).toEqual(['WS /socket', 'WS /socket · chat.message', 'WS /socket · presence'])
-    expect(must(routes.find((r) => r.name === 'WS /socket · chat.message')).captureIds).toHaveLength(2)
+    // The socket seen without a typed message (closed early, a reconnect…) is
+    // the same endpoint: it is folded into the first typed route, not a third.
+    expect(routes.map((r) => r.name).sort()).toEqual(['WS /socket · chat.message', 'WS /socket · presence'])
+    expect(must(routes.find((r) => r.name === 'WS /socket · chat.message')).captureIds).toHaveLength(3)
+    // Alone, an untyped socket is still a route.
+    expect(flattenRoutes(deduceRoutes([ws(null)])).map((r) => r.name)).toEqual(['WS /socket'])
   })
 })
 

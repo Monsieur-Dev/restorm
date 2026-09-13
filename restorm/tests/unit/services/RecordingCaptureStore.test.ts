@@ -157,11 +157,18 @@ describe('recording capture store — runs, details and events', () => {
     const second = store.startRun('s1', 'http://localhost:8080/', 'tab-1', ALL)
     store.offer(call('http://a/2'))
     store.offer(call('http://a/3'))
+    const removedRuns: string[] = []
+    store.on('run-removed', (payload) => { removedRuns.push(payload.runId) })
     expect(store.clearRun('s1', second.id)).toHaveLength(2)
-    expect(store.runs('s1').map((r) => r.id)).toEqual([first?.id, second.id])
-    expect(store.status('s1').state).toBe('recording')
+    // The live run is replaced by a fresh one: the cleared group is gone,
+    // the recording goes on.
+    const fresh = store.runs('s1')[1]
+    expect(store.runs('s1').map((r) => r.id)).toEqual([first?.id, fresh?.id])
+    expect(fresh?.id).not.toBe(second.id)
+    expect(store.status('s1')).toMatchObject({ state: 'recording', runId: fresh?.id })
     expect(store.clearRun('s1', first?.id ?? '')).toHaveLength(1)
-    expect(store.runs('s1').map((r) => r.id)).toEqual([second.id])
+    expect(store.runs('s1').map((r) => r.id)).toEqual([fresh?.id])
+    expect(removedRuns).toEqual([second.id, first?.id])
     expect(store.list('s1')).toEqual([])
   })
 

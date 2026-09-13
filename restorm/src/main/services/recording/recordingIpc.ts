@@ -9,6 +9,7 @@
 import { BrowserWindow } from 'electron'
 import { eventBusService, logger, validatedHandle } from 'electron-core-ui/main'
 import { miniBrowserService } from '../MiniBrowserService'
+import { collectionStore } from '../CollectionStore'
 import { recordingCaptureStore, type RecordingStoreEvents } from './RecordingCaptureStore'
 import { recordingCaptureEngine } from './RecordingCaptureEngine'
 import { captureToHistoryDetail } from './captureHistory'
@@ -35,6 +36,7 @@ export const RECORDING_PUSH_CHANNELS: Record<keyof RecordingStoreEvents, string>
   'capture-updated': 'recording:capture-updated',
   'captures-removed': 'recording:captures-removed',
   'run-changed': 'recording:run-changed',
+  'run-removed': 'recording:run-removed',
   'status-changed': 'recording:status-changed'
 }
 
@@ -60,6 +62,16 @@ export function registerRecordingIpc(): void {
     recordingCaptureEngine.stop(payload.id)
     recordingCaptureStore.clearSession(payload.id)
   })
+  // A session deleted WITH its parent folder emits no recording event: after
+  // any folder deletion, forget every session that is no longer in the tree.
+  const forgetOrphans = (): void => {
+    for (const sessionId of recordingCaptureStore.sessionIds()) {
+      if (collectionStore.findById(sessionId) !== null) continue
+      recordingCaptureEngine.stop(sessionId)
+      recordingCaptureStore.clearSession(sessionId)
+    }
+  }
+  eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.FOLDER_DELETED, forgetOrphans)
 
   validatedHandle('recording:start', recordingStartArgs, async (_event, [sessionId, tabId, url, config]) => {
     const webContents = miniBrowserService.getWebContents(tabId)

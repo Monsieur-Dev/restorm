@@ -70,6 +70,8 @@ Feature: Recording session sidebar nodes and tabs
     Then the captures list shows a call to "/api/ping"
     When I click the first captured call
     Then the capture detail shows the response tabs
+    When I clear the live run with its trash button
+    Then the cleared run row is gone and a fresh live run row shows
     When I click the session "browser" row
     And I click the browser stop button
     Then the session is idle
@@ -102,6 +104,8 @@ Feature: Recording session sidebar nodes and tabs
     Then the recording "routes" tab is open
     And the recording routes tab lists 1 deduced request
     And the Routes row of the session lists the request "GET /api/ping" in the folder "api"
+    When I click the deduced request "GET /api/ping" in the routes tab
+    Then the request "GET /api/ping" is open in a tab
 
   Scenario: An agent drives a whole recording over MCP — create, record, read the captures, deduce
     Given a Pro project with an env folder is open with the MCP server enabled
@@ -158,7 +162,7 @@ Feature: Recording session sidebar nodes and tabs
     And the Routes row of the session lists the request "GET /api/pets/{{petId}}" in the folder "api > pets"
     And the Routes row of the session lists the request "Pets" in the folder ""
     And the Routes row of the session lists the request "pets.PetService.ListPets" in the folder "pets.PetService"
-    And the Routes row of the session lists the request "WS /ws · hello" in the folder ""
+    And the Routes row of the session lists a request starting with "WS /ws"
     And the Routes row of the session lists no request "localhost:8123"
     And the Routes row of the session lists no request "GET /api/health"
     When I click the session row

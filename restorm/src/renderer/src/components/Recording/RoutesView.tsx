@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Callout, ListView, useAuthState, type ListViewItemData } from 'electron-core-ui/renderer'
+import { Button, Callout, ListView, useAuthState, type ListViewItemData, type ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import type { FolderItem, RecordingSession, Request } from '../../../../shared/types/collections'
 import { isAnyFolder, isRequest } from '../../../../shared/types/collections'
 import { isRecordingDeduceLocked } from '../../../../shared/auth/planCapabilities'
@@ -11,6 +11,8 @@ import './routesView.css'
 
 export interface RoutesViewProps {
   session: RecordingSession
+  /** Open a deduced request in its own tab — the click on a request row. */
+  onOpenRequest?: ((requestId: string) => void) | undefined
 }
 
 function countRequests(items: readonly FolderItem[]): number {
@@ -27,6 +29,14 @@ function badgeIdOf(request: Request): string {
   }
 }
 
+function collectRequestIds(items: readonly FolderItem[], into: Set<string>): Set<string> {
+  for (const item of items) {
+    if (isAnyFolder(item)) collectRequestIds(item.items, into)
+    else if (isRequest(item)) into.add(item.id)
+  }
+  return into
+}
+
 function toRows(items: readonly FolderItem[]): ListViewItemData[] {
   return items.flatMap((item): ListViewItemData[] => {
     if (isAnyFolder(item)) {
@@ -39,16 +49,21 @@ function toRows(items: readonly FolderItem[]): ListViewItemData[] {
 
 /**
  * The Routes node's tab: the tree of requests deduced from the captures (a
- * read-only mirror of what hangs under the Routes row in the sidebar), an
- * empty state until the first deduction — and, on the Community plan, the
- * callout saying deduction is a Pro feature.
+ * mirror of what hangs under the Routes row in the sidebar — clicking a
+ * request opens its tab, like the sidebar row would), an empty state until
+ * the first deduction — and, on the Community plan, the callout saying
+ * deduction is a Pro feature.
  */
-export const RoutesView: React.FC<RoutesViewProps> = ({ session }) => {
+export const RoutesView: React.FC<RoutesViewProps> = ({ session, onOpenRequest }) => {
   const { t } = useTranslation()
   const locked = isRecordingDeduceLocked(useAuthState())
   const items = useMemo(() => session.items ?? [], [session.items])
   const rows = useMemo(() => toRows(items), [items])
+  const requestIds = useMemo(() => collectRequestIds(items, new Set<string>()), [items])
   const total = countRequests(items)
+  const openRow = useCallback((payload: ListViewItemEventPayload): void => {
+    if (requestIds.has(payload.item.id)) onOpenRequest?.(payload.item.id)
+  }, [requestIds, onOpenRequest])
 
   return (
     <div className="recording-routes" data-testid="recording-routes-view">
@@ -73,7 +88,7 @@ export const RoutesView: React.FC<RoutesViewProps> = ({ session }) => {
             {t('recording.routes.count', { count: total })}
           </p>
           <div className="recording-routes-list">
-            <ListView data-testid="recording-routes-list" items={rows} ariaLabel={t('recording.node.routes')} />
+            <ListView data-testid="recording-routes-list" items={rows} ariaLabel={t('recording.node.routes')} onItemClick={openRow} />
           </div>
           <p className="design-field-hint">{t('recording.routes.hint')}</p>
         </>

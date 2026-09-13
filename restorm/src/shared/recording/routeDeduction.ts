@@ -422,7 +422,21 @@ interface EmitContext {
   options: ResolvedOptions
 }
 
+/** A WebSocket bucket without a message type is a socket seen without a
+ *  recognisable message (closed before its first message, a reconnect…). Next
+ *  to a typed bucket on the same url it is the same endpoint, not a second
+ *  route: fold it into the first typed bucket. Alone, it stays a route. */
+function foldUntypedWebSocket(node: TrieNode): void {
+  const untyped = node.captures.get('ws:')
+  if (untyped === undefined) return
+  const typedKey = [...node.captures.keys()].find((key) => key.startsWith('ws:') && key !== 'ws:')
+  if (typedKey === undefined) return
+  node.captures.get(typedKey)?.push(...untyped)
+  node.captures.delete('ws:')
+}
+
 function emitRoutes(node: TrieNode, segments: PathSegment[], folder: DeducedFolder, ctx: EmitContext): void {
+  foldUntypedWebSocket(node)
   for (const [methodKey, list] of node.captures) {
     const captures = [...list].sort((a, b) => a.timestamp - b.timestamp)
     const lastSuccess = lastSuccessOf(captures)
@@ -466,6 +480,7 @@ function emitRoutes(node: TrieNode, segments: PathSegment[], folder: DeducedFold
     // hosts several routes itself; a lone leaf (`/assets/app.js`,
     // `/api/comments`) stays in its parent's folder — one request does not
     // deserve a folder of its own.
+    foldUntypedWebSocket(child)
     const opensFolder = !isTrivialShape(child) || child.captures.size > 1
     const sub = opensFolder ? ensureFolder(folder, segment) : folder
     emitRoutes(child, [...segments, { kind: 'static', value: segment }], sub, ctx)

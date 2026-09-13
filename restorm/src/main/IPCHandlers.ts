@@ -7,6 +7,8 @@ import { EditorWindow } from './windows/EditorWindow'
 import { contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
 import { registerRecordingIpc } from './services/recording/recordingIpc'
+import { recordingCaptureEngine } from './services/recording/RecordingCaptureEngine'
+import { recordingCaptureStore } from './services/recording/RecordingCaptureStore'
 import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { attachDraftStoreForFile } from './FileOperations'
@@ -733,6 +735,10 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', async () => {
     contextService.clearAll()
+    // File close — a recording is project-scoped: detach every live recorder
+    // and forget the captured calls (they only ever live in memory).
+    recordingCaptureEngine.stopAll()
+    recordingCaptureStore.clearAll()
     // File close — stop every running scenario. Runs are project-scoped: closing
     // the file (or opening another over it) must halt anything still executing,
     // exactly as if the user had stopped each run by hand. Sub-runs included.

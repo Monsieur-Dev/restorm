@@ -34,6 +34,7 @@ export interface RecordingStoreEvents {
   'capture-updated': RecordedCallSummary
   'captures-removed': { sessionId: string; ids: string[] }
   'run-changed': RecordingRun
+  'run-removed': { sessionId: string; runId: string }
   'status-changed': RecordingStatus
 }
 
@@ -272,6 +273,10 @@ export class RecordingCaptureStore {
 
   /** Drop every call of one run (the trash button on a level-1 row). The
    * run itself stays listed while it is live, and is forgotten otherwise. */
+  /** Drop a run and its calls. The live run cannot really go away while the
+   *  recording continues: it is replaced by a fresh, empty run (new id, new
+   *  start time) so the group the user cleared disappears and the next
+   *  capture opens a new one. */
   clearRun(sessionId: string, runId: string): string[] {
     const state = this.sessions.get(sessionId)
     if (!state) return []
@@ -282,8 +287,16 @@ export class RecordingCaptureStore {
         removed.push(id)
       }
     }
-    if (state.activeRunId !== runId) state.runs = state.runs.filter((r) => r.id !== runId)
+    const run = state.runs.find((r) => r.id === runId)
+    state.runs = state.runs.filter((r) => r.id !== runId)
     if (removed.length > 0) this.emit('captures-removed', { sessionId, ids: removed })
+    if (run !== undefined) this.emit('run-removed', { sessionId, runId })
+    if (state.activeRunId === runId && run !== undefined) {
+      const fresh: RecordingRun = { id: newRunId(), sessionId, url: run.url, startedAt: Date.now(), endedAt: null }
+      state.runs.push(fresh)
+      state.activeRunId = fresh.id
+      this.emit('run-changed', fresh)
+    }
     this.emit('status-changed', this.status(sessionId))
     return removed
   }
@@ -307,6 +320,11 @@ export class RecordingCaptureStore {
     this.sessions.delete(sessionId)
     if (ids.length > 0) this.emit('captures-removed', { sessionId, ids })
     this.emit('status-changed', this.status(sessionId))
+  }
+
+  /** Every session the store holds state for (captures or a live run). */
+  sessionIds(): string[] {
+    return [...this.sessions.keys()]
   }
 
   clearAll(): void {

@@ -51,12 +51,17 @@ export function useRecordingCaptures(sessionId: string): RecordingCapturesState 
       if (run.sessionId !== sessionId) return
       forSession((prev) => ({ ...prev, runs: prev.runs.some((r) => r.id === run.id) ? prev.runs.map((r) => (r.id === run.id ? run : r)) : [...prev.runs, run] }))
     })
+    const offRunRemoved = api.onRunRemoved((payload) => {
+      if (payload.sessionId !== sessionId) return
+      forSession((prev) => ({ ...prev, runs: prev.runs.filter((r) => r.id !== payload.runId) }))
+    })
     return () => {
       cancelled = true
       offAdded()
       offUpdated()
       offRemoved()
       offRun()
+      offRunRemoved()
     }
   }, [sessionId])
 

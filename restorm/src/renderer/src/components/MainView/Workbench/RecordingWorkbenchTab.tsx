@@ -22,6 +22,8 @@ type RecordingWorkbenchTabProps = Omit<
   onStopRecording?: ((sessionId: string) => void) | undefined
   /** Deduce the routes from the captures into the session's Routes node (Pro+). */
   onDeduceRoutes?: ((sessionId: string) => void) | undefined
+  /** Open a deduced request (a row of the Routes tab) in its own tab. */
+  onOpenRequest?: ((requestId: string) => void) | undefined
 }
 
 /**
@@ -30,7 +32,7 @@ type RecordingWorkbenchTabProps = Omit<
  * trail mirrors the sidebar — `…path / Session [ / Node ]` — and the H1 is
  * editable only on the config tab (renaming the session).
  */
-export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ session, node, breadcrumbs, tabId, onStartRecording, onStopRecording, onDeduceRoutes, ...rest }) => {
+export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ session, node, breadcrumbs, tabId, onStartRecording, onStopRecording, onDeduceRoutes, onOpenRequest, ...rest }) => {
   const { t } = useTranslation()
   const trail: BreadcrumbItem[] = node === 'config'
     ? breadcrumbs.map((crumb, i) => (i === breadcrumbs.length - 1 ? { ...crumb, icon: null } : crumb))
@@ -60,7 +62,7 @@ export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ se
           <CapturesView session={session} onDeduceRoutes={onDeduceRoutes} />
         )}
         {node === 'routes' && (
-          <RoutesView session={session} />
+          <RoutesView session={session} onOpenRequest={onOpenRequest} />
         )}
       </div>
     </RestormWorkbenchTab>
