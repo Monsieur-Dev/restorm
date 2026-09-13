@@ -15,6 +15,18 @@ import {
 } from 'electron-core-ui/renderer'
 import { buildEmptyAreaContextMenu, type AddChildHandler, type SidebarContextMenuItem } from './contextMenuBuilder'
 
+/** Row count from which the workspace tree mounts only its visible window. */
+const SIDEBAR_VIRTUALIZE_FROM_ROWS = 400
+
+function countListViewRows(items: readonly ListViewItemData[]): number {
+  let count = 0
+  for (const item of items) {
+    count += 1
+    if (item.children && item.children.length > 0) count += countListViewRows(item.children)
+  }
+  return count
+}
+
 export interface RestormSidebarProps {
   items: ListViewItemData[]
   favoriteItems: ListViewItemData[]
@@ -122,6 +134,8 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   onOpenedEditingEnd
 }) => {
   const { t } = useTranslation()
+  // Virtualise the tree only once it is big enough to pay for it.
+  const virtualizeTree = useMemo(() => countListViewRows(items) >= SIDEBAR_VIRTUALIZE_FROM_ROWS, [items])
   const [emptyAreaMenu, setEmptyAreaMenu] = useState<{ visible: boolean; x: number; y: number }>({ visible: false, x: 0, y: 0 })
 
   const handleItemClick = useCallback((payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => {
@@ -362,6 +376,14 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               items={items}
               rootRole="tree"
               ariaLabel={t('sidebar.workspace')}
+              // Large projects (and deduced recordings) can reach thousands
+              // of rows: past the threshold, mount only the visible window.
+              // Rows are a fixed 26px. Below it every row stays in the DOM —
+              // a row scrolled out of a virtual window is not there to be
+              // found (screen-reader walk, find-in-page, a test locator), so
+              // the ordinary project keeps the plain tree.
+              virtualized={virtualizeTree}
+              rowHeight={26}
               selectionMode="multiple"
               // Fall back to the anchor when no explicit multi-selection
               // exists: paths that only set the anchor (item creation's

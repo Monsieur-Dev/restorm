@@ -69,3 +69,15 @@ Feature: ListView
     When I drag list view "listview-basic" item "a-sub-1" after item "a-sub-2"
     Then list view harness last drop position should be "after"
 
+  Scenario: Virtualised list mounts only the visible window and scrolls through the whole list
+    Given I open the list view e2e tab
+    Then list view "listview-virtual" should be visible
+    Then list view "listview-virtual" mounts item "v-0"
+    Then list view "listview-virtual" mounts fewer than 100 rows
+    Then list view "listview-virtual" scroll height is at least 129000
+    When I scroll list view "listview-virtual" to the bottom
+    Then list view "listview-virtual" mounts item "v-4999"
+    Then list view "listview-virtual" does not mount item "v-0"
+    When I click list view "listview-virtual" item "v-4999"
+    Then list view harness last selection itemid should be "v-4999"
+

@@ -223,3 +223,99 @@ describe('ListView multi-drag', () => {
     expect(onSelectionChange).toHaveBeenLastCalledWith(['b'], expect.anything())
   })
 })
+
+/**
+ * Opt-in virtualisation: only the rows inside the viewport (+ overscan) are
+ * mounted, spacers keep the scrollbar honest, and the window follows the
+ * scroll offset. jsdom has no layout, so the viewport is injected by
+ * defining `clientHeight` on the scroll content and firing a scroll event —
+ * exactly the two signals the component reads.
+ */
+describe('ListView virtualisation', () => {
+  const ROW = 26
+  const many: ListViewItemData[] = Array.from({ length: 200 }, (_, i) => ({ id: `row-${String(i)}`, title: `Row ${String(i)}` }))
+
+  function scrollContent(container: HTMLElement): HTMLElement {
+    const el = container.querySelector<HTMLElement>('[data-testid="virt-scrollable-content"]')
+    if (!el) throw new Error('scroll content not found')
+    return el
+  }
+  function mountedRows(container: HTMLElement): HTMLElement[] {
+    return Array.from(container.querySelectorAll<HTMLElement>('.list-view-row'))
+  }
+  function spacers(container: HTMLElement): number[] {
+    return Array.from(container.querySelectorAll<HTMLElement>('.list-view-virtual-spacer')).map((s) => parseInt(s.style.height, 10))
+  }
+  function setViewport(el: HTMLElement, height: number, scrollTop: number): void {
+    Object.defineProperty(el, 'clientHeight', { value: height, configurable: true })
+    el.scrollTop = scrollTop
+    fireEvent.scroll(el)
+  }
+
+  it('mounts every row while the viewport is unmeasured (jsdom, first paint)', () => {
+    const { container } = render(<ListView data-testid="virt" items={many} virtualized rowHeight={ROW} />)
+    expect(mountedRows(container)).toHaveLength(200)
+    expect(spacers(container)).toEqual([])
+  })
+
+  it('mounts only the visible window plus the overscan, with spacers standing in for the rest', () => {
+    const { container } = render(<ListView data-testid="virt" items={many} virtualized rowHeight={ROW} overscan={4} />)
+    const content = scrollContent(container)
+    setViewport(content, 10 * ROW, 0)
+    // 10 visible + 4 overscan below (nothing above at the top).
+    const rows = mountedRows(container)
+    expect(rows).toHaveLength(14)
+    expect(rows[0]?.dataset['itemId']).toBe('row-0')
+    expect(rows[13]?.dataset['itemId']).toBe('row-13')
+    expect(spacers(container)).toEqual([(200 - 14) * ROW])
+    // Each mounted row is forced to the fixed height the window assumes.
+    expect(rows[0]?.style.height).toBe(`${String(ROW)}px`)
+  })
+
+  it('follows the scroll offset and keeps the total height equal to rows × rowHeight', () => {
+    const { container } = render(<ListView data-testid="virt" items={many} virtualized rowHeight={ROW} overscan={4} />)
+    const content = scrollContent(container)
+    setViewport(content, 10 * ROW, 100 * ROW)
+    const rows = mountedRows(container)
+    expect(rows[0]?.dataset['itemId']).toBe('row-96')
+    expect(rows[rows.length - 1]?.dataset['itemId']).toBe('row-113')
+    const [top, bottom] = spacers(container)
+    expect(top).toBe(96 * ROW)
+    expect(bottom).toBe((200 - 114) * ROW)
+    expect((top ?? 0) + rows.length * ROW + (bottom ?? 0)).toBe(200 * ROW)
+  })
+
+  it('collapsing a container removes its children from the virtual set', () => {
+    const tree: ListViewItemData[] = [
+      { id: 'folder', title: 'Folder', children: Array.from({ length: 150 }, (_, i) => ({ id: `child-${String(i)}`, title: `Child ${String(i)}` })) },
+      ...Array.from({ length: 50 }, (_, i) => ({ id: `tail-${String(i)}`, title: `Tail ${String(i)}` }))
+    ]
+    const { container } = render(<ListView data-testid="virt" items={tree} virtualized rowHeight={ROW} overscan={2} />)
+    const content = scrollContent(container)
+    setViewport(content, 5 * ROW, 0)
+    // 1 folder + 150 children + 50 tail rows = 201 rows.
+    expect(spacers(container)).toEqual([(201 - 7) * ROW])
+    const expander = row(container, 'folder').querySelector<HTMLElement>('.list-view-expander')
+    if (!expander) throw new Error('expander not found')
+    fireEvent.click(expander)
+    // 1 folder + 50 tail rows = 51 rows.
+    expect(spacers(container)).toEqual([(51 - 7) * ROW])
+    expect(mountedRows(container)[1]?.dataset['itemId']).toBe('tail-0')
+  })
+
+  it('keeps the row being renamed mounted even when scrolled out of the window', () => {
+    const { container } = render(
+      <ListView data-testid="virt" items={many} virtualized rowHeight={ROW} overscan={2} isRenameable editingItemId="row-150" />
+    )
+    const content = scrollContent(container)
+    setViewport(content, 5 * ROW, 0)
+    expect(container.querySelector('.list-view-row[data-item-id="row-150"] input')).not.toBeNull()
+  })
+
+  it('is off by default: every row stays mounted and no spacer is rendered', () => {
+    const { container } = render(<ListView data-testid="virt" items={many} />)
+    setViewport(scrollContent(container), 10 * 26, 0)
+    expect(mountedRows(container)).toHaveLength(200)
+    expect(spacers(container)).toEqual([])
+  })
+})

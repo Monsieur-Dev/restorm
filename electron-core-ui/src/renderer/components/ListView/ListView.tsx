@@ -34,6 +34,10 @@ export const LIST_VIEW_DRAG_MIME = 'application/x-listview-item'
  */
 export const LIST_VIEW_MULTI_DRAG_MIME = 'application/x-listview-items'
 
+/** The stylesheet's row `min-height`; the virtualised window assumes it. */
+const DEFAULT_ROW_HEIGHT = 26
+const DEFAULT_OVERSCAN = 10
+
 interface FlatItem {
   item: ListViewItemData
   depth: number
@@ -206,7 +210,10 @@ const ListViewInner: React.FC<ListViewProps> = ({
   canDrop,
   selectionContextMenuItems,
   dragExpandDelayMs = null,
-  onEmptyAreaDrop
+  onEmptyAreaDrop,
+  virtualized = false,
+  rowHeight = DEFAULT_ROW_HEIGHT,
+  overscan = DEFAULT_OVERSCAN
 }) => {
   const rootTestId = dataTestId ?? 'list-view'
   const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
@@ -352,6 +359,35 @@ const ListViewInner: React.FC<ListViewProps> = ({
   const flatItemsRef = useRef(flatItems)
   useEffect(() => { flatItemsRef.current = flatItems }, [flatItems])
 
+  // ── Virtualisation ────────────────────────────────────────────────────
+  // The viewport (scroll offset + height of the scroll content element) the
+  // mounted-row window is computed from. Height 0 = not measured yet (or a
+  // layout-less environment): fall back to mounting every row.
+  const [viewport, setViewport] = useState<{ scrollTop: number; height: number }>({ scrollTop: 0, height: 0 })
+  const measureViewport = useCallback((scrollTop?: number) => {
+    const el = listRef.current
+    if (!el) return
+    const next = { scrollTop: scrollTop ?? el.scrollTop, height: el.clientHeight }
+    setViewport((prev) => (prev.scrollTop === next.scrollTop && prev.height === next.height ? prev : next))
+  }, [])
+  const handleScroll = useCallback((scrollTop: number) => {
+    if (virtualized) measureViewport(scrollTop)
+  }, [virtualized, measureViewport])
+  useEffect(() => {
+    if (!virtualized) return
+    const el = listRef.current
+    if (!el) return
+    // Measure once the layout has settled, then follow the element's size.
+    const frame = requestAnimationFrame(() => { measureViewport() })
+    if (typeof ResizeObserver === 'undefined') return () => { cancelAnimationFrame(frame) }
+    const observer = new ResizeObserver(() => { measureViewport() })
+    observer.observe(el)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+  }, [virtualized, measureViewport])
+
   // Derive editingValue: if editingState was set for a different item, compute initial value
   const editingValue = useMemo(() => {
     if (!editingItemId) return ''
@@ -370,15 +406,28 @@ const ListViewInner: React.FC<ListViewProps> = ({
   const shouldScrollRef = useRef(false)
 
   // Function to scroll active item into view (called explicitly when needed)
-  const scrollActiveIntoView = useCallback(() => {
+  const scrollActiveIntoView = useCallback((id: string | null) => {
     const container = listRef.current
     if (!container) return
+
+    if (virtualized) {
+      // The active row may not be mounted: scroll by index, not by DOM node.
+      const index = flatItemsRef.current.findIndex((flat) => flat.item.id === id)
+      if (index === -1) return
+      const top = index * rowHeight
+      const bottom = top + rowHeight
+      const viewTop = container.scrollTop
+      const viewBottom = viewTop + container.clientHeight
+      if (top < viewTop) container.scrollTo({ top, behavior: 'smooth' })
+      else if (bottom > viewBottom) container.scrollTo({ top: bottom - container.clientHeight, behavior: 'smooth' })
+      return
+    }
 
     const row = container.querySelector<HTMLDivElement>('.list-view-row.is-active')
     if (!row) return
 
     row.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [])
+  }, [virtualized, rowHeight])
 
   // Scroll to active item only when explicitly requested
   React.useEffect(() => {
@@ -388,7 +437,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
     // Clear flag and scroll in RAF to avoid sync mutation
     requestAnimationFrame(() => {
       shouldScrollRef.current = false
-      scrollActiveIntoView()
+      scrollActiveIntoView(activeId)
     })
   }, [activeId, scrollActiveIntoView])
 
@@ -972,6 +1021,30 @@ const ListViewInner: React.FC<ListViewProps> = ({
 
   const isReady = flatItems.length > 0 || initialItems.length === 0
 
+  // The mounted-row window. Without virtualisation (or before the viewport
+  // is measured) it is the whole list.
+  const rowWindow = useMemo<{ start: number; end: number }>(() => {
+    const total = flatItems.length
+    if (!virtualized || viewport.height <= 0) return { start: 0, end: total }
+    const first = Math.floor(viewport.scrollTop / rowHeight)
+    const visible = Math.ceil(viewport.height / rowHeight)
+    let start = Math.max(0, first - overscan)
+    let end = Math.min(total, first + visible + overscan)
+    // Keep the row being renamed mounted: unmounting its input would blur
+    // and commit the rename mid-typing.
+    if (editingItemId) {
+      const editing = flatItems.findIndex((flat) => flat.item.id === editingItemId)
+      if (editing !== -1) {
+        start = Math.min(start, editing)
+        end = Math.max(end, editing + 1)
+      }
+    }
+    return { start, end }
+  }, [flatItems, virtualized, viewport, rowHeight, overscan, editingItemId])
+  const mountedRows = virtualized ? flatItems.slice(rowWindow.start, rowWindow.end) : flatItems
+  const topSpacer = rowWindow.start * rowHeight
+  const bottomSpacer = (flatItems.length - rowWindow.end) * rowHeight
+
   return (
     <div className={rootClasses} style={style} data-testid={rootTestId} data-ready={isReady}>
       <ScrollableElement
@@ -984,17 +1057,21 @@ const ListViewInner: React.FC<ListViewProps> = ({
           mouseWheelSmoothScroll: true
         }}
         contentRef={listRef}
-        contentClassName="list-view"
+        contentClassName={virtualized ? 'list-view is-virtualized' : 'list-view'}
         role={rootRole}
         aria-label={ariaLabel}
         tabIndex={0}
         onKeyDown={handleKeyDown}
+        {...(virtualized ? { onScroll: handleScroll } : {})}
         {...(onEmptyAreaDrop && !disableDrag ? {
           onDragOver: handleEmptyAreaDragOver,
           onDrop: handleEmptyAreaDrop
         } : {})}
       >
-        {flatItems.map((flat) => {
+        {virtualized && topSpacer > 0 && (
+          <div className="list-view-virtual-spacer" aria-hidden="true" style={{ height: topSpacer }} />
+        )}
+        {mountedRows.map((flat) => {
             const { item, depth, isLeaf, isExpanded } = flat
             const isSelected = selectedIds.has(item.id)
             const isActive = activeId === item.id
@@ -1088,7 +1165,8 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 item.icon
               )
 
-            const rowStyle: React.CSSProperties = {}
+            // A virtualised row is forced to the height the window assumes.
+            const rowStyle: React.CSSProperties = virtualized ? { height: rowHeight, minHeight: rowHeight } : {}
             const stickyLevel = item.isStickyHeader ? depth + 1 : 0
 
             return (
@@ -1178,6 +1256,9 @@ const ListViewInner: React.FC<ListViewProps> = ({
               </div>
             )
           })}
+        {virtualized && bottomSpacer > 0 && (
+          <div className="list-view-virtual-spacer" aria-hidden="true" style={{ height: bottomSpacer }} />
+        )}
       </ScrollableElement>
       {contextMenuItems && (
         <ContextMenu

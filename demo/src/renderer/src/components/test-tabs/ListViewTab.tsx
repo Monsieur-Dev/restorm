@@ -178,6 +178,8 @@ const ListViewTab: React.FC = () => {
   ]), [])
 
   const initialMultiItems = useMemo<ListViewItemData[]>(() => (makeLeafItems('m', 12)), [])
+  // Virtualisation harness: far more rows than the 200px box can show.
+  const initialVirtualItems = useMemo<ListViewItemData[]>(() => (makeLeafItems('v', 5000)), [])
 
   const [basicItems, setBasicItems] = useState<ListViewItemData[]>(initialBasicItems)
   const [controlledExpandedIds] = useState<string[]>([])
@@ -259,6 +261,21 @@ const ListViewTab: React.FC = () => {
             ariaLabel="ListView multiple selection"
             selectionMode="multiple"
             onSelectionChange={onSelectionChange('listview-multi')}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gap: 8 }}>
+        <div style={{ opacity: 0.7 }}>{t('listView.harness.virtualized')}</div>
+        <div style={{ height: 200, border: '1px solid var(--panel-border)', overflow: 'hidden' }}>
+          <ListView
+            data-testid="listview-virtual"
+            items={initialVirtualItems}
+            rootRole="list"
+            ariaLabel="ListView virtualised"
+            virtualized
+            rowHeight={26}
+            onSelectionChange={onSelectionChange('listview-virtual')}
           />
         </div>
       </div>

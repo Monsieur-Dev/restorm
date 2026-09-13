@@ -203,6 +203,10 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
               <ListView
                 data-testid="recording-captures-list"
                 items={items}
+                // A recording can hold thousands of calls: mount only the
+                // visible window (rows are a fixed 26px).
+                virtualized
+                rowHeight={26}
                 selectionMode="single"
                 selectedIds={selectedId !== null ? [selectedId] : []}
                 onItemClick={handleItemClick}

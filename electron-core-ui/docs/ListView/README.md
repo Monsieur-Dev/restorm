@@ -114,6 +114,17 @@ export interface ListViewProps {
    *  Receives every dragged row — consumers typically move them to the
    *  top level. Absent, the empty area is not a drop target. */
   onEmptyAreaDrop?: (sources: ListViewItemEventPayload[], originalEvent: React.DragEvent<HTMLElement>) => void
+
+  /** OPT-IN virtualisation (default false): only the rows in the viewport
+   *  plus `overscan` rows on each side are mounted; spacers keep the
+   *  scrollbar true to the full list. PREREQUISITE: every row is exactly
+   *  `rowHeight` px tall. Sticky headers are not supported in this mode. */
+  virtualized?: boolean
+  /** Fixed row height (px) the window is computed from; rows are forced to
+   *  it. Default 26. */
+  rowHeight?: number
+  /** Rows mounted beyond each viewport edge. Default 10. */
+  overscan?: number
 }
 
 export interface ListViewItemProps {
@@ -207,6 +218,21 @@ const FileTree: React.FC = () => {
   - A COLLAPSED container hovered for `dragExpandDelayMs` (opt-in — pass
     e.g. 1000) expands itself through the normal toggle path, so controlled
     `expandedIds` parents see it as a chevron click.
+
+- **Virtualisation (opt-in)**: `virtualized` mounts only the rows inside the
+  viewport plus `overscan` rows above and below; two spacers stand in for the
+  rest so the scrollbar reflects the whole list, and the window follows the
+  scroll offset and the element's size. It is computed, never measured, so the
+  **fixed row height is a prerequisite**: pass the real height in `rowHeight`
+  (default 26, the stylesheet's `min-height`) and keep every row's content
+  within it — a row that wraps or grows misaligns the window (measuring would
+  mean rendering every row once, which defeats the purpose). Collapsing a node
+  removes its children from the virtual set, so the total height follows the
+  tree. Revealing the active row (keyboard navigation, controlled `activeId`)
+  scrolls by index, so it works for unmounted rows. The row being renamed is
+  always kept mounted. Sticky headers are not supported (a header scrolled out
+  of the window unmounts). Off by default: existing consumers keep every row
+  in the DOM.
 
 ## Notes for AI Usage
 

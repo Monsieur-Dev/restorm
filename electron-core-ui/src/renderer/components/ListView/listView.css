@@ -17,6 +17,23 @@
   background-color: var(--editor-background);
 }
 
+/* Virtualised list: the rows above the viewport are swapped for a spacer (and
+   back) on every scroll. Chromium's scroll anchoring would read each swap as
+   "content above me moved" and correct scrollTop, which moves the window
+   again — a feedback loop that keeps re-mounting rows. The window math
+   already keeps the total height constant, so anchoring has nothing to fix. */
+.list-view.is-virtualized {
+  overflow-anchor: none;
+}
+
+/* Virtualisation spacers: they stand in for the unmounted rows above and
+   below the window so the scrollbar stays true; events fall through to the
+   list's empty area. */
+.list-view-virtual-spacer {
+  flex: none;
+  pointer-events: none;
+}
+
 .list-view-row {
   display: flex;
   align-items: center;

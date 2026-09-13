@@ -190,7 +190,8 @@
       "title": "ListView",
       "basic": "Basic (selection, expand, sticky, rename, dnd, context menu)",
       "controlledExpansion": "Controlled expansion (expandedIds)",
-      "multipleSelection": "Multiple selection"
+      "multipleSelection": "Multiple selection",
+      "virtualized": "Virtualised (5000 rows, fixed 26px)"
     }
   },
   "listViewDropdown": {

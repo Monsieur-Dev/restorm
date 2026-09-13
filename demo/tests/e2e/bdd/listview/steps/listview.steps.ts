@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd'
+import { expect } from '@playwright/test'
 import {
   defineContextMenuBddSteps,
   defineListViewBddSteps,
@@ -7,7 +8,7 @@ import {
 import { openListViewE2ETab } from '../fixtures/listview.fixture'
 
 const bdd = createBdd()
-const { Given, Then } = bdd
+const { Given, When, Then } = bdd
 
 defineListViewBddSteps(bdd)
 defineScrollableElementBddSteps(bdd)
@@ -93,3 +94,30 @@ Then('list view harness last delete itemid should be {string}', async ({ page },
 })
 
 export {}
+
+// ── Virtualisation ────────────────────────────────────────────────────
+
+Then('list view {string} mounts item {string}', async ({ page }, listId: string, itemId: string) => {
+  await expect(page.locator(`[data-testid="${listId}"] .list-view-row[data-item-id="${itemId}"]`)).toBeVisible({ timeout: 5000 })
+})
+
+Then('list view {string} does not mount item {string}', async ({ page }, listId: string, itemId: string) => {
+  await expect(page.locator(`[data-testid="${listId}"] .list-view-row[data-item-id="${itemId}"]`)).toHaveCount(0, { timeout: 5000 })
+})
+
+Then('list view {string} mounts fewer than {int} rows', async ({ page }, listId: string, max: number) => {
+  const rows = page.locator(`[data-testid="${listId}"] .list-view-row`)
+  await expect.poll(async () => rows.count(), { timeout: 5000 }).toBeLessThan(max)
+  expect(await rows.count()).toBeGreaterThan(0)
+})
+
+Then('list view {string} scroll height is at least {int}', async ({ page }, listId: string, min: number) => {
+  const content = page.locator(`[data-testid="${listId}-scrollable-content"]`)
+  await expect.poll(async () => content.evaluate((el) => el.scrollHeight), { timeout: 5000 }).toBeGreaterThanOrEqual(min)
+})
+
+When('I scroll list view {string} to the bottom', async ({ page }, listId: string) => {
+  const content = page.locator(`[data-testid="${listId}-scrollable-content"]`)
+  await content.evaluate((el) => { el.scrollTop = el.scrollHeight })
+  await page.waitForTimeout(300)
+})
