@@ -2863,6 +2863,24 @@
       "pause": "Pozastavit nahrávání",
       "resume": "Pokračovat v nahrávání",
       "stop": "Zastavit nahrávání"
+    },
+    "captures": {
+      "empty": "Zatím nebylo zachyceno žádné volání. Spusťte nahrávání v nastavení relace a volání stránky se zde budou zobrazovat průběžně.",
+      "filterPlaceholder": "Filtrovat volání (regulární výraz)",
+      "live": "probíhá",
+      "clearRun": "Odstranit volání tohoto nahrávání",
+      "selectOne": "Vyberte volání pro zobrazení jeho odpovědi.",
+      "loadingDetail": "Načítání volání…",
+      "addToWhitelist": "Přidat na bílou listinu…",
+      "addToBlacklist": "Přidat na černou listinu…",
+      "patternLabel": "Vzor (regulární výraz)",
+      "add": "Přidat",
+      "addAndApply": "Přidat a použít na zachycená volání",
+      "applyConfirm": "Použití listin na již zachycená volání odstraní všechna, která nyní odmítají. Tuto akci nelze vrátit zpět.",
+      "applyConfirmOk": "Použít a odstranit",
+      "deduce": "Odvodit trasy",
+      "deduceWhileRecording": "Před odvozením tras zastavte nahrávání.",
+      "deduceUnavailable": "Odvozování tras zatím není k dispozici."
     }
   },
   "mcp": {

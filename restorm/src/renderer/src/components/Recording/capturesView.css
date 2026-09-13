@@ -1,0 +1,92 @@
+.recording-captures {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.recording-captures--empty {
+  justify-content: flex-start;
+}
+
+.recording-captures-filter {
+  padding: 8px 16px 4px;
+}
+
+.recording-captures-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.recording-captures-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.recording-capture-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.recording-capture-time {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.recording-capture-route {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recording-capture-status {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.recording-capture-error {
+  color: var(--testing-iconFailed, var(--errorForeground));
+  flex-shrink: 0;
+}
+
+.recording-run-label {
+  opacity: 0.85;
+}
+
+.recording-capture-detail {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  padding: 0 8px 8px 0;
+}
+
+.recording-capture-detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--descriptionForeground);
+  font-style: italic;
+  padding: 16px;
+  text-align: center;
+}
+
+.recording-captures-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--panel-border, rgba(128, 128, 128, 0.35));
+}

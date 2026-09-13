@@ -2860,6 +2860,24 @@
       "pause": "기록 일시 중지",
       "resume": "기록 계속",
       "stop": "기록 중지"
+    },
+    "captures": {
+      "empty": "아직 기록된 호출이 없습니다. 세션 설정에서 기록을 시작하면 페이지의 호출이 실시간으로 여기에 표시됩니다.",
+      "filterPlaceholder": "호출 필터링(정규 표현식)",
+      "live": "기록 중",
+      "clearRun": "이 기록의 호출 삭제",
+      "selectOne": "호출을 선택하면 응답을 볼 수 있습니다.",
+      "loadingDetail": "호출을 불러오는 중…",
+      "addToWhitelist": "허용 목록에 추가…",
+      "addToBlacklist": "차단 목록에 추가…",
+      "patternLabel": "패턴(정규 표현식)",
+      "add": "추가",
+      "addAndApply": "추가하고 기록된 호출에 적용",
+      "applyConfirm": "이미 기록된 호출에 목록을 적용하면 이제 거부되는 모든 호출이 제거됩니다. 이 작업은 취소할 수 없습니다.",
+      "applyConfirmOk": "적용 및 제거",
+      "deduce": "경로 추론",
+      "deduceWhileRecording": "경로를 추론하기 전에 기록을 중지하십시오.",
+      "deduceUnavailable": "경로 추론은 아직 사용할 수 없습니다."
     }
   },
   "mcp": {

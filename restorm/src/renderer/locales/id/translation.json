@@ -2860,6 +2860,24 @@
       "pause": "Jeda perekaman",
       "resume": "Lanjutkan perekaman",
       "stop": "Hentikan perekaman"
+    },
+    "captures": {
+      "empty": "Belum ada panggilan yang ditangkap. Mulai perekaman dari pengaturan sesi agar panggilan halaman muncul di sini secara langsung.",
+      "filterPlaceholder": "Saring panggilan (ekspresi reguler)",
+      "live": "berjalan",
+      "clearRun": "Hapus panggilan dari perekaman ini",
+      "selectOne": "Pilih panggilan untuk melihat responsnya.",
+      "loadingDetail": "Memuat panggilan…",
+      "addToWhitelist": "Tambahkan ke daftar putih…",
+      "addToBlacklist": "Tambahkan ke daftar hitam…",
+      "patternLabel": "Pola (ekspresi reguler)",
+      "add": "Tambahkan",
+      "addAndApply": "Tambahkan dan terapkan ke panggilan yang ditangkap",
+      "applyConfirm": "Menerapkan daftar ke panggilan yang sudah ditangkap menghapus semua panggilan yang kini ditolak. Tindakan ini tidak dapat dibatalkan.",
+      "applyConfirmOk": "Terapkan dan hapus",
+      "deduce": "Simpulkan rute",
+      "deduceWhileRecording": "Hentikan perekaman sebelum menyimpulkan rute.",
+      "deduceUnavailable": "Penyimpulan rute belum tersedia."
     }
   },
   "mcp": {

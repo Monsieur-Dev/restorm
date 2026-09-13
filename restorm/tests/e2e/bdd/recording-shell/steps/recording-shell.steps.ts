@@ -1,6 +1,8 @@
 import { createBdd } from 'playwright-bdd'
 import { copyFileSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
+import { createServer, type Server } from 'http'
+import type { AddressInfo } from 'net'
 import type { Page, Locator } from '@playwright/test'
 import { test, expect, RECORDING_SHELL_TEMP_DIR } from '../../fixtures/recording-shell.fixture'
 
@@ -174,6 +176,34 @@ Then('the saved file declares file format version {string}', async ({}, version:
 
 const LOCAL_PAGE = `file://${resolve(__dirname, '../../../samples/fixtures/recording-page.html')}`
 
+/** A tiny API the local test page calls (CORS open — the page is a file://
+ * origin): every call is a real 200 with a JSON body, so the recording sees
+ * genuine API traffic without any docker mock. */
+let apiServer: Server | null = null
+let apiBase = ''
+
+async function ensureApiServer(): Promise<string> {
+  if (apiServer !== null) return apiBase
+  apiServer = createServer((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/json')
+    if ((req.url ?? '').startsWith('/api/ping')) {
+      res.statusCode = 200
+      res.end(JSON.stringify({ pong: true, url: req.url }))
+      return
+    }
+    res.statusCode = 404
+    res.end(JSON.stringify({ error: 'not found' }))
+  })
+  await new Promise<void>((resolveListen) => { apiServer?.listen(0, '127.0.0.1', () => { resolveListen() }) })
+  // Steps files cannot register Playwright hooks; an unref'd server never
+  // keeps the worker alive, so it simply dies with the process.
+  apiServer.unref()
+  const address = apiServer.address() as AddressInfo
+  apiBase = `http://127.0.0.1:${address.port}`
+  return apiBase
+}
+
 function recordButton(p: Page): Locator {
   return p.locator('[data-testid="recording-config-record"]')
 }
@@ -195,8 +225,9 @@ When('I set the session url to the local test page', async () => {
   // The ECUI InputBox suffixes its own test id on the native input.
   const input = p.locator('[data-testid="recording-config-url-input"]')
   await expect(input).toBeVisible({ timeout: 5000 })
+  const api = await ensureApiServer()
   await input.click()
-  await input.fill(LOCAL_PAGE)
+  await input.fill(`${LOCAL_PAGE}?api=${encodeURIComponent(api)}`)
   // The InputBox debounces its onChange; let the value land on the session.
   await p.waitForTimeout(700)
 })
@@ -246,4 +277,42 @@ Then('the session is paused', async () => {
 Then('the recording {string} tab is closed', async ({}, node: string) => {
   const p = requirePage()
   await expect(p.locator(`[data-testid="recording-tab-${node}"]`)).toHaveCount(0, { timeout: 5000 })
+})
+
+// ── Captures tab ─────────────────────────────────────────────────────
+
+Then('the captures list shows a call to {string}', async ({}, route: string) => {
+  const p = requirePage()
+  const rows = p.locator('[data-testid^="recording-capture-row-"]').filter({ hasText: route })
+  await expect(rows.first()).toBeVisible({ timeout: 15000 })
+})
+
+Then('the captures list shows a live run row', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid^="recording-run-row-"]').first()).toBeVisible({ timeout: 5000 })
+})
+
+When('I filter the captures with {string}', async ({}, pattern: string) => {
+  const p = requirePage()
+  const input = p.locator('[data-testid="recording-captures-filter-input"]')
+  await input.click()
+  await input.fill(pattern)
+  await p.waitForTimeout(600)
+})
+
+Then('the captures list shows no call', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid^="recording-capture-row-"]')).toHaveCount(0, { timeout: 5000 })
+})
+
+When('I click the first captured call', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid^="recording-capture-row-"]').first().click()
+  await p.waitForTimeout(500)
+})
+
+Then('the capture detail shows the response tabs', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="recording-capture-detail"]')).toBeVisible({ timeout: 10000 })
+  await expect(p.locator('[data-testid="recording-capture-detail-tabs"]')).toBeVisible({ timeout: 5000 })
 })

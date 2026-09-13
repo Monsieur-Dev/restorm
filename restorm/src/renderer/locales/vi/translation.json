@@ -2860,6 +2860,24 @@
       "pause": "Tạm dừng ghi",
       "resume": "Tiếp tục ghi",
       "stop": "Dừng ghi"
+    },
+    "captures": {
+      "empty": "Chưa có lệnh gọi nào được ghi. Hãy bắt đầu ghi từ cài đặt của phiên để thấy các lệnh gọi của trang xuất hiện ở đây theo thời gian thực.",
+      "filterPlaceholder": "Lọc các lệnh gọi (biểu thức chính quy)",
+      "live": "đang ghi",
+      "clearRun": "Xóa các lệnh gọi của lần ghi này",
+      "selectOne": "Hãy chọn một lệnh gọi để xem phản hồi của nó.",
+      "loadingDetail": "Đang tải lệnh gọi…",
+      "addToWhitelist": "Thêm vào danh sách trắng…",
+      "addToBlacklist": "Thêm vào danh sách đen…",
+      "patternLabel": "Mẫu (biểu thức chính quy)",
+      "add": "Thêm",
+      "addAndApply": "Thêm và áp dụng cho các lệnh gọi đã ghi",
+      "applyConfirm": "Áp dụng các danh sách cho các lệnh gọi đã ghi sẽ xóa mọi lệnh gọi mà chúng nay từ chối. Không thể hoàn tác thao tác này.",
+      "applyConfirmOk": "Áp dụng và xóa",
+      "deduce": "Suy ra các tuyến",
+      "deduceWhileRecording": "Hãy dừng ghi trước khi suy ra các tuyến.",
+      "deduceUnavailable": "Tính năng suy ra tuyến chưa khả dụng."
     }
   },
   "mcp": {

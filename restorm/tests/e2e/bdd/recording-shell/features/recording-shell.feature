@@ -54,3 +54,22 @@ Feature: Recording session sidebar nodes and tabs
     Then the session is idle
     And the session has no "browser" row
     And the recording "browser" tab is closed
+
+  Scenario: Captured calls appear live in the Captures tab and can be filtered
+    Given a project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    And I set the session url to the local test page
+    And I click the record button
+    Then the session is on air
+    When I click the session "captures" row
+    Then the captures list shows a call to "/api/ping"
+    And the captures list shows a live run row
+    When I filter the captures with "nothing-matches"
+    Then the captures list shows no call
+    When I filter the captures with "ping"
+    Then the captures list shows a call to "/api/ping"
+    When I click the first captured call
+    Then the capture detail shows the response tabs
+    When I click the session "browser" row
+    And I click the browser stop button
+    Then the session is idle

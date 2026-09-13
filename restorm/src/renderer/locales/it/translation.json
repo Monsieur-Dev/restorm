@@ -2861,6 +2861,24 @@
       "pause": "Metti in pausa la registrazione",
       "resume": "Riprendi la registrazione",
       "stop": "Interrompi la registrazione"
+    },
+    "captures": {
+      "empty": "Nessuna chiamata acquisita per ora. Avvii una registrazione dalle impostazioni della sessione per vedere qui le chiamate della pagina in tempo reale.",
+      "filterPlaceholder": "Filtra le chiamate (espressione regolare)",
+      "live": "in corso",
+      "clearRun": "Elimina le chiamate di questa registrazione",
+      "selectOne": "Selezioni una chiamata per vederne la risposta.",
+      "loadingDetail": "Caricamento della chiamata…",
+      "addToWhitelist": "Aggiungi alla lista bianca…",
+      "addToBlacklist": "Aggiungi alla lista nera…",
+      "patternLabel": "Pattern (espressione regolare)",
+      "add": "Aggiungi",
+      "addAndApply": "Aggiungi e applica alle chiamate acquisite",
+      "applyConfirm": "Applicare le liste alle chiamate già acquisite elimina tutte quelle che ora rifiutano. L’operazione non può essere annullata.",
+      "applyConfirmOk": "Applica ed elimina",
+      "deduce": "Deduci le route",
+      "deduceWhileRecording": "Interrompa la registrazione prima di dedurre le route.",
+      "deduceUnavailable": "La deduzione delle route non è ancora disponibile."
     }
   },
   "mcp": {

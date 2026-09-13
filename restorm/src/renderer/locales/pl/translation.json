@@ -2863,6 +2863,24 @@
       "pause": "Wstrzymaj nagrywanie",
       "resume": "Wznów nagrywanie",
       "stop": "Zatrzymaj nagrywanie"
+    },
+    "captures": {
+      "empty": "Nie przechwycono jeszcze żadnego wywołania. Proszę rozpocząć nagrywanie w ustawieniach sesji, aby na bieżąco widzieć tutaj wywołania strony.",
+      "filterPlaceholder": "Filtruj wywołania (wyrażenie regularne)",
+      "live": "w toku",
+      "clearRun": "Usuń wywołania z tego nagrania",
+      "selectOne": "Proszę wybrać wywołanie, aby zobaczyć jego odpowiedź.",
+      "loadingDetail": "Wczytywanie wywołania…",
+      "addToWhitelist": "Dodaj do białej listy…",
+      "addToBlacklist": "Dodaj do czarnej listy…",
+      "patternLabel": "Wzorzec (wyrażenie regularne)",
+      "add": "Dodaj",
+      "addAndApply": "Dodaj i zastosuj do przechwyconych wywołań",
+      "applyConfirm": "Zastosowanie list do już przechwyconych wywołań usuwa wszystkie te, które są teraz odrzucane. Tej operacji nie można cofnąć.",
+      "applyConfirmOk": "Zastosuj i usuń",
+      "deduce": "Wywnioskuj trasy",
+      "deduceWhileRecording": "Proszę zatrzymać nagrywanie przed wywnioskowaniem tras.",
+      "deduceUnavailable": "Wnioskowanie tras nie jest jeszcze dostępne."
     }
   },
   "mcp": {

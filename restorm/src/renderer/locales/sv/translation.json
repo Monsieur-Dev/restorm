@@ -2861,6 +2861,24 @@
       "pause": "Pausa inspelningen",
       "resume": "Återuppta inspelningen",
       "stop": "Stoppa inspelningen"
+    },
+    "captures": {
+      "empty": "Inga anrop har fångats ännu. Starta en inspelning från sessionens inställningar för att se sidans anrop dyka upp här i realtid.",
+      "filterPlaceholder": "Filtrera anropen (reguljärt uttryck)",
+      "live": "pågår",
+      "clearRun": "Ta bort anropen från den här inspelningen",
+      "selectOne": "Välj ett anrop för att se dess svar.",
+      "loadingDetail": "Läser in anropet…",
+      "addToWhitelist": "Lägg till i vitlistan…",
+      "addToBlacklist": "Lägg till i svartlistan…",
+      "patternLabel": "Mönster (reguljärt uttryck)",
+      "add": "Lägg till",
+      "addAndApply": "Lägg till och tillämpa på de infångade anropen",
+      "applyConfirm": "Att tillämpa listorna på de redan infångade anropen tar bort alla som de nu avvisar. Detta kan inte ångras.",
+      "applyConfirmOk": "Tillämpa och ta bort",
+      "deduce": "Härled rutterna",
+      "deduceWhileRecording": "Stoppa inspelningen innan rutterna härleds.",
+      "deduceUnavailable": "Härledning av rutter är inte tillgänglig ännu."
     }
   },
   "mcp": {

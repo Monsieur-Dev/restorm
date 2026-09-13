@@ -2862,6 +2862,24 @@
       "pause": "Pauziraj snimanje",
       "resume": "Nastavi snimanje",
       "stop": "Zaustavi snimanje"
+    },
+    "captures": {
+      "empty": "Još nije zabilježen nijedan poziv. Pokrenite snimanje iz postavki sesije kako bi se pozivi stranice ovdje pojavljivali u stvarnom vremenu.",
+      "filterPlaceholder": "Filtrirajte pozive (regularni izraz)",
+      "live": "u tijeku",
+      "clearRun": "Izbriši pozive ovog snimanja",
+      "selectOne": "Odaberite poziv da biste vidjeli njegov odgovor.",
+      "loadingDetail": "Učitavanje poziva…",
+      "addToWhitelist": "Dodaj na bijelu listu…",
+      "addToBlacklist": "Dodaj na crnu listu…",
+      "patternLabel": "Uzorak (regularni izraz)",
+      "add": "Dodaj",
+      "addAndApply": "Dodaj i primijeni na zabilježene pozive",
+      "applyConfirm": "Primjena lista na već zabilježene pozive uklanja sve one koje sada odbijaju. Ova se radnja ne može poništiti.",
+      "applyConfirmOk": "Primijeni i ukloni",
+      "deduce": "Izvedi rute",
+      "deduceWhileRecording": "Zaustavite snimanje prije izvođenja ruta.",
+      "deduceUnavailable": "Izvođenje ruta još nije dostupno."
     }
   },
   "mcp": {

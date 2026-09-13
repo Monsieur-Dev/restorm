@@ -2862,6 +2862,24 @@
       "pause": "Pune înregistrarea pe pauză",
       "resume": "Reia înregistrarea",
       "stop": "Oprește înregistrarea"
+    },
+    "captures": {
+      "empty": "Niciun apel capturat încă. Porniți o înregistrare din setările sesiunii pentru a vedea aici apelurile paginii pe măsură ce au loc.",
+      "filterPlaceholder": "Filtrați apelurile (expresie regulată)",
+      "live": "în curs",
+      "clearRun": "Ștergeți apelurile acestei înregistrări",
+      "selectOne": "Selectați un apel pentru a-i vedea răspunsul.",
+      "loadingDetail": "Se încarcă apelul…",
+      "addToWhitelist": "Adăugați la lista albă…",
+      "addToBlacklist": "Adăugați la lista neagră…",
+      "patternLabel": "Tipar (expresie regulată)",
+      "add": "Adăugați",
+      "addAndApply": "Adăugați și aplicați apelurilor capturate",
+      "applyConfirm": "Aplicarea listelor apelurilor deja capturate elimină toate apelurile pe care acestea le refuză acum. Acțiunea nu poate fi anulată.",
+      "applyConfirmOk": "Aplicați și eliminați",
+      "deduce": "Deduceți rutele",
+      "deduceWhileRecording": "Opriți înregistrarea înainte de a deduce rutele.",
+      "deduceUnavailable": "Deducerea rutelor nu este încă disponibilă."
     }
   },
   "mcp": {

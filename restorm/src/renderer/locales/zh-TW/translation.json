@@ -2860,6 +2860,24 @@
       "pause": "暫停錄製",
       "resume": "繼續錄製",
       "stop": "停止錄製"
+    },
+    "captures": {
+      "empty": "尚未擷取任何呼叫。請在工作階段設定中開始錄製，頁面的呼叫便會即時顯示於此。",
+      "filterPlaceholder": "篩選呼叫（正規表示式）",
+      "live": "進行中",
+      "clearRun": "刪除此次錄製的呼叫",
+      "selectOne": "選取一個呼叫以檢視其回應。",
+      "loadingDetail": "正在載入呼叫…",
+      "addToWhitelist": "新增至白名單…",
+      "addToBlacklist": "新增至黑名單…",
+      "patternLabel": "模式（正規表示式）",
+      "add": "新增",
+      "addAndApply": "新增並套用至已擷取的呼叫",
+      "applyConfirm": "將名單套用至已擷取的呼叫會移除其中所有現已被拒絕的呼叫。此操作無法復原。",
+      "applyConfirmOk": "套用並移除",
+      "deduce": "推導路由",
+      "deduceWhileRecording": "請先停止錄製再推導路由。",
+      "deduceUnavailable": "路由推導尚未提供。"
     }
   },
   "mcp": {

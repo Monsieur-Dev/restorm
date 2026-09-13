@@ -2861,6 +2861,24 @@
       "pause": "Opname pauzeren",
       "resume": "Opname hervatten",
       "stop": "Opname stoppen"
+    },
+    "captures": {
+      "empty": "Nog geen aanroep vastgelegd. Start een opname vanuit de sessie-instellingen om de aanroepen van de pagina hier live te zien verschijnen.",
+      "filterPlaceholder": "Aanroepen filteren (reguliere expressie)",
+      "live": "bezig",
+      "clearRun": "De aanroepen van deze opname verwijderen",
+      "selectOne": "Selecteer een aanroep om het antwoord te zien.",
+      "loadingDetail": "Aanroep wordt geladen…",
+      "addToWhitelist": "Toevoegen aan de witte lijst…",
+      "addToBlacklist": "Toevoegen aan de zwarte lijst…",
+      "patternLabel": "Patroon (reguliere expressie)",
+      "add": "Toevoegen",
+      "addAndApply": "Toevoegen en toepassen op de vastgelegde aanroepen",
+      "applyConfirm": "De lijsten toepassen op de al vastgelegde aanroepen verwijdert elke aanroep die ze nu weigeren. Dit kan niet ongedaan worden gemaakt.",
+      "applyConfirmOk": "Toepassen en verwijderen",
+      "deduce": "Routes afleiden",
+      "deduceWhileRecording": "Stop de opname voordat u de routes afleidt.",
+      "deduceUnavailable": "Het afleiden van routes is nog niet beschikbaar."
     }
   },
   "mcp": {

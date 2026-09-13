@@ -2861,6 +2861,24 @@
       "pause": "Felvétel szüneteltetése",
       "resume": "Felvétel folytatása",
       "stop": "Felvétel leállítása"
+    },
+    "captures": {
+      "empty": "Még nincs rögzített hívás. Indítson felvételt a munkamenet beállításaiból, hogy az oldal hívásai valós időben itt jelenjenek meg.",
+      "filterPlaceholder": "Hívások szűrése (reguláris kifejezés)",
+      "live": "folyamatban",
+      "clearRun": "E felvétel hívásainak törlése",
+      "selectOne": "Válasszon egy hívást a válaszának megtekintéséhez.",
+      "loadingDetail": "A hívás betöltése…",
+      "addToWhitelist": "Hozzáadás a fehérlistához…",
+      "addToBlacklist": "Hozzáadás a feketelistához…",
+      "patternLabel": "Minta (reguláris kifejezés)",
+      "add": "Hozzáadás",
+      "addAndApply": "Hozzáadás és alkalmazás a rögzített hívásokra",
+      "applyConfirm": "A listák alkalmazása a már rögzített hívásokra eltávolít minden hívást, amelyet azok immár elutasítanak. Ez nem vonható vissza.",
+      "applyConfirmOk": "Alkalmazás és eltávolítás",
+      "deduce": "Útvonalak levezetése",
+      "deduceWhileRecording": "Állítsa le a felvételt az útvonalak levezetése előtt.",
+      "deduceUnavailable": "Az útvonalak levezetése még nem érhető el."
     }
   },
   "mcp": {

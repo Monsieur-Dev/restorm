@@ -2861,6 +2861,24 @@
       "pause": "Mettre l’enregistrement en pause",
       "resume": "Reprendre l’enregistrement",
       "stop": "Arrêter l’enregistrement"
+    },
+    "captures": {
+      "empty": "Aucun appel capturé pour le moment. Lancez un enregistrement depuis les paramètres de la session pour voir apparaître ici les appels de la page au fil de l’eau.",
+      "filterPlaceholder": "Filtrer les appels (expression régulière)",
+      "live": "en cours",
+      "clearRun": "Supprimer les appels de cet enregistrement",
+      "selectOne": "Sélectionnez un appel pour voir sa réponse.",
+      "loadingDetail": "Chargement de l’appel…",
+      "addToWhitelist": "Ajouter à la liste blanche…",
+      "addToBlacklist": "Ajouter à la liste noire…",
+      "patternLabel": "Motif (expression régulière)",
+      "add": "Ajouter",
+      "addAndApply": "Ajouter et appliquer aux appels capturés",
+      "applyConfirm": "Appliquer les listes aux appels déjà capturés supprime tous ceux qu’elles refusent désormais. Cette action est irréversible.",
+      "applyConfirmOk": "Appliquer et supprimer",
+      "deduce": "Déduire les routes",
+      "deduceWhileRecording": "Arrêtez l’enregistrement avant de déduire les routes.",
+      "deduceUnavailable": "La déduction des routes n’est pas encore disponible."
     }
   },
   "mcp": {

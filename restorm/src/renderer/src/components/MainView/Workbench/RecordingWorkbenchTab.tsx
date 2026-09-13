@@ -6,6 +6,7 @@ import { recordingNodeRowId, recordingNodeSpec, type RecordingTabNode } from '..
 import { RestormWorkbenchTab, type RestormWorkbenchTabProps } from './RestormWorkbenchTab'
 import { RecordingConfigView } from '../../Recording/RecordingConfigView'
 import { RecordingBrowserPanel } from '../../Recording/RecordingBrowserPanel'
+import { CapturesView } from '../../Recording/CapturesView'
 import './recordingWorkbenchTab.css'
 
 type RecordingWorkbenchTabProps = Omit<
@@ -52,7 +53,10 @@ export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ se
         {node === 'browser' && tabId !== undefined && (
           <RecordingBrowserPanel session={session} tabId={tabId} onStop={(id) => { onStopRecording?.(id) }} />
         )}
-        {(node === 'captures' || node === 'routes') && (
+        {node === 'captures' && (
+          <CapturesView session={session} />
+        )}
+        {node === 'routes' && (
           <p className="recording-tab-placeholder">{t(`recording.placeholder.${node}`)}</p>
         )}
       </div>

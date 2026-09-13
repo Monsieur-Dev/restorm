@@ -2861,6 +2861,24 @@
       "pause": "Sæt optagelsen på pause",
       "resume": "Genoptag optagelsen",
       "stop": "Stop optagelsen"
+    },
+    "captures": {
+      "empty": "Ingen kald er opsamlet endnu. Start en optagelse fra sessionens indstillinger for at se sidens kald dukke op her, efterhånden som de sker.",
+      "filterPlaceholder": "Filtrér kaldene (regulært udtryk)",
+      "live": "i gang",
+      "clearRun": "Slet kaldene fra denne optagelse",
+      "selectOne": "Vælg et kald for at se dets svar.",
+      "loadingDetail": "Indlæser kaldet…",
+      "addToWhitelist": "Føj til hvidlisten…",
+      "addToBlacklist": "Føj til sortlisten…",
+      "patternLabel": "Mønster (regulært udtryk)",
+      "add": "Tilføj",
+      "addAndApply": "Tilføj og anvend på de opsamlede kald",
+      "applyConfirm": "At anvende listerne på de allerede opsamlede kald fjerner alle dem, de nu afviser. Det kan ikke fortrydes.",
+      "applyConfirmOk": "Anvend og fjern",
+      "deduce": "Udled ruterne",
+      "deduceWhileRecording": "Stop optagelsen, før ruterne udledes.",
+      "deduceUnavailable": "Udledning af ruter er endnu ikke tilgængelig."
     }
   },
   "mcp": {

@@ -2861,6 +2861,24 @@
       "pause": "Sett opptaket på pause",
       "resume": "Fortsett opptaket",
       "stop": "Stopp opptaket"
+    },
+    "captures": {
+      "empty": "Ingen kall er fanget ennå. Start et opptak fra sesjonsinnstillingene for å se sidens kall dukke opp her etter hvert som de skjer.",
+      "filterPlaceholder": "Filtrer kallene (regulært uttrykk)",
+      "live": "pågår",
+      "clearRun": "Slett kallene fra dette opptaket",
+      "selectOne": "Velg et kall for å se svaret.",
+      "loadingDetail": "Laster kallet…",
+      "addToWhitelist": "Legg til i hvitelisten…",
+      "addToBlacklist": "Legg til i svartelisten…",
+      "patternLabel": "Mønster (regulært uttrykk)",
+      "add": "Legg til",
+      "addAndApply": "Legg til og bruk på de fangede kallene",
+      "applyConfirm": "Å bruke listene på kallene som allerede er fanget, fjerner alle de nå avviser. Dette kan ikke angres.",
+      "applyConfirmOk": "Bruk og fjern",
+      "deduce": "Utled rutene",
+      "deduceWhileRecording": "Stopp opptaket før rutene utledes.",
+      "deduceUnavailable": "Utledning av ruter er ikke tilgjengelig ennå."
     }
   },
   "mcp": {

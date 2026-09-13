@@ -2861,6 +2861,24 @@
       "pause": "Kaydı duraklat",
       "resume": "Kayda devam et",
       "stop": "Kaydı durdur"
+    },
+    "captures": {
+      "empty": "Henüz yakalanan çağrı yok. Sayfanın çağrılarını gerçekleştikçe burada görmek için oturum ayarlarından bir kayıt başlatınız.",
+      "filterPlaceholder": "Çağrıları filtrele (düzenli ifade)",
+      "live": "devam ediyor",
+      "clearRun": "Bu kaydın çağrılarını sil",
+      "selectOne": "Yanıtını görmek için bir çağrı seçiniz.",
+      "loadingDetail": "Çağrı yükleniyor…",
+      "addToWhitelist": "Beyaz listeye ekle…",
+      "addToBlacklist": "Kara listeye ekle…",
+      "patternLabel": "Desen (düzenli ifade)",
+      "add": "Ekle",
+      "addAndApply": "Ekle ve yakalanan çağrılara uygula",
+      "applyConfirm": "Listelerin zaten yakalanmış çağrılara uygulanması, artık reddettikleri tüm çağrıları kaldırır. Bu işlem geri alınamaz.",
+      "applyConfirmOk": "Uygula ve kaldır",
+      "deduce": "Rotaları çıkar",
+      "deduceWhileRecording": "Rotaları çıkarmadan önce kaydı durdurunuz.",
+      "deduceUnavailable": "Rota çıkarma henüz kullanılamıyor."
     }
   },
   "mcp": {

@@ -2861,6 +2861,24 @@
       "pause": "Aufnahme pausieren",
       "resume": "Aufnahme fortsetzen",
       "stop": "Aufnahme beenden"
+    },
+    "captures": {
+      "empty": "Noch kein Aufruf erfasst. Starten Sie eine Aufnahme in den Sitzungseinstellungen, damit die Aufrufe der Seite hier live erscheinen.",
+      "filterPlaceholder": "Aufrufe filtern (regulärer Ausdruck)",
+      "live": "läuft",
+      "clearRun": "Die Aufrufe dieser Aufnahme löschen",
+      "selectOne": "Wählen Sie einen Aufruf, um seine Antwort zu sehen.",
+      "loadingDetail": "Aufruf wird geladen…",
+      "addToWhitelist": "Zur Positivliste hinzufügen…",
+      "addToBlacklist": "Zur Negativliste hinzufügen…",
+      "patternLabel": "Muster (regulärer Ausdruck)",
+      "add": "Hinzufügen",
+      "addAndApply": "Hinzufügen und auf die erfassten Aufrufe anwenden",
+      "applyConfirm": "Das Anwenden der Listen auf die bereits erfassten Aufrufe entfernt alle, die sie nun ablehnen. Dies kann nicht rückgängig gemacht werden.",
+      "applyConfirmOk": "Anwenden und entfernen",
+      "deduce": "Routen ableiten",
+      "deduceWhileRecording": "Beenden Sie die Aufnahme, bevor Sie die Routen ableiten.",
+      "deduceUnavailable": "Die Routenableitung ist noch nicht verfügbar."
     }
   },
   "mcp": {

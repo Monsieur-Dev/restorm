@@ -2861,6 +2861,24 @@
       "pause": "Ndalo përkohësisht regjistrimin",
       "resume": "Rifillo regjistrimin",
       "stop": "Ndal regjistrimin"
+    },
+    "captures": {
+      "empty": "Asnjë thirrje nuk është kapur ende. Nisni një regjistrim nga cilësimet e sesionit për të parë këtu thirrjet e faqes në kohë reale.",
+      "filterPlaceholder": "Filtroni thirrjet (shprehje e rregullt)",
+      "live": "në vazhdim",
+      "clearRun": "Fshi thirrjet e këtij regjistrimi",
+      "selectOne": "Zgjidhni një thirrje për të parë përgjigjen e saj.",
+      "loadingDetail": "Po ngarkohet thirrja…",
+      "addToWhitelist": "Shto në listën e bardhë…",
+      "addToBlacklist": "Shto në listën e zezë…",
+      "patternLabel": "Model (shprehje e rregullt)",
+      "add": "Shto",
+      "addAndApply": "Shto dhe zbato te thirrjet e kapura",
+      "applyConfirm": "Zbatimi i listave te thirrjet tashmë të kapura heq të gjitha ato që ato tani refuzojnë. Ky veprim nuk mund të zhbëhet.",
+      "applyConfirmOk": "Zbato dhe hiq",
+      "deduce": "Nxirr rrugët",
+      "deduceWhileRecording": "Ndalni regjistrimin përpara se të nxirrni rrugët.",
+      "deduceUnavailable": "Nxjerrja e rrugëve nuk është ende e disponueshme."
     }
   },
   "mcp": {

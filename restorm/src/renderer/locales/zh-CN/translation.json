@@ -2860,6 +2860,24 @@
       "pause": "暂停录制",
       "resume": "继续录制",
       "stop": "停止录制"
+    },
+    "captures": {
+      "empty": "尚未捕获任何调用。请在会话设置中开始录制，页面的调用便会实时显示在此处。",
+      "filterPlaceholder": "筛选调用（正则表达式）",
+      "live": "进行中",
+      "clearRun": "删除此次录制的调用",
+      "selectOne": "选择一个调用以查看其响应。",
+      "loadingDetail": "正在加载调用…",
+      "addToWhitelist": "添加到白名单…",
+      "addToBlacklist": "添加到黑名单…",
+      "patternLabel": "模式（正则表达式）",
+      "add": "添加",
+      "addAndApply": "添加并应用到已捕获的调用",
+      "applyConfirm": "将名单应用到已捕获的调用会移除其中所有现已被拒绝的调用。此操作无法撤销。",
+      "applyConfirmOk": "应用并移除",
+      "deduce": "推导路由",
+      "deduceWhileRecording": "请先停止录制再推导路由。",
+      "deduceUnavailable": "路由推导尚不可用。"
     }
   },
   "mcp": {

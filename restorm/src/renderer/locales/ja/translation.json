@@ -2860,6 +2860,24 @@
       "pause": "記録を一時停止",
       "resume": "記録を再開",
       "stop": "記録を停止"
+    },
+    "captures": {
+      "empty": "まだ呼び出しは記録されていません。セッションの設定から記録を開始すると、ページの呼び出しがリアルタイムでここに表示されます。",
+      "filterPlaceholder": "呼び出しを絞り込む（正規表現）",
+      "live": "記録中",
+      "clearRun": "この記録の呼び出しを削除",
+      "selectOne": "呼び出しを選択すると、そのレスポンスが表示されます。",
+      "loadingDetail": "呼び出しを読み込んでいます…",
+      "addToWhitelist": "ホワイトリストに追加…",
+      "addToBlacklist": "ブラックリストに追加…",
+      "patternLabel": "パターン（正規表現）",
+      "add": "追加",
+      "addAndApply": "追加して記録済みの呼び出しに適用",
+      "applyConfirm": "記録済みの呼び出しにリストを適用すると、リストが拒否する呼び出しはすべて削除されます。この操作は取り消せません。",
+      "applyConfirmOk": "適用して削除",
+      "deduce": "ルートを推定",
+      "deduceWhileRecording": "ルートを推定する前に記録を停止してください。",
+      "deduceUnavailable": "ルートの推定はまだ利用できません。"
     }
   },
   "mcp": {

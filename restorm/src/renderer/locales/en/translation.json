@@ -2861,6 +2861,24 @@
       "pause": "Pause the recording",
       "resume": "Resume the recording",
       "stop": "Stop the recording"
+    },
+    "captures": {
+      "empty": "No call captured yet. Start a recording from the session settings to see the calls of the page appear here as they happen.",
+      "filterPlaceholder": "Filter the calls (regular expression)",
+      "live": "recording",
+      "clearRun": "Delete the calls of this run",
+      "selectOne": "Select a call to see its response.",
+      "loadingDetail": "Loading the call…",
+      "addToWhitelist": "Add to the white list…",
+      "addToBlacklist": "Add to the black list…",
+      "patternLabel": "Pattern (regular expression)",
+      "add": "Add",
+      "addAndApply": "Add and apply to the captured calls",
+      "applyConfirm": "Applying the lists to the calls already captured removes every call they now refuse. This cannot be undone.",
+      "applyConfirmOk": "Apply and remove",
+      "deduce": "Deduce the routes",
+      "deduceWhileRecording": "Stop the recording before deducing the routes.",
+      "deduceUnavailable": "Route deduction is not available yet."
     }
   },
   "mcp": {

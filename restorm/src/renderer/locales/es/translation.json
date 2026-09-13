@@ -2861,6 +2861,24 @@
       "pause": "Pausar la grabación",
       "resume": "Reanudar la grabación",
       "stop": "Detener la grabación"
+    },
+    "captures": {
+      "empty": "Todavía no se ha capturado ninguna llamada. Inicie una grabación desde la configuración de la sesión para ver aquí las llamadas de la página en tiempo real.",
+      "filterPlaceholder": "Filtrar las llamadas (expresión regular)",
+      "live": "en curso",
+      "clearRun": "Eliminar las llamadas de esta grabación",
+      "selectOne": "Seleccione una llamada para ver su respuesta.",
+      "loadingDetail": "Cargando la llamada…",
+      "addToWhitelist": "Añadir a la lista blanca…",
+      "addToBlacklist": "Añadir a la lista negra…",
+      "patternLabel": "Patrón (expresión regular)",
+      "add": "Añadir",
+      "addAndApply": "Añadir y aplicar a las llamadas capturadas",
+      "applyConfirm": "Aplicar las listas a las llamadas ya capturadas elimina todas las que ahora rechazan. Esta acción no se puede deshacer.",
+      "applyConfirmOk": "Aplicar y eliminar",
+      "deduce": "Deducir las rutas",
+      "deduceWhileRecording": "Detenga la grabación antes de deducir las rutas.",
+      "deduceUnavailable": "La deducción de rutas aún no está disponible."
     }
   },
   "mcp": {

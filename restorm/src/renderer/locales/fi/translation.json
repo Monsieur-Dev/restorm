@@ -2861,6 +2861,24 @@
       "pause": "Keskeytä tallennus",
       "resume": "Jatka tallennusta",
       "stop": "Lopeta tallennus"
+    },
+    "captures": {
+      "empty": "Kutsuja ei ole vielä kaapattu. Aloittakaa tallennus istunnon asetuksista, jotta sivun kutsut näkyvät tässä sitä mukaa kuin ne tapahtuvat.",
+      "filterPlaceholder": "Suodata kutsuja (säännöllinen lauseke)",
+      "live": "käynnissä",
+      "clearRun": "Poista tämän tallennuksen kutsut",
+      "selectOne": "Valitkaa kutsu nähdäksenne sen vastauksen.",
+      "loadingDetail": "Ladataan kutsua…",
+      "addToWhitelist": "Lisää sallittujen luetteloon…",
+      "addToBlacklist": "Lisää estettyjen luetteloon…",
+      "patternLabel": "Kuvio (säännöllinen lauseke)",
+      "add": "Lisää",
+      "addAndApply": "Lisää ja sovella kaapattuihin kutsuihin",
+      "applyConfirm": "Luetteloiden soveltaminen jo kaapattuihin kutsuihin poistaa kaikki kutsut, jotka ne nyt hylkäävät. Toimintoa ei voi kumota.",
+      "applyConfirmOk": "Sovella ja poista",
+      "deduce": "Päättele reitit",
+      "deduceWhileRecording": "Lopettakaa tallennus ennen reittien päättelyä.",
+      "deduceUnavailable": "Reittien päättely ei ole vielä käytettävissä."
     }
   },
   "mcp": {
