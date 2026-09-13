@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Sender en anonymiseret rapport, når Restorm går ned, så fejlen kan rettes. Rapporter renses for URL'er, tokens, forespørgselsindhold og personoplysninger, før de forlader din maskine. Indgår i den gratis plan; en betalt plan lader dig slå det fra. Alle detaljer: https://restorm.app/privacy",
     "telemetryTitle": "Send brugsstatistik",
     "telemetryDescription": "Sender anonym statistik om, hvilke funktioner der bruges, så udviklingen kan prioriteres. Slået fra som standard og aldrig aktiveret uden dit udtrykkelige samtykke. Indeholder ingen forespørgselsdata, ingen URL'er og ingen personoplysninger. Alle detaljer: https://restorm.app/privacy",
+    "geolocationTitle": "Del din placering med den indbyggede browser",
+    "geolocationDescription": "Henter din omtrentlige placering (fra systemets placeringstjeneste, eller fra din IP-adresse som reserve) og giver den kun videre til den indbyggede mini-webbrowser, så websteder, der bruger geolokation, virker i en optagelsessession. Der sendes intet til Restorm.",
+    "geolocationConsent": {"title": "Del din placering med den indbyggede browser?", "body": "Restorm beder systemets placeringstjeneste om din placering (og hvis den ikke har nogen, anslås den ud fra din IP-adresse via en tredjepartstjeneste) og giver den kun videre til de sider, der åbnes i den indbyggede mini-webbrowser. Din placering forlader ellers aldrig din computer og glemmes, så snart du slår indstillingen fra.", "accept": "Tillad", "decline": "Ikke nu"},
     "crashReportsLockedLabel": "Kan ændres fra Pro-abonnementet. På det gratis abonnement er nedbrudsrapporter nødvendige for at opretholde kvaliteten.",
     "consentToast": {
       "title": "Hjælp os med at forbedre Restorm",

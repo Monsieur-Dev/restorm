@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Invia un rapporto anonimizzato quando Restorm si arresta, così il problema può essere corretto. I rapporti vengono ripuliti da URL, token, corpi delle richieste e dati personali prima di lasciare il suo computer. Incluso nel piano gratuito; un piano a pagamento consente di disattivarlo. Tutti i dettagli: https://restorm.app/privacy",
     "telemetryTitle": "Inviare le statistiche di utilizzo",
     "telemetryDescription": "Invia statistiche anonime sulle funzionalità utilizzate, per orientare gli sviluppi futuri. Disattivato per impostazione predefinita e mai attivato senza il suo consenso esplicito. Non contiene dati delle richieste, né URL, né dati personali. Tutti i dettagli: https://restorm.app/privacy",
+    "geolocationTitle": "Condividere la sua posizione con il browser integrato",
+    "geolocationDescription": "Ottiene la sua posizione approssimativa (dal servizio di localizzazione del sistema o, in mancanza, dal suo indirizzo IP) e la trasmette esclusivamente al mini browser integrato, affinché i siti che geolocalizzano funzionino in una sessione di registrazione. Nulla viene inviato a Restorm.",
+    "geolocationConsent": {"title": "Condividere la sua posizione con il browser integrato?", "body": "Restorm chiederà la sua posizione al servizio di localizzazione del suo sistema (e, se questo non ne dispone, la stimerà dal suo indirizzo IP tramite un servizio di terze parti) per trasmetterla esclusivamente alle pagine aperte nel mini browser integrato. In nessun altro caso la sua posizione lascia il suo computer, e viene dimenticata non appena disattiva questa opzione.", "accept": "Consenti", "decline": "Non ora"},
     "crashReportsLockedLabel": "Modificabile a partire dal piano Pro. Nel piano gratuito i rapporti di arresto anomalo sono necessari per mantenere la qualità.",
     "consentToast": {
       "title": "Ci aiuti a migliorare Restorm",

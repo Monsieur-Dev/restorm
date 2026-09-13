@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Envia um relatório anonimizado quando o Restorm falha, para que o problema possa ser corrigido. Os relatórios são limpos de URL, tokens, corpos de pedido e dados pessoais antes de saírem do seu computador. Incluído no plano gratuito; um plano pago permite desativá-lo. Todos os detalhes: https://restorm.app/privacy",
     "telemetryTitle": "Enviar estatísticas de utilização",
     "telemetryDescription": "Envia estatísticas anónimas sobre as funcionalidades utilizadas, para orientar o que será desenvolvido a seguir. Desativado por predefinição e nunca ativado sem o seu consentimento explícito. Não contém dados de pedidos, nem URL, nem dados pessoais. Todos os detalhes: https://restorm.app/privacy",
+    "geolocationTitle": "Partilhar a sua localização com o navegador integrado",
+    "geolocationDescription": "Obtém a sua posição aproximada (a partir do serviço de localização do sistema ou, em alternativa, do seu endereço IP) e transmite-a apenas ao mini navegador integrado, para que os sites que utilizam geolocalização funcionem numa sessão de gravação. Nada é enviado ao Restorm.",
+    "geolocationConsent": {"title": "Partilhar a sua localização com o navegador integrado?", "body": "O Restorm pedirá a sua posição ao serviço de localização do seu sistema (e, se este não a tiver, irá estimá-la a partir do seu endereço IP através de um serviço de terceiros) para a transmitir apenas às páginas abertas no mini navegador integrado. Em nenhum outro caso a sua posição sai do seu computador, e é esquecida assim que desativar esta opção.", "accept": "Permitir", "decline": "Agora não"},
     "crashReportsLockedLabel": "Alterável a partir do plano Pro. No plano gratuito, os relatórios de falha são necessários para manter a qualidade.",
     "consentToast": {
       "title": "Ajude-nos a melhorar o Restorm",

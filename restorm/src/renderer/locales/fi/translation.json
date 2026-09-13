@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltanne. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
     "telemetryTitle": "Lähetä käyttötilastot",
     "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustanne. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
+    "geolocationTitle": "Sijaintinne jakaminen upotetun selaimen kanssa",
+    "geolocationDescription": "Hakee likimääräisen sijaintinne (järjestelmän sijaintipalvelusta tai varalla IP-osoitteestanne) ja välittää sen ainoastaan upotetulle mini-selaimelle, jotta paikannusta käyttävät sivustot toimivat tallennusistunnossa. Restormille ei lähetetä mitään.",
+    "geolocationConsent": {"title": "Jaetaanko sijaintinne upotetun selaimen kanssa?", "body": "Restorm pyytää sijaintianne järjestelmänne sijaintipalvelusta (ja jos sitä ei ole saatavilla, arvioi sen IP-osoitteestanne kolmannen osapuolen palvelun avulla) ja välittää sen ainoastaan upotetussa mini-selaimessa avatuille sivuille. Sijaintinne ei muutoin koskaan poistu tietokoneeltanne, ja se unohdetaan heti, kun poistatte tämän asetuksen käytöstä.", "accept": "Salli", "decline": "Ei nyt"},
     "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
     "consentToast": {
       "title": "Auttakaa meitä parantamaan Restormia",

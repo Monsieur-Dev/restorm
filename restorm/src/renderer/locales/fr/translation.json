@@ -3424,6 +3424,9 @@
     "crashReportsDescription": "Envoie un rapport anonymisé lorsque Restorm plante, afin que la panne puisse être corrigée. Les rapports sont expurgés des URL, jetons, corps de requête et données personnelles avant de quitter votre machine. Inclus dans l'offre gratuite ; une offre payante permet de le désactiver. Détails complets : https://restorm.app/privacy",
     "telemetryTitle": "Envoyer les statistiques d'utilisation",
     "telemetryDescription": "Envoie des statistiques anonymes sur les fonctionnalités utilisées, pour orienter les développements à venir. Désactivé par défaut et jamais activé sans votre consentement explicite. Ne contient aucune donnée de requête, aucune URL et aucune donnée personnelle. Détails complets : https://restorm.app/privacy",
+    "geolocationTitle": "Partager votre position avec le navigateur intégré",
+    "geolocationDescription": "Obtient votre position approximative (depuis le service de localisation du système, ou à défaut depuis votre adresse IP) et la transmet uniquement au mini-navigateur intégré, pour que les sites qui géolocalisent fonctionnent dans une session d'enregistrement. Rien n'est envoyé à Restorm.",
+    "geolocationConsent": {"title": "Partager votre position avec le navigateur intégré ?", "body": "Restorm demandera votre position au service de localisation de votre système (et, s'il n'en a pas, l'estimera depuis votre adresse IP via un service tiers) pour la transmettre uniquement aux pages ouvertes dans le mini-navigateur intégré. Votre position ne quitte votre ordinateur en aucun autre cas et est oubliée dès que vous désactivez cette option.", "accept": "Autoriser", "decline": "Pas maintenant"},
     "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
     "consentToast": {
       "title": "Aidez-nous à améliorer Restorm",

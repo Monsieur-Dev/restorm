@@ -196,6 +196,13 @@ export class RecordingCaptureEngine {
     private readonly logger: EngineLogger = { warn: () => undefined, debug: () => undefined }
   ) {}
 
+  private debuggerReleasedHook: ((webContents: WebContentsLike) => void) | null = null
+
+  /** Called after the engine detaches the debugger from a view (a stop). */
+  setDebuggerReleasedHook(hook: ((webContents: WebContentsLike) => void) | null): void {
+    this.debuggerReleasedHook = hook
+  }
+
   /** Start recording `sessionId` on the given mini-browser web contents. */
   async start(sessionId: string, tabId: string, webContents: WebContentsLike, url: string, config: RecordingFilterConfig): Promise<RecordingStatus> {
     if (this.attachments.has(sessionId)) this.stop(sessionId)
@@ -273,6 +280,9 @@ export class RecordingCaptureEngine {
     if (detachDebugger && !webContents.isDestroyed()) {
       try {
         if (dbg.isAttached()) dbg.detach()
+        // Whatever rode this attachment (the geolocation override) is gone
+        // with it: let its owner put it back.
+        this.debuggerReleasedHook?.(webContents)
       } catch (error) {
         this.logger.warn('[RecordingCaptureEngine] debugger detach failed', { sessionId: attachment.sessionId, error: String(error) })
       }

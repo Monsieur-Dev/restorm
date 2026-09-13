@@ -3431,6 +3431,9 @@
     "crashReportsDescription": "Trimite un raport anonimizat atunci când Restorm se blochează, pentru ca defecțiunea să poată fi remediată. Rapoartele sunt curățate de URL-uri, jetoane, corpuri de cerere și date personale înainte de a părăsi computerul dumneavoastră. Inclus în planul gratuit; un plan cu plată permite dezactivarea. Toate detaliile: https://restorm.app/privacy",
     "telemetryTitle": "Trimite statistici de utilizare",
     "telemetryDescription": "Trimite statistici anonime despre funcțiile utilizate, pentru a orienta dezvoltările viitoare. Dezactivat implicit și niciodată activat fără consimțământul dumneavoastră explicit. Nu conține date ale cererilor, URL-uri sau date personale. Toate detaliile: https://restorm.app/privacy",
+    "geolocationTitle": "Partajarea locației dumneavoastră cu browserul integrat",
+    "geolocationDescription": "Obține poziția dumneavoastră aproximativă (de la serviciul de localizare al sistemului sau, în lipsa acestuia, din adresa dumneavoastră IP) și o transmite exclusiv mini browserului integrat, pentru ca site-urile care folosesc geolocalizarea să funcționeze într-o sesiune de înregistrare. Nimic nu este trimis către Restorm.",
+    "geolocationConsent": {"title": "Partajați locația dumneavoastră cu browserul integrat?", "body": "Restorm va solicita poziția dumneavoastră de la serviciul de localizare al sistemului (și, dacă acesta nu o are, o va estima din adresa dumneavoastră IP printr-un serviciu terț), transmițând-o exclusiv paginilor deschise în mini browserul integrat. În niciun alt caz poziția dumneavoastră nu părăsește computerul și este uitată imediat ce dezactivați această opțiune.", "accept": "Permite", "decline": "Nu acum"},
     "crashReportsLockedLabel": "Modificabil începând cu planul Pro. În planul gratuit, rapoartele de blocare sunt necesare pentru menținerea calității.",
     "consentToast": {
       "title": "Ajutați-ne să îmbunătățim Restorm",

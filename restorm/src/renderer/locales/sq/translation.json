@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Dërgon një raport të anonimizuar kur Restorm rrëzohet, që defekti të mund të riparohet. Raportet pastrohen nga URL-të, çelësat, trupat e kërkesave dhe të dhënat personale para se të largohen nga makina juaj. E përfshirë në planin falas; një plan me pagesë lejon çaktivizimin. Detajet e plota: https://restorm.app/privacy",
     "telemetryTitle": "Dërgo statistikat e përdorimit",
     "telemetryDescription": "Dërgon statistika anonime për funksionet e përdorura, për të orientuar zhvillimet e ardhshme. E çaktivizuar si parazgjedhje dhe kurrë e aktivizuar pa pëlqimin tuaj të shprehur. Nuk përmban të dhëna kërkesash, as URL, as të dhëna personale. Detajet e plota: https://restorm.app/privacy",
+    "geolocationTitle": "Ndani vendndodhjen tuaj me shfletuesin e integruar",
+    "geolocationDescription": "Merr vendndodhjen tuaj të përafërt (nga shërbimi i vendndodhjes i sistemit ose, si zgjidhje rezervë, nga adresa juaj IP) dhe ia kalon vetëm mini shfletuesit të integruar, që faqet që përdorin gjeolokalizimin të funksionojnë në një sesion regjistrimi. Asgjë nuk dërgohet te Restorm.",
+    "geolocationConsent": {"title": "Të ndahet vendndodhja juaj me shfletuesin e integruar?", "body": "Restorm do t'i kërkojë shërbimit të vendndodhjes të sistemit tuaj pozicionin tuaj (dhe, nëse ky nuk ka asnjë, do ta vlerësojë nga adresa juaj IP përmes një shërbimi të palës së tretë) dhe do t'ua kalojë vetëm faqeve të hapura në mini shfletuesin e integruar. Në asnjë rast tjetër vendndodhja juaj nuk del nga kompjuteri juaj dhe harrohet sapo e çaktivizoni këtë opsion.", "accept": "Lejo", "decline": "Jo tani"},
     "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
     "consentToast": {
       "title": "Na ndihmoni ta përmirësojmë Restorm",

@@ -3431,6 +3431,9 @@
     "crashReportsDescription": "Šalje anonimizirano izvješće kada se Restorm sruši, kako bi se kvar mogao ispraviti. Izvješća se čiste od URL-ova, tokena, tijela zahtjeva i osobnih podataka prije nego napuste vaše računalo. Uključeno u besplatni plan; plaćeni plan omogućuje isključivanje. Svi detalji: https://restorm.app/privacy",
     "telemetryTitle": "Slanje statistike korištenja",
     "telemetryDescription": "Šalje anonimnu statistiku o tome koje se značajke koriste, radi usmjeravanja budućeg razvoja. Isključeno prema zadanome i nikada uključeno bez vašeg izričitog pristanka. Ne sadrži podatke zahtjeva, URL-ove ni osobne podatke. Svi detalji: https://restorm.app/privacy",
+    "geolocationTitle": "Dijeljenje vaše lokacije s ugrađenim preglednikom",
+    "geolocationDescription": "Dohvaća vašu približnu lokaciju (iz sustavske usluge lokacije ili, zamjenski, iz vaše IP adrese) i prosljeđuje je isključivo ugrađenom mini web pregledniku, kako bi web-mjesta koja koriste geolokaciju radila u sesiji snimanja. Ništa se ne šalje tvrtki Restorm.",
+    "geolocationConsent": {"title": "Dijeliti vašu lokaciju s ugrađenim preglednikom?", "body": "Restorm će zatražiti vašu lokaciju od usluge lokacije vašeg sustava (a ako je ona nema, procijenit će je iz vaše IP adrese putem usluge treće strane) i proslijediti je isključivo stranicama otvorenima u ugrađenom mini web pregledniku. Vaša lokacija ni u kojem drugom slučaju ne napušta vaše računalo i zaboravlja se čim isključite ovu opciju.", "accept": "Dopusti", "decline": "Ne sada"},
     "crashReportsLockedLabel": "Promjenjivo od Pro plana. U besplatnom planu izvješća o rušenju potrebna su za održavanje kvalitete.",
     "consentToast": {
       "title": "Pomozite nam poboljšati Restorm",

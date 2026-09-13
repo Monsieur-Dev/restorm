@@ -3424,6 +3424,9 @@
     "crashReportsDescription": "Send an anonymised report when Restorm crashes, so the failure can be fixed. Reports are scrubbed of URLs, tokens, request bodies and personal data before leaving your machine. Included with the free plan; a paid plan can turn it off. Full details: https://restorm.app/privacy",
     "telemetryTitle": "Send usage analytics",
     "telemetryDescription": "Send anonymous statistics on which features are used, to guide what gets built next. Off by default and never enabled without your explicit consent. Contains no request data, no URLs and no personal data. Full details: https://restorm.app/privacy",
+    "geolocationTitle": "Share your location with the embedded browser",
+    "geolocationDescription": "Obtain your approximate position (from the system's location service, or from your IP address as a fallback) and pass it only to the embedded mini browser, so sites that geolocate work in a recording session. Nothing is sent to Restorm.",
+    "geolocationConsent": {"title": "Share your location with the embedded browser?", "body": "Restorm will ask your system's location service for your position (and, if it has none, estimate it from your IP address through a third-party lookup) and hand it only to the pages opened in the embedded mini browser. Your position never leaves your computer otherwise and is forgotten as soon as you turn this off.", "accept": "Allow", "decline": "Not now"},
     "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
     "consentToast": {
       "title": "Help us improve Restorm",

@@ -3432,6 +3432,9 @@
     "crashReportsDescription": "Odešle anonymizované hlášení, když Restorm spadne, aby bylo možné závadu opravit. Hlášení jsou před odesláním z vašeho počítače zbavena URL, tokenů, těl požadavků a osobních údajů. Součást bezplatného tarifu; placený tarif umožňuje odesílání vypnout. Úplné informace: https://restorm.app/privacy",
     "telemetryTitle": "Odesílat statistiky používání",
     "telemetryDescription": "Odesílá anonymní statistiky o tom, které funkce se používají, aby bylo možné nasměrovat další vývoj. Ve výchozím stavu vypnuto a nikdy zapnuto bez vašeho výslovného souhlasu. Neobsahuje data požadavků, URL ani osobní údaje. Úplné informace: https://restorm.app/privacy",
+    "geolocationTitle": "Sdílet vaši polohu s vestavěným prohlížečem",
+    "geolocationDescription": "Zjistí vaši přibližnou polohu (ze systémové služby určování polohy, případně z vaší IP adresy) a předá ji pouze vestavěnému mini-prohlížeči, aby weby využívající geolokaci fungovaly v relaci nahrávání. Společnosti Restorm se nic neodesílá.",
+    "geolocationConsent": {"title": "Sdílet vaši polohu s vestavěným prohlížečem?", "body": "Restorm požádá systémovou službu určování polohy o vaši polohu (a pokud ji nezná, odhadne ji z vaší IP adresy pomocí služby třetí strany) a předá ji pouze stránkám otevřeným ve vestavěném mini-prohlížeči. V žádném jiném případě vaše poloha neopustí váš počítač a je zapomenuta, jakmile tuto možnost vypnete.", "accept": "Povolit", "decline": "Teď ne"},
     "crashReportsLockedLabel": "Lze změnit od tarifu Pro. V bezplatném tarifu jsou zprávy o pádech nutné pro udržení kvality.",
     "consentToast": {
       "title": "Pomozte nám vylepšit Restorm",

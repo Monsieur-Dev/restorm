@@ -219,3 +219,15 @@ groups:
           descriptionKey: "privacy.telemetryDescription"
           type: "toggle"
           default: false
+      # The position is obtained for free (GeoClue on Linux, the OS service on
+      # macOS / Windows, an IP-based guess as the last resort) and handed ONLY
+      # to the embedded mini-browser, so sites that geolocate work in a
+      # recording session. OFF by default; the custom renderer asks for the
+      # user's consent before turning it on, and turning it off forgets the
+      # position and removes it from every open browser view.
+      - setting:
+          id: "geolocation"
+          titleKey: "privacy.geolocationTitle"
+          descriptionKey: "privacy.geolocationDescription"
+          type: "geolocation-toggle"
+          default: false

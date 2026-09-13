@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Anonimizált jelentést küld, amikor a Restorm összeomlik, hogy a hiba javítható legyen. A jelentésekből az URL-ek, tokenek, kéréstörzsek és személyes adatok eltávolításra kerülnek, mielőtt elhagynák a gépét. Az ingyenes csomag része; fizetős csomaggal kikapcsolható. Teljes tájékoztató: https://restorm.app/privacy",
     "telemetryTitle": "Használati statisztikák küldése",
     "telemetryDescription": "Névtelen statisztikát küld arról, mely funkciókat használják, hogy a további fejlesztés irányt kapjon. Alapértelmezetten kikapcsolva, és kifejezett hozzájárulása nélkül soha nem aktív. Nem tartalmaz kérésadatokat, URL-eket vagy személyes adatokat. Teljes tájékoztató: https://restorm.app/privacy",
+    "geolocationTitle": "Tartózkodási hely megosztása a beágyazott böngészővel",
+    "geolocationDescription": "Lekéri az Ön hozzávetőleges tartózkodási helyét (a rendszer helymeghatározó szolgáltatásától, vagy ennek hiányában az IP-címe alapján), és kizárólag a beágyazott mini böngészőnek adja át, hogy a helymeghatározást használó webhelyek működjenek egy felvételi munkamenetben. A Restorm felé semmi nem kerül elküldésre.",
+    "geolocationConsent": {"title": "Megosztja tartózkodási helyét a beágyazott böngészővel?", "body": "A Restorm a rendszer helymeghatározó szolgáltatásától kéri le az Ön tartózkodási helyét (és ha az nem áll rendelkezésre, az IP-címe alapján, egy külső szolgáltatás segítségével becsüli meg), majd kizárólag a beágyazott mini böngészőben megnyitott oldalaknak adja át. Tartózkodási helye más esetben soha nem hagyja el a számítógépét, és a rendszer elfelejti, amint kikapcsolja ezt a beállítást.", "accept": "Engedélyezés", "decline": "Most nem"},
     "crashReportsLockedLabel": "A Pro csomagtól módosítható. Az ingyenes csomagban az összeomlási jelentések a minőség fenntartásához szükségesek.",
     "consentToast": {
       "title": "Segítsen nekünk a Restorm fejlesztésében",

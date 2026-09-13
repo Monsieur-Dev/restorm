@@ -3429,6 +3429,9 @@
     "crashReportsDescription": "在 Restorm 當機時傳送匿名化報告，以便修復故障。報告在離開您的裝置前會清除 URL、權杖、請求內容與個人資料。免費方案包含此功能；付費方案可將其關閉。 完整說明：https://restorm.app/privacy",
     "telemetryTitle": "傳送使用統計",
     "telemetryDescription": "傳送關於使用了哪些功能的匿名統計，用於引導後續開發。預設關閉，未經您明確同意絕不啟用。不含任何請求資料、URL 或個人資料。 完整說明：https://restorm.app/privacy",
+    "geolocationTitle": "與內嵌瀏覽器分享您的位置",
+    "geolocationDescription": "取得您的大致位置（來自系統定位服務，無法取得時則依您的 IP 位址推算），並僅傳遞給內嵌的迷你網頁瀏覽器，讓需要定位的網站能在錄製工作階段中正常運作。不會向 Restorm 傳送任何內容。",
+    "geolocationConsent": {"title": "與內嵌瀏覽器分享您的位置?", "body": "Restorm 將向您系統的定位服務要求您的位置（若無法取得，則透過第三方查詢服務依您的 IP 位址推算），並僅傳遞給在內嵌迷你網頁瀏覽器中開啟的頁面。除此之外，您的位置絕不會離開您的電腦，並會在您關閉此選項後立即被清除。", "accept": "允許", "decline": "暫時不要"},
     "crashReportsLockedLabel": "自 Pro 方案起可變更。在免費方案中，當機報告是維持品質所必需的。",
     "consentToast": {
       "title": "協助我們改進 Restorm",

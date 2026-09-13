@@ -1,6 +1,6 @@
 import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
-import { mkdirSync, writeFileSync, rmSync } from 'fs'
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
 import { tmpdir } from 'os'
 import electronPath from 'electron'
@@ -16,6 +16,9 @@ const RESTORM_ROOT = resolve(__dirname, '../../../..')
 export interface LaunchedApp {
   app: ElectronApplication
   page: Page
+  /** A scratch dir private to this launch (parallel workers must not share
+   * project files: an instance autosaves the copy it has open). */
+  tempDir: string
   /** The MCP endpoint, when launched with `mcp: true`. */
   discovery?: McpDiscovery
 }
@@ -25,6 +28,9 @@ export interface LaunchOptions {
   plan?: 'pro' | 'enterprise'
   /** Expose the embedded MCP server and return its discovery record. */
   mcp?: boolean
+  /** A fixed position (`lat,lng[,accuracy]`) the geolocation service uses
+   * instead of any real source (dev-only env switch). */
+  geolocation?: string
 }
 
 export interface RecordingShellFixtures {
@@ -40,8 +46,9 @@ export const test = base.extend<RecordingShellFixtures>({
 
   launchApp: async ({ restormRoot }, use, testInfo) => {
     const launched: { app: ElectronApplication; logs: string[] }[] = []
+    const tempDirs: string[] = []
 
-    rmSync(RECORDING_SHELL_TEMP_DIR, { recursive: true, force: true })
+    // Never wipe the shared root: another worker's instance may be using it.
     mkdirSync(RECORDING_SHELL_TEMP_DIR, { recursive: true })
 
     const electronExePath = electronPath as unknown as string
@@ -64,7 +71,8 @@ export const test = base.extend<RecordingShellFixtures>({
         NODE_ENV: 'development',
         RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
         ECUI_DISABLE_GPU: '1',
-        ...(opts?.plan !== undefined ? { RESTORM_E2E_ENTITLEMENT_PLAN: opts.plan } : {})
+        ...(opts?.plan !== undefined ? { RESTORM_E2E_ENTITLEMENT_PLAN: opts.plan } : {}),
+        ...(opts?.geolocation !== undefined ? { RESTORM_E2E_GEOLOCATION: opts.geolocation } : {})
       }
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
@@ -121,9 +129,11 @@ export const test = base.extend<RecordingShellFixtures>({
       }
 
       launched.push({ app, logs })
-      if (discoveryPath === null) return { app, page }
+      const tempDir = mkdtempSync(join(RECORDING_SHELL_TEMP_DIR, 'run-'))
+      tempDirs.push(tempDir)
+      if (discoveryPath === null) return { app, page, tempDir }
       const discovery = await readMcpDiscoveryWithRetry(discoveryPath)
-      return { app, page, discovery }
+      return { app, page, tempDir, discovery }
     }
 
     await use(launcher)
@@ -142,6 +152,7 @@ export const test = base.extend<RecordingShellFixtures>({
       } catch { /* ignore */ }
       try { app.process().kill('SIGKILL') } catch { /* ignore */ }
     }
+    for (const dir of tempDirs) { try { rmSync(dir, { recursive: true, force: true }) } catch { /* ignore */ } }
 
     if (blockingErrors.length > 0 && testInfo.status === 'passed') {
       const logFile = join(testInfo.outputDir, 'renderer-errors.txt')

@@ -3429,6 +3429,9 @@
     "crashReportsDescription": "Gửi một báo cáo đã ẩn danh khi Restorm gặp sự cố, để lỗi có thể được khắc phục. Báo cáo được loại bỏ URL, mã thông báo, nội dung yêu cầu và dữ liệu cá nhân trước khi rời khỏi máy của bạn. Bao gồm trong gói miễn phí; gói trả phí cho phép tắt tính năng này. Chi tiết đầy đủ: https://restorm.app/privacy",
     "telemetryTitle": "Gửi thống kê sử dụng",
     "telemetryDescription": "Gửi thống kê ẩn danh về những tính năng được sử dụng, nhằm định hướng phát triển tiếp theo. Mặc định tắt và không bao giờ bật nếu không có sự đồng ý rõ ràng của bạn. Không chứa dữ liệu yêu cầu, URL hay dữ liệu cá nhân. Chi tiết đầy đủ: https://restorm.app/privacy",
+    "geolocationTitle": "Chia sẻ vị trí của bạn với trình duyệt nhúng",
+    "geolocationDescription": "Lấy vị trí gần đúng của bạn (từ dịch vụ định vị của hệ thống, hoặc từ địa chỉ IP của bạn khi không có) và chỉ chuyển cho trình duyệt web mini nhúng, để các trang web dùng định vị hoạt động được trong một phiên ghi. Không có gì được gửi đến Restorm.",
+    "geolocationConsent": {"title": "Chia sẻ vị trí của bạn với trình duyệt nhúng?", "body": "Restorm sẽ hỏi dịch vụ định vị của hệ thống về vị trí của bạn (và nếu không có, sẽ ước tính từ địa chỉ IP của bạn thông qua một dịch vụ tra cứu bên thứ ba) rồi chỉ chuyển cho các trang mở trong trình duyệt web mini nhúng. Ngoài ra, vị trí của bạn không bao giờ rời khỏi máy tính và sẽ bị xóa ngay khi bạn tắt tùy chọn này.", "accept": "Cho phép", "decline": "Để sau"},
     "crashReportsLockedLabel": "Có thể thay đổi từ gói Pro. Ở gói miễn phí, báo cáo sự cố là cần thiết để duy trì chất lượng.",
     "consentToast": {
       "title": "Hãy giúp chúng tôi cải thiện Restorm",

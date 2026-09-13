@@ -3432,6 +3432,9 @@
     "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Pana/Pani komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
     "telemetryTitle": "Wysyłaj statystyki użycia",
     "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Pana/Pani wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
+    "geolocationTitle": "Udostępnianie lokalizacji wbudowanej przeglądarce",
+    "geolocationDescription": "Ustala przybliżoną lokalizację (z systemowej usługi lokalizacji lub, w razie jej braku, na podstawie adresu IP) i przekazuje ją wyłącznie wbudowanej mini przeglądarce, aby witryny korzystające z geolokalizacji działały w sesji nagrywania. Do firmy Restorm nic nie jest wysyłane.",
+    "geolocationConsent": {"title": "Udostępnić lokalizację wbudowanej przeglądarce?", "body": "Restorm poprosi systemową usługę lokalizacji o Pana/Pani położenie (a jeśli nie będzie ono dostępne, oszacuje je na podstawie adresu IP za pośrednictwem usługi zewnętrznej) i przekaże je wyłącznie stronom otwartym we wbudowanej mini przeglądarce. W żadnym innym przypadku Pana/Pani położenie nie opuszcza komputera i jest zapominane, gdy tylko wyłączy Pan/Pani tę opcję.", "accept": "Zezwól", "decline": "Nie teraz"},
     "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
     "consentToast": {
       "title": "Pomóż nam ulepszyć Restorm",

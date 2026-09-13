@@ -50,6 +50,7 @@
 
 import { BrowserWindow, WebContentsView } from 'electron'
 import { logger } from 'electron-core-ui/main'
+import { geolocationService } from './geolocation/GeolocationService'
 
 /**
  * The mini-browser embeds web content: http(s) pages, and a LOCAL html page
@@ -140,6 +141,8 @@ class MiniBrowserService {
 		}
 		this.views.set(tabId, state)
 		this.wireEvents(tabId, state)
+		// The user's position (when shared) reaches the page through this view.
+		geolocationService.track(view.webContents)
 		this.ensureWindowNavHidden(ownerWindow)
 		// Tear the view down when its owner window closes — the renderer's
 		// unmount cleanup never runs on a hard window close, so without

@@ -1,11 +1,11 @@
 import { createBdd } from 'playwright-bdd'
 import { copyFileSync, readFileSync } from 'fs'
-import { join, resolve } from 'path'
+import { dirname, join, resolve } from 'path'
 import { createServer, type Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { Page, Locator } from '@playwright/test'
 import { callMcpToolOverJsonRpc, type McpDiscovery, type McpToolReply } from 'electron-core-ui/testing'
-import { test, expect, RECORDING_SHELL_TEMP_DIR, type LaunchOptions } from '../../fixtures/recording-shell.fixture'
+import { test, expect, type LaunchOptions } from '../../fixtures/recording-shell.fixture'
 
 const { Given, When, Then } = createBdd(test)
 
@@ -78,15 +78,15 @@ async function openAddSubmenu(p: Page, row: Locator): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-async function launchWithProject(launchApp: (opts?: LaunchOptions) => Promise<{ page: Page; discovery?: McpDiscovery }>, plan?: 'pro', mcp = false): Promise<void> {
+async function launchWithProject(launchApp: (opts?: LaunchOptions) => Promise<{ page: Page; tempDir: string; discovery?: McpDiscovery }>, plan?: 'pro', mcp = false, geolocation?: string): Promise<void> {
   mcpDiscovery = null
   mcpSessionId = null
   lastMcpReply = null
   envFolderId = ENV_FOLDER_ID
-  const launched = await launchApp({ ...(plan !== undefined ? { plan } : {}), ...(mcp ? { mcp: true } : {}) })
+  const launched = await launchApp({ ...(plan !== undefined ? { plan } : {}), ...(mcp ? { mcp: true } : {}), ...(geolocation !== undefined ? { geolocation } : {}) })
   page = launched.page
   mcpDiscovery = launched.discovery ?? null
-  projectPath = join(RECORDING_SHELL_TEMP_DIR, `recording-shell-${plan ?? 'community'}${mcp ? '-mcp' : ''}.restorm`)
+  projectPath = join(launched.tempDir, `recording-shell-${plan ?? 'community'}${mcp ? '-mcp' : ''}.restorm`)
   copyFileSync(SAMPLE, projectPath)
   await openProject()
   if (plan === 'pro') {
@@ -542,12 +542,36 @@ const HARNESS_SERVERS: { ns: 'http' | 'graphql'; id: string }[] = [
 
 Given('the recording harness project is open on Pro', async ({ launchApp }) => {
   await launchWithProject(launchApp, 'pro')
+  await openHarnessProject()
+})
+
+/** Same harness, with a fixed position seeded for the geolocation service. */
+Given('the recording harness project is open with a seeded position', async ({ launchApp }) => {
+  await launchWithProject(launchApp, 'pro', false, '48.85,2.35,120')
+  await openHarnessProject()
+})
+
+async function openHarnessProject(): Promise<void> {
   // Swap the creation sample for the harness: every mock the page calls
   // lives in one scenario, on one port (same origin as the page: no CORS).
-  projectPath = join(RECORDING_SHELL_TEMP_DIR, 'recording-harness.restorm')
+  projectPath = join(dirname(projectPath), 'recording-harness.restorm')
   copyFileSync(HARNESS_SAMPLE, projectPath)
   envFolderId = HARNESS_ENV_FOLDER_ID
   await openProject(HARNESS_ENV_FOLDER_ID)
+}
+
+/** The privacy toggle's consent dialog: turning the setting on through the
+ * settings page asks first; accepting writes the setting, which is what the
+ * main process follows. */
+When('I turn on the shared-location privacy setting and accept the consent', async () => {
+  const p = requirePage()
+  await p.evaluate(async () => {
+    const w = window as unknown as { api?: { settings?: { set?: (key: string, value: unknown) => Promise<unknown> } } }
+    const fn = w.api?.settings?.set
+    if (typeof fn !== 'function') throw new Error('window.api.settings.set is not available')
+    await fn('privacy:geolocation', true)
+  })
+  await p.waitForTimeout(500)
 })
 
 async function harnessListening(p: Page): Promise<boolean> {

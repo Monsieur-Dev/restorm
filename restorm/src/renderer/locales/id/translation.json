@@ -3429,6 +3429,9 @@
     "crashReportsDescription": "Mengirim laporan yang dianonimkan saat Restorm mengalami kerusakan, agar masalahnya dapat diperbaiki. Laporan dibersihkan dari URL, token, isi permintaan, dan data pribadi sebelum meninggalkan komputer Anda. Termasuk dalam paket gratis; paket berbayar dapat mematikannya. Detail lengkap: https://restorm.app/privacy",
     "telemetryTitle": "Kirim statistik penggunaan",
     "telemetryDescription": "Mengirim statistik anonim tentang fitur mana yang digunakan, untuk mengarahkan pengembangan berikutnya. Mati secara bawaan dan tidak pernah aktif tanpa persetujuan tegas Anda. Tidak berisi data permintaan, URL, maupun data pribadi. Detail lengkap: https://restorm.app/privacy",
+    "geolocationTitle": "Bagikan lokasi Anda dengan browser tertanam",
+    "geolocationDescription": "Memperoleh posisi perkiraan Anda (dari layanan lokasi sistem, atau dari alamat IP Anda sebagai cadangan) dan meneruskannya hanya ke mini web browser tertanam, agar situs yang menggunakan geolokasi berfungsi dalam sesi perekaman. Tidak ada yang dikirim ke Restorm.",
+    "geolocationConsent": {"title": "Bagikan lokasi Anda dengan browser tertanam?", "body": "Restorm akan meminta posisi Anda dari layanan lokasi sistem Anda (dan, jika tidak tersedia, memperkirakannya dari alamat IP Anda melalui layanan pihak ketiga) lalu meneruskannya hanya ke halaman yang dibuka di mini web browser tertanam. Selain itu, posisi Anda tidak pernah meninggalkan komputer Anda dan akan dilupakan segera setelah Anda menonaktifkan opsi ini.", "accept": "Izinkan", "decline": "Nanti saja"},
     "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
     "consentToast": {
       "title": "Bantu kami meningkatkan Restorm",

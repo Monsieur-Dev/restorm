@@ -3430,6 +3430,9 @@
     "crashReportsDescription": "Verzendt een geanonimiseerd rapport wanneer Restorm crasht, zodat de storing verholpen kan worden. Rapporten worden ontdaan van URL's, tokens, aanvraaginhoud en persoonsgegevens voordat ze uw machine verlaten. Inbegrepen bij het gratis abonnement; met een betaald abonnement kunt u dit uitschakelen. Alle details: https://restorm.app/privacy",
     "telemetryTitle": "Gebruiksstatistieken verzenden",
     "telemetryDescription": "Verzendt anonieme statistieken over welke functies gebruikt worden, om te sturen wat er hierna gebouwd wordt. Standaard uit en nooit ingeschakeld zonder uw uitdrukkelijke toestemming. Bevat geen aanvraaggegevens, geen URL's en geen persoonsgegevens. Alle details: https://restorm.app/privacy",
+    "geolocationTitle": "Uw locatie delen met de ingebouwde browser",
+    "geolocationDescription": "Bepaalt uw geschatte positie (via de locatieservice van het systeem, of anders op basis van uw IP-adres) en geeft die uitsluitend door aan de ingebouwde mini-webbrowser, zodat sites die geolocatie gebruiken werken in een opnamesessie. Er wordt niets naar Restorm verzonden.",
+    "geolocationConsent": {"title": "Uw locatie delen met de ingebouwde browser?", "body": "Restorm vraagt uw positie op bij de locatieservice van uw systeem (en schat die, als daar geen positie beschikbaar is, op basis van uw IP-adres via een dienst van derden) en geeft die uitsluitend door aan de pagina's die in de ingebouwde mini-webbrowser worden geopend. Uw positie verlaat uw computer verder nooit en wordt vergeten zodra u deze optie uitschakelt.", "accept": "Toestaan", "decline": "Niet nu"},
     "crashReportsLockedLabel": "Aanpasbaar vanaf het Pro-abonnement. In het gratis abonnement zijn crashrapporten nodig om de kwaliteit te bewaken.",
     "consentToast": {
       "title": "Help ons Restorm te verbeteren",

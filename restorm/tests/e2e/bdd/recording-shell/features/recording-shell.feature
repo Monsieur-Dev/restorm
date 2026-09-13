@@ -165,3 +165,14 @@ Feature: Recording session sidebar nodes and tabs
     Then the session config black list contains 2 patterns
     When I stop the recording servers scenario
 
+  Scenario: The shared position reaches the page in the embedded browser
+    Given the recording harness project is open with a seeded position
+    When I turn on the shared-location privacy setting and accept the consent
+    And I run the recording servers scenario
+    And I add a recording session from the env folder's context menu
+    And I set the session url to the harness page
+    And I click the record button
+    Then the session is on air
+    When I click the session "captures" row
+    Then the captures list shows a call to "/api/geo?lat=48.85&lng=2.35"
+

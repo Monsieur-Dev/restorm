@@ -29,6 +29,12 @@ vi.mock('electron-core-ui/main', () => ({
 	logger: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() }
 }))
 
+// The location override is the geolocation service's own concern (its own
+// tests); here it only needs to accept the view.
+vi.mock('./geolocation/GeolocationService', () => ({
+	geolocationService: { track: vi.fn(), reapply: vi.fn() }
+}))
+
 import { miniBrowserService } from './MiniBrowserService'
 
 /** Minimal stand-in for a `BrowserWindow` whose `webContents` lets a

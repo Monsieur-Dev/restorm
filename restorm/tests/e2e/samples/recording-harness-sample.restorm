@@ -79,6 +79,17 @@ collections:
                 ws.onerror = function () { say('ws error') }
               } catch (e) { say('ws failed: ' + e) }
             }
+            // Sites that geolocate: report the position the browser gives us (or the
+            // refusal) as an API call, so a recording shows what the page received.
+            function locate() {
+              if (!navigator.geolocation) { say('geolocation unsupported'); return }
+              navigator.geolocation.getCurrentPosition(
+                function (p) { call('GET', '/api/geo?lat=' + p.coords.latitude.toFixed(2) + '&lng=' + p.coords.longitude.toFixed(2)) },
+                function (e) { say('geolocation refused: ' + e.message) },
+                { timeout: 8000 }
+              )
+            }
+            locate()
             var tick = 0
             function loop() {
               tick += 1
@@ -235,6 +246,29 @@ collections:
         content: '{"ok":true}'
       deprecated: false
       documentation: Noise route — the e2e blacklists it from the session config.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-geo
+      name: GET /api/geo
+      type: http
+      method: GET
+      url: localhost:8123/api/geo
+      body:
+        type: text
+        content: '{"ok":true}'
+      deprecated: false
+      documentation: Called with the position the page obtained from navigator.geolocation (the e2e checks the shared position reaches the page).
       headers:
       - key: Content-Type
         enabled: true
@@ -472,6 +506,30 @@ collections:
       position:
         x: 40
         y: 490
+    - id: rec-node-geo
+      config:
+        connectionName: GET geo
+        label: GET geo
+        requestId: rec-srv-geo
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 535
     - id: rec-node-grpc
       config:
         connectionName: grpc-web ListPets
