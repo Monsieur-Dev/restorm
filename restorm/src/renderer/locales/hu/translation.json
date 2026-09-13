@@ -445,6 +445,7 @@
         "requestBodyFile": "Fájl"
       },
       "loading": "Kérés küldése...",
+      "body": { "download": "Letöltés", "binary": "Bináris tartalom ({{type}}) — a mentéshez használja a Letöltés gombot", "unknownType": "ismeretlen típus" },
       "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
       "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
       "history": {

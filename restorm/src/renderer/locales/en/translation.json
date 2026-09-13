@@ -445,6 +445,7 @@
         "requestBodyFile": "File"
       },
       "loading": "Sending request...",
+      "body": { "download": "Download", "binary": "Binary content ({{type}}) — use Download to save it", "unknownType": "unknown type" },
       "noResponseBody": "No response body — see Infos for details",
       "noResponse": "Click Send to execute the request",
       "history": {

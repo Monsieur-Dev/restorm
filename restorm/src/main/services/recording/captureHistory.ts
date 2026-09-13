@@ -127,6 +127,7 @@ function responseOf(detail: RecordedCallDetail): ResponseHistoryResponse {
         statusText: detail.statusText ?? (detail.error ?? ''),
         responseHeaders: kvs(responseHeaders),
         responseBody: text(detail.response?.body),
+        ...(detail.response?.body?.encoding === 'base64' ? { bodyIsBase64: true } : {}),
         ...(detail.mimeType !== undefined ? { contentType: detail.mimeType } : {}),
         ...(detail.responseSize !== undefined ? { contentLength: detail.responseSize } : {})
       }

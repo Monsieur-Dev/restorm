@@ -445,6 +445,7 @@
         "requestBodyFile": "Tiedosto"
       },
       "loading": "Lähetetään pyyntöä...",
+      "body": { "download": "Lataa", "binary": "Binäärisisältö ({{type}}) — tallentakaa se Lataa-painikkeella", "unknownType": "tuntematon tyyppi" },
       "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
       "noResponse": "Suorittakaa pyyntö napsauttamalla Lähetä",
       "history": {

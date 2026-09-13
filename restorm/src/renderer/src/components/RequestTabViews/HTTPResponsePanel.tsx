@@ -2,8 +2,6 @@ import { type CSSProperties, type ReactNode } from 'react'
 import i18n from 'i18next'
 import type { TFunction } from 'i18next'
 import {
-  Button,
-  CodeEditor,
   ListView,
   type ListViewItemData
 } from 'electron-core-ui/renderer'
@@ -12,13 +10,14 @@ import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
 import type { OperationDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ResponseInfoStatusCodeTooltip } from '../documentation/StatusCodeTooltip'
 import { statusCodeColor } from '../documentation/statusCodeColor'
+import { ResponseBodyViewer } from './ResponseBodyViewer'
+import { formatBytes } from './responseBody'
 
 const flexRowStyle: CSSProperties = { display: 'flex', gap: 8 }
 const boldLabelStyle: CSSProperties = { fontWeight: 600 }
 const kvKeyStyle: CSSProperties = { fontWeight: 600, color: 'var(--symbolIcon-propertyForeground)' }
 const kvValueStyle: CSSProperties = { color: 'var(--descriptionForeground)' }
 const fullHeightBoxStyle: CSSProperties = { height: '100%', boxSizing: 'border-box' }
-const editorContainerStyle: CSSProperties = { flex: 1, minHeight: 0, border: '1px solid var(--panel-border)', borderRadius: 3, boxSizing: 'border-box' }
 const errorTextStyle: CSSProperties = { color: 'var(--testing-iconFailed)' }
 
 /** Format duration in a human-readable way */
@@ -28,11 +27,6 @@ function formatDuration(ms: number): string {
 }
 
 /** Format bytes in a human-readable way */
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
-}
 
 /** Get status color based on status code */
 function getStatusColor(statusCode: number): 'green' | 'red' | 'orange' {
@@ -293,66 +287,11 @@ export function buildHttpResponseViewData(
     </div>
   ) : null
 
-  const formattedResponseBody = (() => {
-    if (!response) return ''
-    const responseBody = response.responseBody
-    if (response.contentType?.includes('application/json')) {
-      try {
-        const parsed: unknown = JSON.parse(responseBody)
-        return JSON.stringify(parsed, null, 2)
-      } catch {
-        return responseBody
-      }
-    }
-    return responseBody
-  })()
-
-  // Binary response: the body is base64-encoded bytes (a UTF-8 text
-  // render would corrupt them), so offer a download instead. Decode in
-  // the browser and trigger an anchor download with a filename derived
-  // from the Content-Type.
-  const downloadBinary = (): void => {
-    if (!response) return
-    try {
-      const byteChars = atob(response.responseBody)
-      const bytes = new Uint8Array(byteChars.length)
-      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i)
-      const mime = response.contentType ?? 'application/octet-stream'
-      const blob = new Blob([bytes], { type: mime })
-      const objectUrl = URL.createObjectURL(blob)
-      const ext = mime.split('/')[1]?.split(';')[0] ?? 'bin'
-      const anchor = document.createElement('a')
-      anchor.href = objectUrl
-      anchor.download = `response.${ext}`
-      anchor.click()
-      URL.revokeObjectURL(objectUrl)
-    } catch {
-      // A malformed base64 payload simply produces no download.
-    }
-  }
-
-  const responseContent = response?.bodyIsBase64 ? (
-    <div style={fullHeightBoxStyle} data-testid="http-response-binary">
-      <div style={{ padding: 12 }}>
-        <div style={{ marginBottom: 8, color: 'var(--descriptionForeground)' }}>
-          Binary response ({response.contentType ?? 'unknown type'})
-          {response.contentLength !== undefined ? ` — ${formatBytes(response.contentLength)}` : ''}
-        </div>
-        <Button onClick={downloadBinary} data-testid="http-response-download-button">
-          Download
-        </Button>
-      </div>
-    </div>
-  ) : response && formattedResponseBody ? (
-    <div style={editorContainerStyle}>
-      <CodeEditor
-        height="100%"
-        language="json"
-        value={formattedResponseBody}
-        options={{ minimap: { enabled: false }, wordWrap: 'on', scrollBeyondLastLine: false, automaticLayout: true, readOnly: true }}
-        data-testid="http-response-body-editor"
-      />
-    </div>
+  // The body: an always-present Download button + a viewer picked from the
+  // Content-Type (image / video / audio / markdown / code editor / binary
+  // notice). Shared with the history and the recording capture pane.
+  const responseContent = response ? (
+    <ResponseBodyViewer response={response} t={labels?.t ?? i18n.t} />
   ) : null
 
   const jsonData = (() => {

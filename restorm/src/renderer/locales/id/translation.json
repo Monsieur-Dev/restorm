@@ -444,6 +444,7 @@
         "requestBodyFile": "Berkas"
       },
       "loading": "Mengirim permintaan...",
+      "body": { "download": "Unduh", "binary": "Konten biner ({{type}}) — gunakan Unduh untuk menyimpannya", "unknownType": "jenis tidak dikenal" },
       "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
       "noResponse": "Klik Kirim untuk menjalankan permintaan",
       "history": {

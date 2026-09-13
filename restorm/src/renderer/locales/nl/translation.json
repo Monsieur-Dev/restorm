@@ -445,6 +445,7 @@
         "requestBodyFile": "Bestand"
       },
       "loading": "Verzoek wordt verzonden...",
+      "body": { "download": "Downloaden", "binary": "Binaire inhoud ({{type}}) — gebruik Downloaden om deze op te slaan", "unknownType": "onbekend type" },
       "noResponseBody": "Geen response-body — zie Infos voor details",
       "noResponse": "Klik op Verzenden om het verzoek uit te voeren",
       "history": {

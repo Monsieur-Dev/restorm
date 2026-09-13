@@ -1205,6 +1205,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       statusText: detail.response.statusText,
       responseHeaders: toKeyValuesFromHistory(detail.response.responseHeaders),
       responseBody: detail.response.responseBody,
+      ...(detail.response.bodyIsBase64 ? { bodyIsBase64: true } : {}),
       ...(detail.response.contentType ? { contentType: detail.response.contentType } : {}),
       ...(detail.response.contentLength !== undefined ? { contentLength: detail.response.contentLength } : {}),
       ...(detail.response.sentCookies ? { sentCookies: detail.response.sentCookies.map((c) => ({ name: c.key, value: c.value })) } : {}),

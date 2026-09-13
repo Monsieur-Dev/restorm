@@ -447,6 +447,7 @@
         "requestBodyFile": "Plik"
       },
       "loading": "Wysyłanie żądania...",
+      "body": { "download": "Pobierz", "binary": "Zawartość binarna ({{type}}) — użyj opcji Pobierz, aby ją zapisać", "unknownType": "nieznany typ" },
       "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
       "noResponse": "Proszę kliknąć Wyślij, aby wykonać żądanie",
       "history": {

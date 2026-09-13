@@ -445,6 +445,7 @@
         "requestBodyFile": "Skedar"
       },
       "loading": "Po dërgohet kërkesa...",
+      "body": { "download": "Shkarko", "binary": "Përmbajtje binare ({{type}}) — përdorni Shkarko për ta ruajtur", "unknownType": "lloj i panjohur" },
       "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
       "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
       "history": {

@@ -444,6 +444,7 @@
         "requestBodyFile": "檔案"
       },
       "loading": "正在傳送請求...",
+      "body": { "download": "下載", "binary": "二進位內容（{{type}}）— 請使用「下載」儲存", "unknownType": "未知類型" },
       "noResponseBody": "無回應內容 — 詳情請見 Infos",
       "noResponse": "點擊「傳送」以執行請求",
       "history": {

@@ -445,6 +445,7 @@
         "requestBodyFile": "Datei"
       },
       "loading": "Anfrage wird gesendet...",
+      "body": { "download": "Herunterladen", "binary": "Binärer Inhalt ({{type}}) — verwenden Sie Herunterladen, um ihn zu speichern", "unknownType": "unbekannter Typ" },
       "noResponseBody": "Kein Antworttext — Details siehe Infos",
       "noResponse": "Klicken Sie auf Senden, um die Anfrage auszuführen",
       "history": {

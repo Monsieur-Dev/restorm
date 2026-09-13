@@ -439,6 +439,14 @@ Then('the response offers a binary download', async () => {
   await expect(download).toBeVisible({ timeout: 20_000 })
 })
 
+Then('the response renders the image inline', async () => {
+  if (page === null) throw new Error('launch first')
+  await openResponseTab(page)
+  const image = page.locator('[data-testid="http-response-image"]:visible').first()
+  await expect(image).toBeVisible({ timeout: 20_000 })
+  await expect(image).toHaveAttribute('src', /^data:image\/png;base64,/)
+})
+
 Then('the response body matches a handlebars uuid for header {string}', async ({}, key: string) => {
   if (page === null) throw new Error('launch first')
   await openResponseTab(page)

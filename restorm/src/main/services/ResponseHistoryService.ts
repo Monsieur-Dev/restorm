@@ -701,6 +701,7 @@ class ResponseHistoryService {
       statusText: result.statusText ?? '',
       responseHeaders,
       responseBody,
+      ...(result.bodyIsBase64 ? { bodyIsBase64: true } : {}),
       ...(contentType ? { contentType } : {}),
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
       ...(sentCookiesKv.length > 0 ? { sentCookies: sentCookiesKv } : {}),

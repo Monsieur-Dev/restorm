@@ -447,6 +447,7 @@
         "requestBodyFile": "Soubor"
       },
       "loading": "Odesílání požadavku...",
+      "body": { "download": "Stáhnout", "binary": "Binární obsah ({{type}}) — uložte jej pomocí tlačítka Stáhnout", "unknownType": "neznámý typ" },
       "noResponseBody": "Bez těla odpovědi — podrobnosti viz Infos",
       "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
       "history": {

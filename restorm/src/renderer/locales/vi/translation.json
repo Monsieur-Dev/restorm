@@ -444,6 +444,7 @@
         "requestBodyFile": "Tệp"
       },
       "loading": "Đang gửi yêu cầu...",
+      "body": { "download": "Tải xuống", "binary": "Nội dung nhị phân ({{type}}) — dùng Tải xuống để lưu lại", "unknownType": "loại không xác định" },
       "noResponseBody": "Không có nội dung phản hồi — xem Infos để biết chi tiết",
       "noResponse": "Nhấp Gửi để thực thi yêu cầu",
       "history": {

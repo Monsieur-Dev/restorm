@@ -445,6 +445,7 @@
         "requestBodyFile": "Ficheiro"
       },
       "loading": "A enviar pedido...",
+      "body": { "download": "Transferir", "binary": "Conteúdo binário ({{type}}) — use Transferir para o guardar", "unknownType": "tipo desconhecido" },
       "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
       "noResponse": "Clique em Enviar para executar o pedido",
       "history": {

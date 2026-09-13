@@ -444,6 +444,7 @@
         "requestBodyFile": "ファイル"
       },
       "loading": "リクエストを送信しています...",
+      "body": { "download": "ダウンロード", "binary": "バイナリコンテンツ（{{type}}）— 保存するには「ダウンロード」を使用してください", "unknownType": "不明なタイプ" },
       "noResponseBody": "レスポンス本文がありません — 詳細は Infos を参照してください",
       "noResponse": "「送信」をクリックしてリクエストを実行してください",
       "history": {

@@ -445,6 +445,7 @@
         "requestBodyFile": "Archivo"
       },
       "loading": "Enviando la petición...",
+      "body": { "download": "Descargar", "binary": "Contenido binario ({{type}}) — use Descargar para guardarlo", "unknownType": "tipo desconocido" },
       "noResponseBody": "Sin cuerpo de respuesta — consulte Infos para más detalles",
       "noResponse": "Pulse Enviar para ejecutar la petición",
       "history": {

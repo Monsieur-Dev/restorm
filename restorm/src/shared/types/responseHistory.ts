@@ -55,6 +55,9 @@ interface ResponseHistoryHttpResponse {
   statusText: string
   responseHeaders: ResponseHistoryKeyValue[]
   responseBody: string
+  /** `responseBody` is base64-encoded bytes (a binary response). Additive +
+   * optional: old records lack it and render as text, as they always did. */
+  bodyIsBase64?: boolean
   contentType?: string
   contentLength?: number
   /** Cookies sent with the request / received across the redirect chain, so a

@@ -445,6 +445,7 @@
         "requestBodyFile": "Fil"
       },
       "loading": "Skickar förfrågan...",
+      "body": { "download": "Ladda ner", "binary": "Binärt innehåll ({{type}}) — använd Ladda ner för att spara det", "unknownType": "okänd typ" },
       "noResponseBody": "Ingen svarstext — se Infos för detaljer",
       "noResponse": "Klicka på Skicka för att köra förfrågan",
       "history": {

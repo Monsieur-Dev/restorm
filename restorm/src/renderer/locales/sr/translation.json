@@ -446,6 +446,7 @@
         "requestBodyFile": "Datoteka"
       },
       "loading": "Slanje zahteva...",
+      "body": { "download": "Preuzmi", "binary": "Binarni sadržaj ({{type}}) — upotrebite Preuzmi da biste ga sačuvali", "unknownType": "nepoznat tip" },
       "noResponseBody": "Nema tela odgovora — pogledajte Infos za detalje",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
       "history": {

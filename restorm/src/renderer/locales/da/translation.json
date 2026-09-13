@@ -445,6 +445,7 @@
         "requestBodyFile": "Fil"
       },
       "loading": "Sender anmodning...",
+      "body": { "download": "Download", "binary": "Binært indhold ({{type}}) — brug Download for at gemme det", "unknownType": "ukendt type" },
       "noResponseBody": "Ingen svar-body — se Infos for detaljer",
       "noResponse": "Klik på Send for at udføre anmodningen",
       "history": {
