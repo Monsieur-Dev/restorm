@@ -2858,6 +2858,11 @@
       "websocket": "WebSocket",
       "graphql": "GraphQL",
       "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pozastavit nahrávání",
+      "resume": "Pokračovat v nahrávání",
+      "stop": "Zastavit nahrávání"
     }
   },
   "mcp": {

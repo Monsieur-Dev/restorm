@@ -2856,6 +2856,11 @@
       "websocket": "WebSocket",
       "graphql": "GraphQL",
       "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pausar a gravação",
+      "resume": "Retomar a gravação",
+      "stop": "Parar a gravação"
     }
   },
   "mcp": {

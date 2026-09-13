@@ -4,11 +4,14 @@ import type { RecordingSession } from '../../../../shared/types/collections'
 import { miniBrowserDriver } from '../../services/miniBrowserDriver'
 import { takePendingRecordingStart } from '../../services/recordingIntent'
 import { recordingFilterConfigOf } from './recordingMutations'
+import { RecordingBrowserControls } from './RecordingBrowserControls'
 
 export interface RecordingBrowserPanelProps {
   session: RecordingSession
   /** The workbench tab id — doubles as the mini-browser view's tab id. */
   tabId: string
+  /** Stop the recording (engine + this tab). */
+  onStop: (sessionId: string) => void
 }
 
 /**
@@ -18,7 +21,7 @@ export interface RecordingBrowserPanelProps {
  * staged start (the record button); a browser tab restored on relaunch
  * records nothing. Unmounting the tab (Stop, close) stops the recording.
  */
-export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ session, tabId }) => {
+export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ session, tabId, onStop }) => {
   // The driver is created once (a new driver identity would re-create the
   // view); it reads the LIVE session through a ref synced after each render.
   const sessionRef = useRef(session)
@@ -51,6 +54,7 @@ export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ se
       initialUrl={session.url}
       onUrlChange={() => { /* the session keeps its configured start url; navigation is free */ }}
       driver={driver}
+      toolbarActions={<RecordingBrowserControls sessionId={session.id} onStop={onStop} />}
     />
   )
 }

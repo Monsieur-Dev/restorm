@@ -1,0 +1,11 @@
+.recording-browser-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Paused: the stop disc keeps its beam but the lap freezes in place. */
+.recording-browser-controls--paused .restorm-round-action-beam .ecu-border-beam-trail,
+.recording-browser-controls--paused .restorm-round-action-beam * {
+  animation-play-state: paused;
+}

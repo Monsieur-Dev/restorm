@@ -50,7 +50,7 @@ export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ se
           />
         )}
         {node === 'browser' && tabId !== undefined && (
-          <RecordingBrowserPanel session={session} tabId={tabId} />
+          <RecordingBrowserPanel session={session} tabId={tabId} onStop={(id) => { onStopRecording?.(id) }} />
         )}
         {(node === 'captures' || node === 'routes') && (
           <p className="recording-tab-placeholder">{t(`recording.placeholder.${node}`)}</p>

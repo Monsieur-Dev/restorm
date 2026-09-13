@@ -2855,6 +2855,11 @@
       "websocket": "WebSocket",
       "graphql": "GraphQL",
       "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "기록 일시 중지",
+      "resume": "기록 계속",
+      "stop": "기록 중지"
     }
   },
   "mcp": {

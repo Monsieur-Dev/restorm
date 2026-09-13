@@ -46,7 +46,11 @@ Feature: Recording session sidebar nodes and tabs
     Then the session has a "browser" row
     And the recording "browser" tab is open
     And the session is on air
-    When I click the session row
-    And I click the record button
+    When I click the browser pause button
+    Then the session is paused
+    When I click the browser pause button
+    Then the session is on air
+    When I click the browser stop button
     Then the session is idle
     And the session has no "browser" row
+    And the recording "browser" tab is closed

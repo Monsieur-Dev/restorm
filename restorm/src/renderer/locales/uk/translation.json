@@ -2858,6 +2858,11 @@
       "websocket": "WebSocket",
       "graphql": "GraphQL",
       "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Призупинити запис",
+      "resume": "Відновити запис",
+      "stop": "Зупинити запис"
     }
   },
   "mcp": {

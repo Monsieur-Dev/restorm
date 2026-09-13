@@ -224,3 +224,26 @@ Then('the session is idle', async () => {
   const id = await sessionId(p)
   await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'idle', { timeout: 10000 })
 })
+
+When('I click the browser pause button', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="recording-browser-pause"]').click()
+  await p.waitForTimeout(400)
+})
+
+When('I click the browser stop button', async () => {
+  const p = requirePage()
+  await p.locator('[data-testid="recording-browser-stop"]').click()
+  await p.waitForTimeout(600)
+})
+
+Then('the session is paused', async () => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'paused', { timeout: 10000 })
+})
+
+Then('the recording {string} tab is closed', async ({}, node: string) => {
+  const p = requirePage()
+  await expect(p.locator(`[data-testid="recording-tab-${node}"]`)).toHaveCount(0, { timeout: 5000 })
+})

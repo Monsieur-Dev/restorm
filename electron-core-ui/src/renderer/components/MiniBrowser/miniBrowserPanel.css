@@ -10,9 +10,19 @@
 .mini-browser-panel__toolbar {
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 6px 8px;
   border-bottom: 1px solid var(--editorWidget-border);
   background-color: var(--editorWidget-background);
+  flex: 0 0 auto;
+}
+
+/* Host-provided controls at the right end of the address line (pause /
+ * stop of a recording session…): never shrink, the address bar does. */
+.mini-browser-panel__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex: 0 0 auto;
 }
 
@@ -23,7 +33,8 @@
  * sit flush against the input's borders (no gap).
  */
 .mini-browser-panel__controls {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* The address `InputBox` is the only growable child — buttons stay at
