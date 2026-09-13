@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Alkalmazás és eltávolítás",
       "deduce": "Útvonalak levezetése",
       "deduceWhileRecording": "Állítsa le a felvételt az útvonalak levezetése előtt.",
-      "deduceUnavailable": "Az útvonalak levezetése még nem érhető el."
+      "deduceUnavailable": "Az útvonalak levezetése még nem érhető el.",
+      "deduceLocked": "Az útvonalak levezetése a Pro csomagtól érhető el."
+    },
+    "routes": {
+      "empty": "Még nincs levezetett útvonal. Rögzítsen hívásokat, majd használja a rögzítések alatti „Útvonalak levezetése” gombot — a kérések itt és az oldalsáv Útvonalak sora alatt jelennek meg.",
+      "proCallout": "Az útvonalak levezetése a rögzített hívásokból a Pro csomagtól érhető el. A felvétel mindenki számára nyitott marad.",
+      "subscribe": "Csomagok megtekintése",
+      "count_one": "{{count}} levezetett kérés",
+      "count_other": "{{count}} levezetett kérés",
+      "hint": "A levezetett kérések közönséges kérések: szabadon szerkeszthetők; egy újabb levezetés megőrzi a módosításait, és csak az új útvonalakat adja hozzá."
     }
   },
   "mcp": {

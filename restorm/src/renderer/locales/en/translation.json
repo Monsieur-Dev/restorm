@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Apply and remove",
       "deduce": "Deduce the routes",
       "deduceWhileRecording": "Stop the recording before deducing the routes.",
-      "deduceUnavailable": "Route deduction is not available yet."
+      "deduceUnavailable": "Route deduction is not available yet.",
+      "deduceLocked": "Deducing the routes is available from the Pro plan."
+    },
+    "routes": {
+      "empty": "No route deduced yet. Record calls, then use “Deduce the routes” under the captures — the requests appear here and under the Routes row in the sidebar.",
+      "proCallout": "Deducing routes from the captured calls is available from the Pro plan. Recording stays open to everyone.",
+      "subscribe": "See the plans",
+      "count_one": "{{count}} deduced request",
+      "count_other": "{{count}} deduced requests",
+      "hint": "The deduced requests are ordinary requests: edit them freely, deducing again keeps your changes and adds the new routes only."
     }
   },
   "mcp": {

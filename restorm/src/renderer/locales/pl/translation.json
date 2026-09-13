@@ -2880,7 +2880,16 @@
       "applyConfirmOk": "Zastosuj i usuń",
       "deduce": "Wywnioskuj trasy",
       "deduceWhileRecording": "Proszę zatrzymać nagrywanie przed wywnioskowaniem tras.",
-      "deduceUnavailable": "Wnioskowanie tras nie jest jeszcze dostępne."
+      "deduceUnavailable": "Wnioskowanie tras nie jest jeszcze dostępne.",
+      "deduceLocked": "Wnioskowanie tras jest dostępne od planu Pro."
+    },
+    "routes": {
+      "empty": "Nie wywnioskowano jeszcze żadnej trasy. Proszę nagrać wywołania, a następnie użyć „Wywnioskuj trasy” pod przechwyceniami — żądania pojawią się tutaj i pod wierszem Trasy na pasku bocznym.",
+      "proCallout": "Wnioskowanie tras z przechwyconych wywołań jest dostępne od planu Pro. Nagrywanie pozostaje otwarte dla wszystkich.",
+      "subscribe": "Zobacz plany",
+      "count_one": "{{count}} wywnioskowane żądanie",
+      "count_other": "{{count}} wywnioskowanych żądań",
+      "hint": "Wywnioskowane żądania są zwykłymi żądaniami: można je dowolnie edytować; ponowne wnioskowanie zachowuje zmiany i dodaje tylko nowe trasy."
     }
   },
   "mcp": {

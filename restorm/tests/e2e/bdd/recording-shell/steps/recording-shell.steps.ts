@@ -68,12 +68,23 @@ async function openAddSubmenu(p: Page, row: Locator): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-Given('a project with an env folder is open', async ({ launchApp }) => {
-  const launched = await launchApp()
+async function launchWithProject(launchApp: (opts?: { plan?: 'pro' | 'enterprise' }) => Promise<{ page: Page }>, plan?: 'pro'): Promise<void> {
+  const launched = await launchApp(plan !== undefined ? { plan } : undefined)
   page = launched.page
-  projectPath = join(RECORDING_SHELL_TEMP_DIR, 'recording-shell.restorm')
+  projectPath = join(RECORDING_SHELL_TEMP_DIR, `recording-shell-${plan ?? 'community'}.restorm`)
   copyFileSync(SAMPLE, projectPath)
   await openProject()
+  if (plan === 'pro') {
+    await expect(requirePage().locator('[data-testid="app-statusbar-version-plan"]')).toContainText('Pro', { timeout: 10000 })
+  }
+}
+
+Given('a project with an env folder is open', async ({ launchApp }) => {
+  await launchWithProject(launchApp)
+})
+
+Given('a Pro project with an env folder is open', async ({ launchApp }) => {
+  await launchWithProject(launchApp, 'pro')
 })
 
 When("I add a recording session from the env folder's context menu", async () => {
@@ -315,4 +326,45 @@ Then('the capture detail shows the response tabs', async () => {
   const p = requirePage()
   await expect(p.locator('[data-testid="recording-capture-detail"]')).toBeVisible({ timeout: 10000 })
   await expect(p.locator('[data-testid="recording-capture-detail-tabs"]')).toBeVisible({ timeout: 5000 })
+})
+
+// ── Route deduction (Pro+) ────────────────────────────────────────────
+
+Then('the deduce routes button is locked', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="recording-captures-deduce"]')).toHaveClass(/disabled/, { timeout: 5000 })
+  await expect(p.locator('[data-testid="recording-captures-deduce-gate-upsell"]').or(p.locator('[data-testid="recording-captures-deduce-gate"] .ecu-gated, [data-testid="recording-captures-deduce-gate"]')).first()).toBeVisible({ timeout: 5000 })
+})
+
+Then('the recording routes tab shows the Pro callout', async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="recording-routes-pro-callout"]')).toBeVisible({ timeout: 10000 })
+})
+
+When('I click the deduce routes button', async () => {
+  const p = requirePage()
+  const button = p.locator('[data-testid="recording-captures-deduce"]')
+  await expect(button).not.toHaveClass(/disabled/, { timeout: 5000 })
+  await button.click()
+  await p.waitForTimeout(1200)
+})
+
+Then('the recording routes tab lists {int} deduced request', async ({}, count: number) => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="recording-routes-list"]')).toBeVisible({ timeout: 10000 })
+  await expect(p.locator('[data-testid="recording-routes-summary"]')).toContainText(String(count), { timeout: 5000 })
+})
+
+Then('the Routes row of the session lists the request {string} in the folder {string}', async ({}, name: string, folder: string) => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect(sidebarRow(p, nodeRowId(id, 'routes'))).toBeVisible({ timeout: 5000 })
+  // The deduction groups the routes by static path prefix, so the request
+  // lives in a (collapsed) folder under the Routes node.
+  const rows = p.locator('[data-testid="sidebar-listview"] .list-view-row')
+  const folderRow = rows.filter({ has: p.getByText(folder, { exact: true }) }).first()
+  await expect(folderRow).toBeVisible({ timeout: 10000 })
+  await folderRow.getByRole('button', { name: /^(Expand|Développer)$/ }).click()
+  const row = rows.filter({ has: p.getByText(name, { exact: true }) }).first()
+  await expect(row).toBeVisible({ timeout: 10000 })
 })

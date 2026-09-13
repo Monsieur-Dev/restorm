@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Aplicar e eliminar",
       "deduce": "Deduzir as rotas",
       "deduceWhileRecording": "Pare a gravação antes de deduzir as rotas.",
-      "deduceUnavailable": "A dedução de rotas ainda não está disponível."
+      "deduceUnavailable": "A dedução de rotas ainda não está disponível.",
+      "deduceLocked": "A dedução das rotas está disponível a partir do plano Pro."
+    },
+    "routes": {
+      "empty": "Ainda não foi deduzida nenhuma rota. Grave chamadas e depois use «Deduzir as rotas» sob as capturas — os pedidos aparecem aqui e sob a linha Rotas da barra lateral.",
+      "proCallout": "Deduzir as rotas a partir das chamadas capturadas está disponível a partir do plano Pro. A gravação continua aberta a todos.",
+      "subscribe": "Ver os planos",
+      "count_one": "{{count}} pedido deduzido",
+      "count_other": "{{count}} pedidos deduzidos",
+      "hint": "Os pedidos deduzidos são pedidos normais: edite-os livremente; uma nova dedução mantém as suas alterações e apenas adiciona as novas rotas."
     }
   },
   "mcp": {

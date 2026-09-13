@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Aplicar y eliminar",
       "deduce": "Deducir las rutas",
       "deduceWhileRecording": "Detenga la grabación antes de deducir las rutas.",
-      "deduceUnavailable": "La deducción de rutas aún no está disponible."
+      "deduceUnavailable": "La deducción de rutas aún no está disponible.",
+      "deduceLocked": "La deducción de rutas está disponible a partir del plan Pro."
+    },
+    "routes": {
+      "empty": "Todavía no se ha deducido ninguna ruta. Grabe llamadas y luego use «Deducir las rutas» bajo las capturas: las solicitudes aparecen aquí y bajo la fila Rutas de la barra lateral.",
+      "proCallout": "Deducir las rutas a partir de las llamadas capturadas está disponible a partir del plan Pro. La grabación sigue abierta a todos.",
+      "subscribe": "Ver los planes",
+      "count_one": "{{count}} solicitud deducida",
+      "count_other": "{{count}} solicitudes deducidas",
+      "hint": "Las solicitudes deducidas son solicitudes normales: edítelas libremente; una nueva deducción conserva sus cambios y solo añade las rutas nuevas."
     }
   },
   "mcp": {

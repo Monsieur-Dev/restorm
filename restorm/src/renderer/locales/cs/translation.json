@@ -2880,7 +2880,16 @@
       "applyConfirmOk": "Použít a odstranit",
       "deduce": "Odvodit trasy",
       "deduceWhileRecording": "Před odvozením tras zastavte nahrávání.",
-      "deduceUnavailable": "Odvozování tras zatím není k dispozici."
+      "deduceUnavailable": "Odvozování tras zatím není k dispozici.",
+      "deduceLocked": "Odvozování tras je dostupné od tarifu Pro."
+    },
+    "routes": {
+      "empty": "Zatím nebyla odvozena žádná trasa. Nahrajte volání a poté použijte „Odvodit trasy“ pod zachycenými voláními — požadavky se zobrazí zde a pod řádkem Trasy v postranním panelu.",
+      "proCallout": "Odvozování tras ze zachycených volání je dostupné od tarifu Pro. Nahrávání zůstává otevřené všem.",
+      "subscribe": "Zobrazit tarify",
+      "count_one": "{{count}} odvozený požadavek",
+      "count_other": "{{count}} odvozených požadavků",
+      "hint": "Odvozené požadavky jsou běžné požadavky: upravujte je libovolně; nové odvození zachová vaše změny a přidá pouze nové trasy."
     }
   },
   "mcp": {

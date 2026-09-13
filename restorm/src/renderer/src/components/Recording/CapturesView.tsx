@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, ListView, MessageType, VerticalSashContainer, type ContextMenuItem, type ListViewItemData, type ListViewItemEventPayload } from 'electron-core-ui/renderer'
+import { Button, GatedControl, InputBox, ListView, MessageType, VerticalSashContainer, useAuthState, type ContextMenuItem, type ListViewItemData, type ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import type { RecordingSession } from '../../../../shared/types/collections'
 import type { RecordedCallSummary, RecordingRun } from '../../../../shared/types/recordingCapture'
 import { isValidFilterPattern } from '../../../../shared/recording/captureFilters'
 import { useUserDateFormat } from '../../hooks/useUserDateFormat'
 import { useRecordingStatus } from '../../services/recordingStatusStore'
+import { subscribeToPro } from '../../services/subscribeToPro'
+import { isRecordingDeduceLocked } from '../../../../shared/auth/planCapabilities'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import { RegistryBadge } from '../common/RegistryBadge'
 import { useRecordingCaptures } from './useRecordingCaptures'
@@ -32,6 +34,8 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
   const { t } = useTranslation()
   const { formatUserDate } = useUserDateFormat()
   const status = useRecordingStatus(session.id)
+  // Recording is open to every plan; deducing the routes is Pro and above.
+  const deduceLocked = isRecordingDeduceLocked(useAuthState())
   const { runs, captures, loaded } = useRecordingCaptures(session.id)
   const [filter, setFilter] = useState('')
   const [collapsedRuns, setCollapsedRuns] = useState<Set<string>>(new Set())
@@ -154,9 +158,11 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
 
   const recording = status.state !== 'idle'
   const hasCaptures = captures.length > 0
-  const deduceTooltip = recording
-    ? t('recording.captures.deduceWhileRecording')
-    : onDeduceRoutes === undefined ? t('recording.captures.deduceUnavailable') : t('recording.captures.deduce')
+  const deduceTooltip = deduceLocked
+    ? t('recording.captures.deduceLocked')
+    : recording
+      ? t('recording.captures.deduceWhileRecording')
+      : onDeduceRoutes === undefined ? t('recording.captures.deduceUnavailable') : t('recording.captures.deduce')
 
   if (loaded && !hasCaptures) {
     return (
@@ -209,17 +215,20 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
         />
       </div>
       <div className="recording-captures-footer">
-        <HeaderHoverTooltip label={deduceTooltip}>
-          <Button
-            emphasis={1}
-            disabled={recording || onDeduceRoutes === undefined}
-            onClick={() => { onDeduceRoutes?.(session.id) }}
-            options={{ ariaLabel: t('recording.captures.deduce') }}
-            data-testid="recording-captures-deduce"
-          >
-            {t('recording.captures.deduce')}
-          </Button>
-        </HeaderHoverTooltip>
+        <GatedControl locked={deduceLocked} onSubscribe={() => { void subscribeToPro() }} data-testid="recording-captures-deduce-gate">
+          <HeaderHoverTooltip label={deduceTooltip}>
+            {/* `GatedControl` blocks pointers only — the lock also disables the button. */}
+            <Button
+              emphasis={1}
+              disabled={deduceLocked || recording || onDeduceRoutes === undefined}
+              onClick={() => { onDeduceRoutes?.(session.id) }}
+              options={{ ariaLabel: t('recording.captures.deduce') }}
+              data-testid="recording-captures-deduce"
+            >
+              {t('recording.captures.deduce')}
+            </Button>
+          </HeaderHoverTooltip>
+        </GatedControl>
       </div>
       <AddFilterPatternModal
         key={modal === null ? 'closed' : `${modal.kind}:${modal.pattern}`}

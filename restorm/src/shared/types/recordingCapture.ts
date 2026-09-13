@@ -105,6 +105,15 @@ export interface RecordingFilterConfig {
   blacklist: string[]
 }
 
+/** One deduced request and the captures behind it, for the history sidecar. */
+export interface RecordingHistoryPlanEntry {
+  requestId: string
+  protocol: RecordingProtocol
+  captureIds: string[]
+  /** The reference call (the last 2xx), pinned in the history. */
+  referenceCaptureId: string | null
+}
+
 export type RecordingState = 'idle' | 'recording' | 'paused'
 
 export interface RecordingStatus {

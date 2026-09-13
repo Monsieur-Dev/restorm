@@ -28,6 +28,13 @@ const call = (id: string, url: string): RecordedCallSummary => ({ id, sessionId:
 
 function bridge(runs: RecordingRun[], captures: RecordedCallSummary[]): { added: (s: RecordedCallSummary) => void } {
   let onAdded: ((s: RecordedCallSummary) => void) | null = null
+  // The deduce button reads the plan through useAuthState → window.api.account.
+  ;(window as unknown as { api: unknown }).api = {
+    account: {
+      getState: () => Promise.resolve({ signedIn: true, plan: 'pro', capabilities: [] }),
+      onStateChanged: () => () => undefined
+    }
+  }
   ;(window as unknown as { restorm: unknown }).restorm = {
     recording: {
       runs: () => Promise.resolve(runs),

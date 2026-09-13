@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Toepassen en verwijderen",
       "deduce": "Routes afleiden",
       "deduceWhileRecording": "Stop de opname voordat u de routes afleidt.",
-      "deduceUnavailable": "Het afleiden van routes is nog niet beschikbaar."
+      "deduceUnavailable": "Het afleiden van routes is nog niet beschikbaar.",
+      "deduceLocked": "Routes afleiden is beschikbaar vanaf het Pro-abonnement."
+    },
+    "routes": {
+      "empty": "Nog geen route afgeleid. Neem aanroepen op en gebruik daarna ‘Routes afleiden’ onder de opnamen — de verzoeken verschijnen hier en onder de rij Routes in de zijbalk.",
+      "proCallout": "Routes afleiden uit de vastgelegde aanroepen is beschikbaar vanaf het Pro-abonnement. Opnemen blijft voor iedereen beschikbaar.",
+      "subscribe": "Bekijk de abonnementen",
+      "count_one": "{{count}} afgeleid verzoek",
+      "count_other": "{{count}} afgeleide verzoeken",
+      "hint": "De afgeleide verzoeken zijn gewone verzoeken: bewerk ze vrij; opnieuw afleiden behoudt uw wijzigingen en voegt alleen nieuwe routes toe."
     }
   },
   "mcp": {

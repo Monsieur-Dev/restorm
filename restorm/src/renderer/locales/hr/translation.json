@@ -2879,7 +2879,16 @@
       "applyConfirmOk": "Primijeni i ukloni",
       "deduce": "Izvedi rute",
       "deduceWhileRecording": "Zaustavite snimanje prije izvođenja ruta.",
-      "deduceUnavailable": "Izvođenje ruta još nije dostupno."
+      "deduceUnavailable": "Izvođenje ruta još nije dostupno.",
+      "deduceLocked": "Izvođenje ruta dostupno je od plana Pro."
+    },
+    "routes": {
+      "empty": "Još nije izvedena nijedna ruta. Snimite pozive, a zatim upotrijebite „Izvedi rute“ ispod snimaka — zahtjevi se pojavljuju ovdje i ispod retka Rute u bočnoj traci.",
+      "proCallout": "Izvođenje ruta iz zabilježenih poziva dostupno je od plana Pro. Snimanje ostaje otvoreno svima.",
+      "subscribe": "Pogledajte planove",
+      "count_one": "{{count}} izvedeni zahtjev",
+      "count_other": "{{count}} izvedena zahtjeva",
+      "hint": "Izvedeni zahtjevi obični su zahtjevi: slobodno ih uređujte; ponovno izvođenje čuva vaše izmjene i dodaje samo nove rute."
     }
   },
   "mcp": {

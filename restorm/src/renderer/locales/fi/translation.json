@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Sovella ja poista",
       "deduce": "Päättele reitit",
       "deduceWhileRecording": "Lopettakaa tallennus ennen reittien päättelyä.",
-      "deduceUnavailable": "Reittien päättely ei ole vielä käytettävissä."
+      "deduceUnavailable": "Reittien päättely ei ole vielä käytettävissä.",
+      "deduceLocked": "Reittien päättely on käytettävissä Pro-tilauksesta alkaen."
+    },
+    "routes": {
+      "empty": "Reittejä ei ole vielä päätelty. Tallentakaa kutsuja ja käyttäkää sitten kaappausten alla olevaa ”Päättele reitit” -painiketta — pyynnöt näkyvät tässä ja sivupalkin Reitit-rivin alla.",
+      "proCallout": "Reittien päättely kaapatuista kutsuista on käytettävissä Pro-tilauksesta alkaen. Tallennus on kaikkien käytettävissä.",
+      "subscribe": "Katso tilaukset",
+      "count_one": "{{count}} päätelty pyyntö",
+      "count_other": "{{count}} pääteltyä pyyntöä",
+      "hint": "Päätellyt pyynnöt ovat tavallisia pyyntöjä: muokatkaa niitä vapaasti; uusi päättely säilyttää muutoksenne ja lisää vain uudet reitit."
     }
   },
   "mcp": {

@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Bruk og fjern",
       "deduce": "Utled rutene",
       "deduceWhileRecording": "Stopp opptaket før rutene utledes.",
-      "deduceUnavailable": "Utledning av ruter er ikke tilgjengelig ennå."
+      "deduceUnavailable": "Utledning av ruter er ikke tilgjengelig ennå.",
+      "deduceLocked": "Utledning av ruter er tilgjengelig fra Pro-planen."
+    },
+    "routes": {
+      "empty": "Ingen ruter er utledet ennå. Ta opp kall, og bruk deretter «Utled rutene» under opptakene — forespørslene vises her og under raden Ruter i sidepanelet.",
+      "proCallout": "Utledning av ruter fra de fangede kallene er tilgjengelig fra Pro-planen. Opptak er fortsatt åpent for alle.",
+      "subscribe": "Se planene",
+      "count_one": "{{count}} utledet forespørsel",
+      "count_other": "{{count}} utledede forespørsler",
+      "hint": "De utledede forespørslene er vanlige forespørsler: rediger dem fritt; en ny utledning beholder endringene dine og legger bare til nye ruter."
     }
   },
   "mcp": {

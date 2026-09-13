@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { captureToHttpResponse, captureToGraphqlResponse, captureToGrpcResponse, captureToWebSocketResponse } from '../../src/renderer/src/components/Recording/captureToResponse'
+import { captureToHttpResponse, captureToGraphqlResponse, captureToGrpcResponse, captureToWebSocketResponse } from '../../src/shared/recording/captureToResponse'
 import type { RecordedCallDetail } from '../../src/shared/types/recordingCapture'
 
 function detail(overrides: Partial<RecordedCallDetail> = {}): RecordedCallDetail {

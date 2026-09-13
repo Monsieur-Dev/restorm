@@ -73,3 +73,32 @@ Feature: Recording session sidebar nodes and tabs
     When I click the session "browser" row
     And I click the browser stop button
     Then the session is idle
+
+  Scenario: Deducing the routes is a Pro feature — locked on Community
+    Given a project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    And I set the session url to the local test page
+    And I click the record button
+    Then the session is on air
+    When I click the session "captures" row
+    Then the captures list shows a call to "/api/ping"
+    And the deduce routes button is locked
+    When I click the session "routes" row
+    Then the recording routes tab shows the Pro callout
+
+  Scenario: On Pro, the captured calls are deduced into real requests under the Routes row
+    Given a Pro project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    And I set the session url to the local test page
+    And I click the record button
+    Then the session is on air
+    When I click the session "captures" row
+    Then the captures list shows a call to "/api/ping"
+    When I click the session "browser" row
+    And I click the browser stop button
+    Then the session is idle
+    When I click the session "captures" row
+    And I click the deduce routes button
+    Then the recording "routes" tab is open
+    And the recording routes tab lists 1 deduced request
+    And the Routes row of the session lists the request "GET /api/ping" in the folder "api"

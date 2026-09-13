@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Applica ed elimina",
       "deduce": "Deduci le route",
       "deduceWhileRecording": "Interrompa la registrazione prima di dedurre le route.",
-      "deduceUnavailable": "La deduzione delle route non è ancora disponibile."
+      "deduceUnavailable": "La deduzione delle route non è ancora disponibile.",
+      "deduceLocked": "La deduzione delle route è disponibile a partire dal piano Pro."
+    },
+    "routes": {
+      "empty": "Nessuna route dedotta per ora. Registri delle chiamate, poi usi «Deduci le route» sotto le acquisizioni: le richieste compaiono qui e sotto la riga Route della barra laterale.",
+      "proCallout": "La deduzione delle route dalle chiamate acquisite è disponibile a partire dal piano Pro. La registrazione resta aperta a tutti.",
+      "subscribe": "Vedi i piani",
+      "count_one": "{{count}} richiesta dedotta",
+      "count_other": "{{count}} richieste dedotte",
+      "hint": "Le richieste dedotte sono richieste normali: le modifichi liberamente; una nuova deduzione conserva le sue modifiche e aggiunge solo le nuove route."
     }
   },
   "mcp": {

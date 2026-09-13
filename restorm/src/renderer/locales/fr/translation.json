@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Appliquer et supprimer",
       "deduce": "Déduire les routes",
       "deduceWhileRecording": "Arrêtez l’enregistrement avant de déduire les routes.",
-      "deduceUnavailable": "La déduction des routes n’est pas encore disponible."
+      "deduceUnavailable": "La déduction des routes n’est pas encore disponible.",
+      "deduceLocked": "La déduction des routes est disponible à partir de l’offre Pro."
+    },
+    "routes": {
+      "empty": "Aucune route déduite pour le moment. Enregistrez des appels, puis utilisez « Déduire les routes » sous les captures — les requêtes apparaissent ici et sous la ligne Routes de la barre latérale.",
+      "proCallout": "La déduction des routes à partir des appels capturés est disponible à partir de l’offre Pro. L’enregistrement reste ouvert à tous.",
+      "subscribe": "Voir les offres",
+      "count_one": "{{count}} requête déduite",
+      "count_other": "{{count}} requêtes déduites",
+      "hint": "Les requêtes déduites sont des requêtes ordinaires : modifiez-les librement, une nouvelle déduction conserve vos modifications et n’ajoute que les nouvelles routes."
     }
   },
   "mcp": {

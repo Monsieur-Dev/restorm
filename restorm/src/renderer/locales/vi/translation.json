@@ -2877,7 +2877,16 @@
       "applyConfirmOk": "Áp dụng và xóa",
       "deduce": "Suy ra các tuyến",
       "deduceWhileRecording": "Hãy dừng ghi trước khi suy ra các tuyến.",
-      "deduceUnavailable": "Tính năng suy ra tuyến chưa khả dụng."
+      "deduceUnavailable": "Tính năng suy ra tuyến chưa khả dụng.",
+      "deduceLocked": "Suy ra các tuyến khả dụng từ gói Pro."
+    },
+    "routes": {
+      "empty": "Chưa có tuyến nào được suy ra. Hãy ghi các lệnh gọi, rồi dùng “Suy ra các tuyến” bên dưới các bản ghi — các yêu cầu sẽ xuất hiện ở đây và dưới dòng Tuyến trong thanh bên.",
+      "proCallout": "Suy ra các tuyến từ các lệnh gọi đã ghi khả dụng từ gói Pro. Việc ghi vẫn mở cho mọi người.",
+      "subscribe": "Xem các gói",
+      "count_one": "{{count}} yêu cầu được suy ra",
+      "count_other": "{{count}} yêu cầu được suy ra",
+      "hint": "Các yêu cầu được suy ra là yêu cầu thông thường: hãy chỉnh sửa tùy ý; suy ra lại sẽ giữ các thay đổi của bạn và chỉ thêm các tuyến mới."
     }
   },
   "mcp": {

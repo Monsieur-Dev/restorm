@@ -12,11 +12,11 @@ import type {
   WebSocketResponse,
   KeyValue,
   HTTPMethod
-} from '../../../../shared/types/collections'
-import type { CookiePair } from '../../../../shared/cookies/cookieTypes'
-import type { CaptureHeader, RecordedCallDetail } from '../../../../shared/types/recordingCapture'
-import { createTypedKeyValue } from '../../../../shared/utils/createTypedKeyValue'
-import { headerValue } from '../../../../shared/recording/classifyCapture'
+} from '../types/collections'
+import type { CookiePair } from '../cookies/cookieTypes'
+import type { CaptureHeader, RecordedCallDetail } from '../types/recordingCapture'
+import { createTypedKeyValue } from '../utils/createTypedKeyValue'
+import { headerValue } from './classifyCapture'
 
 const HTTP_METHODS: readonly HTTPMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY']
 

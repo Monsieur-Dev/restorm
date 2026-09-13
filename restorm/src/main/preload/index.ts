@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus } from '../../shared/types/recordingCapture'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus, RecordingHistoryPlanEntry } from '../../shared/types/recordingCapture'
 import { cloneForEventBus } from '../../shared/utils/cloneForEventBus'
 // Import from core-ui preload modules using relative paths
 // This works in both dev and prod because:
@@ -857,6 +857,10 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Destructive: drop the stored calls the current lists would refuse. */
     applyFilters: async (sessionId: string): Promise<{ removed: string[] }> => {
       return await ipcRenderer.invoke('recording:apply-filters', sessionId) as { removed: string[] }
+    },
+    /** Write the captured calls behind each deduced request into its response history. */
+    materializeHistory: async (sessionId: string, plan: RecordingHistoryPlanEntry[]): Promise<{ stored: number }> => {
+      return await ipcRenderer.invoke('recording:materialize-history', sessionId, plan) as { stored: number }
     },
     onCaptureAdded: (callback: (summary: RecordedCallSummary) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, summary: RecordedCallSummary): void => { callback(summary) }

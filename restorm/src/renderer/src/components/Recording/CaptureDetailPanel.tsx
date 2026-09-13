@@ -8,7 +8,7 @@ import { buildResponseTabs, formatJsonForGraph } from '../RequestTabViews/respon
 import { buildWebSocketResponseView } from '../RequestTabViews/webSocketResponseView'
 import { buildGraphqlResponseView } from '../RequestTabViews/graphqlResponseView'
 import { buildGrpcResponseView } from '../RequestTabViews/grpcResponseView'
-import { captureToGraphqlResponse, captureToGrpcResponse, captureToHttpResponse, captureToWebSocketResponse } from './captureToResponse'
+import { captureToGraphqlResponse, captureToGrpcResponse, captureToHttpResponse, captureToWebSocketResponse } from '../../../../shared/recording/captureToResponse'
 
 /** What every protocol builder hands back — the input of the shared response tabs. */
 interface CaptureResponseView {

@@ -930,3 +930,9 @@ export const recordingClearRunArgs = z.tuple([sessionIdArg, z.string().min(1)])
 export const recordingRemoveArgs = z.tuple([sessionIdArg, z.array(z.string().min(1))])
 export const recordingSetFiltersArgs = z.tuple([sessionIdArg, recordingFilterConfigSchema])
 export const recordingApplyFiltersArgs = z.tuple([sessionIdArg])
+export const recordingMaterializeHistoryArgs = z.tuple([sessionIdArg, z.array(z.object({
+  requestId: z.string().min(1),
+  protocol: recordingProtocolSchema,
+  captureIds: z.array(z.string().min(1)),
+  referenceCaptureId: z.string().min(1).nullable()
+}))])

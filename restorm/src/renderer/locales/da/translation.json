@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Anvend og fjern",
       "deduce": "Udled ruterne",
       "deduceWhileRecording": "Stop optagelsen, før ruterne udledes.",
-      "deduceUnavailable": "Udledning af ruter er endnu ikke tilgængelig."
+      "deduceUnavailable": "Udledning af ruter er endnu ikke tilgængelig.",
+      "deduceLocked": "Udledning af ruter er tilgængelig fra Pro-planen."
+    },
+    "routes": {
+      "empty": "Ingen ruter er udledt endnu. Optag kald, og brug derefter „Udled ruterne“ under optagelserne — anmodningerne vises her og under rækken Ruter i sidepanelet.",
+      "proCallout": "Udledning af ruter fra de opsamlede kald er tilgængelig fra Pro-planen. Optagelse er fortsat åben for alle.",
+      "subscribe": "Se planerne",
+      "count_one": "{{count}} udledt anmodning",
+      "count_other": "{{count}} udledte anmodninger",
+      "hint": "De udledte anmodninger er almindelige anmodninger: rediger dem frit; en ny udledning bevarer dine ændringer og tilføjer kun nye ruter."
     }
   },
   "mcp": {

@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Zbato dhe hiq",
       "deduce": "Nxirr rrugët",
       "deduceWhileRecording": "Ndalni regjistrimin përpara se të nxirrni rrugët.",
-      "deduceUnavailable": "Nxjerrja e rrugëve nuk është ende e disponueshme."
+      "deduceUnavailable": "Nxjerrja e rrugëve nuk është ende e disponueshme.",
+      "deduceLocked": "Nxjerrja e rrugëve është e disponueshme që nga plani Pro."
+    },
+    "routes": {
+      "empty": "Asnjë rrugë nuk është nxjerrë ende. Regjistroni thirrje dhe më pas përdorni «Nxirr rrugët» poshtë kapjeve — kërkesat shfaqen këtu dhe poshtë rreshtit Rrugët në shiritin anësor.",
+      "proCallout": "Nxjerrja e rrugëve nga thirrjet e kapura është e disponueshme që nga plani Pro. Regjistrimi mbetet i hapur për të gjithë.",
+      "subscribe": "Shikoni planet",
+      "count_one": "{{count}} kërkesë e nxjerrë",
+      "count_other": "{{count}} kërkesa të nxjerra",
+      "hint": "Kërkesat e nxjerra janë kërkesa të zakonshme: modifikojini lirisht; një nxjerrje e re ruan ndryshimet tuaja dhe shton vetëm rrugët e reja."
     }
   },
   "mcp": {

@@ -192,6 +192,8 @@ export interface RestormWorkbenchProps {
   /** Record button of a session's config tab: start (opens the browser tab) / stop. */
   onStartRecordingSession?: ((sessionId: string) => void) | undefined
   onStopRecordingSession?: ((sessionId: string) => void) | undefined
+  /** Deduce a session's routes from its captures (Pro+). */
+  onDeduceRecordingRoutes?: ((sessionId: string) => void) | undefined
   /** Check if a request is a favorite */
   isItemFavorite?: ((itemId: string) => boolean) | undefined
   /** Toggle favorite status on a request */
@@ -275,6 +277,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getRecordingSessionById,
   onStartRecordingSession,
   onStopRecordingSession,
+  onDeduceRecordingRoutes,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -1183,6 +1186,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           tabId={effectiveTab.id}
           onStartRecording={onStartRecordingSession}
           onStopRecording={onStopRecordingSession}
+          onDeduceRoutes={onDeduceRecordingRoutes}
         />
       )
     }
@@ -1993,7 +1997,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getDesignById, getRecordingSessionById, onStartRecordingSession, onStopRecordingSession, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl, tabReloadEpoch])
+  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getDesignById, getRecordingSessionById, onStartRecordingSession, onStopRecordingSession, onDeduceRecordingRoutes, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl, tabReloadEpoch])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

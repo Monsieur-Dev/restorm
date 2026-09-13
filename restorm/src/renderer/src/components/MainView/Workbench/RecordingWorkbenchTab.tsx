@@ -7,6 +7,7 @@ import { RestormWorkbenchTab, type RestormWorkbenchTabProps } from './RestormWor
 import { RecordingConfigView } from '../../Recording/RecordingConfigView'
 import { RecordingBrowserPanel } from '../../Recording/RecordingBrowserPanel'
 import { CapturesView } from '../../Recording/CapturesView'
+import { RoutesView } from '../../Recording/RoutesView'
 import './recordingWorkbenchTab.css'
 
 type RecordingWorkbenchTabProps = Omit<
@@ -19,6 +20,8 @@ type RecordingWorkbenchTabProps = Omit<
   onStartRecording?: ((sessionId: string) => void) | undefined
   /** Stop the live recording — engine + browser tab. */
   onStopRecording?: ((sessionId: string) => void) | undefined
+  /** Deduce the routes from the captures into the session's Routes node (Pro+). */
+  onDeduceRoutes?: ((sessionId: string) => void) | undefined
 }
 
 /**
@@ -27,7 +30,7 @@ type RecordingWorkbenchTabProps = Omit<
  * trail mirrors the sidebar — `…path / Session [ / Node ]` — and the H1 is
  * editable only on the config tab (renaming the session).
  */
-export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ session, node, breadcrumbs, tabId, onStartRecording, onStopRecording, ...rest }) => {
+export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ session, node, breadcrumbs, tabId, onStartRecording, onStopRecording, onDeduceRoutes, ...rest }) => {
   const { t } = useTranslation()
   const trail: BreadcrumbItem[] = node === 'config'
     ? breadcrumbs.map((crumb, i) => (i === breadcrumbs.length - 1 ? { ...crumb, icon: null } : crumb))
@@ -54,10 +57,10 @@ export const RecordingWorkbenchTab: React.FC<RecordingWorkbenchTabProps> = ({ se
           <RecordingBrowserPanel session={session} tabId={tabId} onStop={(id) => { onStopRecording?.(id) }} />
         )}
         {node === 'captures' && (
-          <CapturesView session={session} />
+          <CapturesView session={session} onDeduceRoutes={onDeduceRoutes} />
         )}
         {node === 'routes' && (
-          <p className="recording-tab-placeholder">{t(`recording.placeholder.${node}`)}</p>
+          <RoutesView session={session} />
         )}
       </div>
     </RestormWorkbenchTab>

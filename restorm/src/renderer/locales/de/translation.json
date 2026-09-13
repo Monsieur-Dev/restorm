@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Anwenden und entfernen",
       "deduce": "Routen ableiten",
       "deduceWhileRecording": "Beenden Sie die Aufnahme, bevor Sie die Routen ableiten.",
-      "deduceUnavailable": "Die Routenableitung ist noch nicht verfügbar."
+      "deduceUnavailable": "Die Routenableitung ist noch nicht verfügbar.",
+      "deduceLocked": "Das Ableiten der Routen ist ab dem Pro-Tarif verfügbar."
+    },
+    "routes": {
+      "empty": "Noch keine Route abgeleitet. Erfassen Sie Aufrufe und verwenden Sie dann „Routen ableiten“ unter den Aufzeichnungen — die Anfragen erscheinen hier und unter der Zeile „Routen“ in der Seitenleiste.",
+      "proCallout": "Das Ableiten von Routen aus den erfassten Aufrufen ist ab dem Pro-Tarif verfügbar. Die Aufnahme bleibt für alle offen.",
+      "subscribe": "Tarife ansehen",
+      "count_one": "{{count}} abgeleitete Anfrage",
+      "count_other": "{{count}} abgeleitete Anfragen",
+      "hint": "Die abgeleiteten Anfragen sind gewöhnliche Anfragen: Bearbeiten Sie sie frei; eine erneute Ableitung behält Ihre Änderungen und fügt nur neue Routen hinzu."
     }
   },
   "mcp": {

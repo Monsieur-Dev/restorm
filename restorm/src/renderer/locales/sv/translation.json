@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Tillämpa och ta bort",
       "deduce": "Härled rutterna",
       "deduceWhileRecording": "Stoppa inspelningen innan rutterna härleds.",
-      "deduceUnavailable": "Härledning av rutter är inte tillgänglig ännu."
+      "deduceUnavailable": "Härledning av rutter är inte tillgänglig ännu.",
+      "deduceLocked": "Härledning av rutter är tillgänglig från Pro-planen."
+    },
+    "routes": {
+      "empty": "Inga rutter har härletts ännu. Spela in anrop och använd sedan ”Härled rutterna” under inspelningarna — förfrågningarna visas här och under raden Rutter i sidopanelen.",
+      "proCallout": "Att härleda rutter från de infångade anropen är tillgängligt från Pro-planen. Inspelning är fortsatt öppen för alla.",
+      "subscribe": "Se planerna",
+      "count_one": "{{count}} härledd förfrågan",
+      "count_other": "{{count}} härledda förfrågningar",
+      "hint": "De härledda förfrågningarna är vanliga förfrågningar: redigera dem fritt; en ny härledning behåller dina ändringar och lägger bara till nya rutter."
     }
   },
   "mcp": {

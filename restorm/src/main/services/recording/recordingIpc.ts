@@ -11,6 +11,8 @@ import { eventBusService, logger, validatedHandle } from 'electron-core-ui/main'
 import { miniBrowserService } from '../MiniBrowserService'
 import { recordingCaptureStore, type RecordingStoreEvents } from './RecordingCaptureStore'
 import { recordingCaptureEngine } from './RecordingCaptureEngine'
+import { captureToHistoryDetail } from './captureHistory'
+import { responseHistoryService } from '../ResponseHistoryService'
 import { DocumentEvents, type DocumentDeletedPayload } from '../DocumentEvents'
 import {
   recordingStartArgs,
@@ -23,7 +25,8 @@ import {
   recordingClearRunArgs,
   recordingRemoveArgs,
   recordingSetFiltersArgs,
-  recordingApplyFiltersArgs
+  recordingApplyFiltersArgs,
+  recordingMaterializeHistoryArgs
 } from '../../ipc/schemas'
 
 export const RECORDING_PUSH_CHANNELS: Record<keyof RecordingStoreEvents, string> = {
@@ -111,5 +114,18 @@ export function registerRecordingIpc(): void {
 
   validatedHandle('recording:apply-filters', recordingApplyFiltersArgs, (_event, [sessionId]) => {
     return { removed: recordingCaptureStore.applyFiltersToExisting(sessionId) }
+  })
+
+  // The history of the requests deduced from a session: every captured call
+  // behind a route becomes a history entry of the new request (same sidecar,
+  // same format, same cap), the reference call — the last 2xx — pinned so
+  // it stands out and outlives the cap.
+  validatedHandle('recording:materialize-history', recordingMaterializeHistoryArgs, async (_event, [sessionId, plan]) => {
+    const details = plan.flatMap((entry) => entry.captureIds.flatMap((captureId) => {
+      const call = recordingCaptureStore.get(sessionId, captureId)
+      return call ? [captureToHistoryDetail(entry.requestId, call, captureId === entry.referenceCaptureId)] : []
+    }))
+    const stored = await responseHistoryService.storeCapturedCalls(details)
+    return { stored }
   })
 }

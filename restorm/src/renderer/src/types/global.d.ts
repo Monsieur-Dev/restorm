@@ -15,7 +15,7 @@ import type {
   GitState
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
-import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus } from '../../../shared/types/recordingCapture'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus, RecordingHistoryPlanEntry } from '../../../shared/types/recordingCapture'
 import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
 import type { DesignIssueView } from '../../../shared/design/describeDesignIssue'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
@@ -286,6 +286,7 @@ declare global {
         remove: (sessionId: string, ids: string[]) => Promise<{ removed: string[] }>
         setFilters: (sessionId: string, config: RecordingFilterConfig) => Promise<{ ok: boolean }>
         applyFilters: (sessionId: string) => Promise<{ removed: string[] }>
+        materializeHistory: (sessionId: string, plan: RecordingHistoryPlanEntry[]) => Promise<{ stored: number }>
         onCaptureAdded: (callback: (summary: RecordedCallSummary) => void) => (() => void)
         onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void) => (() => void)
         onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void) => (() => void)

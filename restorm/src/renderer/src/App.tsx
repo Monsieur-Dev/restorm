@@ -53,7 +53,10 @@ import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
 import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
 import { RecordingSession as RecordingSessionClass } from '../../shared/models/RecordingSession'
-import { recordingTabId } from '../../shared/recording/recordingSections'
+import { recordingTabId, recordingNodeRowId } from '../../shared/recording/recordingSections'
+import { deduceRoutes, flattenRoutes } from '../../shared/recording/routeDeduction'
+import { materializeDeducedTree } from '../../shared/recording/deducedItems'
+import type { RecordedCallDetail } from '../../shared/types/recordingCapture'
 import { requestRecordingStart, clearPendingRecordingStart } from './services/recordingIntent'
 
 /**
@@ -2399,6 +2402,48 @@ const App: React.FC = () => {
     handleCloseTabByTabId(recordingTabId(sessionId, 'browser'))
   }, [handleCloseTabByTabId])
 
+  // "Deduce the routes": the captured calls become a tree of folders + real
+  // requests under the session's Routes node — merged with a previous
+  // deduction (the user's edits win, only new routes are added), each new
+  // request prefilled from its last successful call and given the calls as
+  // its response history (the reference one pinned). Then the Routes node
+  // opens on the result.
+  const handleDeduceRecordingRoutes = useCallback((sessionId: string): void => {
+    const api = window.restorm?.recording
+    if (!api) return
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
+    if (!item || !isRecordingSession(item)) return
+    const session = item
+    void (async () => {
+      const captures = await api.list(sessionId)
+      const tree = deduceRoutes(captures)
+      const referenceIds = new Set(flattenRoutes(tree).map((route) => route.lastSuccessCaptureId).filter((id): id is string => id !== null))
+      const references = new Map<string, RecordedCallDetail>()
+      for (const id of referenceIds) {
+        const detail = await api.get(sessionId, id)
+        if (detail) references.set(id, detail)
+      }
+      const result = materializeDeducedTree(
+        tree, references, session.items, generateUniqueId,
+        (item, parentId) => makeReactiveFolderItem(item, parentId ?? session.id)
+      )
+      if (result.created.length === 0) {
+        logger.info('[App] Route deduction found nothing new', { sessionId, routes: result.summary.routes })
+      } else {
+        session.items = result.items
+        for (const { item: created, parentId } of result.created) emitClonedSubtreeCreated(created, parentId ?? session.id)
+        setRootItems((prev) => [...prev])
+        void api.materializeHistory(sessionId, result.history).catch((error: unknown) => {
+          logger.warn('[App] Could not write the deduced requests history', { sessionId, error: String(error) })
+        })
+      }
+      setExpandedIds((prev) => Array.from(new Set([...prev, sessionId, recordingNodeRowId(sessionId, 'routes')])))
+      openRecordingTab(session, 'routes', breadcrumbs, { temporary: false })
+    })().catch((error: unknown) => {
+      logger.error('[App] Route deduction failed', { sessionId, error: String(error) })
+    })
+  }, [rootItems, setRootItems, setExpandedIds, openRecordingTab])
+
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
   // Let the transient-clients store close the tabs its requests opened when a
@@ -4064,6 +4109,7 @@ const App: React.FC = () => {
               getRecordingSessionById={getRecordingSessionByIdCb}
               onStartRecordingSession={handleStartRecordingSession}
               onStopRecordingSession={handleStopRecordingSession}
+              onDeduceRecordingRoutes={handleDeduceRecordingRoutes}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -4157,6 +4203,7 @@ const App: React.FC = () => {
             getRecordingSessionById={(id) => findRecordingSessionById(rootItems, id)}
             onStartRecordingSession={handleStartRecordingSession}
             onStopRecordingSession={handleStopRecordingSession}
+            onDeduceRecordingRoutes={handleDeduceRecordingRoutes}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

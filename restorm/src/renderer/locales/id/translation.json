@@ -2877,7 +2877,16 @@
       "applyConfirmOk": "Terapkan dan hapus",
       "deduce": "Simpulkan rute",
       "deduceWhileRecording": "Hentikan perekaman sebelum menyimpulkan rute.",
-      "deduceUnavailable": "Penyimpulan rute belum tersedia."
+      "deduceUnavailable": "Penyimpulan rute belum tersedia.",
+      "deduceLocked": "Penyimpulan rute tersedia mulai paket Pro."
+    },
+    "routes": {
+      "empty": "Belum ada rute yang disimpulkan. Rekam panggilan, lalu gunakan “Simpulkan rute” di bawah tangkapan — permintaan muncul di sini dan di bawah baris Rute pada bilah sisi.",
+      "proCallout": "Menyimpulkan rute dari panggilan yang ditangkap tersedia mulai paket Pro. Perekaman tetap terbuka untuk semua.",
+      "subscribe": "Lihat paket",
+      "count_one": "{{count}} permintaan yang disimpulkan",
+      "count_other": "{{count}} permintaan yang disimpulkan",
+      "hint": "Permintaan yang disimpulkan adalah permintaan biasa: ubah dengan bebas; penyimpulan ulang mempertahankan perubahan Anda dan hanya menambahkan rute baru."
     }
   },
   "mcp": {

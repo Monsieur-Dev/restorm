@@ -2879,7 +2879,16 @@
       "applyConfirmOk": "Aplicați și eliminați",
       "deduce": "Deduceți rutele",
       "deduceWhileRecording": "Opriți înregistrarea înainte de a deduce rutele.",
-      "deduceUnavailable": "Deducerea rutelor nu este încă disponibilă."
+      "deduceUnavailable": "Deducerea rutelor nu este încă disponibilă.",
+      "deduceLocked": "Deducerea rutelor este disponibilă începând cu planul Pro."
+    },
+    "routes": {
+      "empty": "Nicio rută dedusă încă. Înregistrați apeluri, apoi folosiți „Deduceți rutele” sub capturi — cererile apar aici și sub rândul Rute din bara laterală.",
+      "proCallout": "Deducerea rutelor din apelurile capturate este disponibilă începând cu planul Pro. Înregistrarea rămâne deschisă tuturor.",
+      "subscribe": "Vedeți planurile",
+      "count_one": "{{count}} cerere dedusă",
+      "count_other": "{{count}} cereri deduse",
+      "hint": "Cererile deduse sunt cereri obișnuite: editați-le liber; o nouă deducere păstrează modificările dumneavoastră și adaugă doar rutele noi."
     }
   },
   "mcp": {

@@ -2878,7 +2878,16 @@
       "applyConfirmOk": "Uygula ve kaldır",
       "deduce": "Rotaları çıkar",
       "deduceWhileRecording": "Rotaları çıkarmadan önce kaydı durdurunuz.",
-      "deduceUnavailable": "Rota çıkarma henüz kullanılamıyor."
+      "deduceUnavailable": "Rota çıkarma henüz kullanılamıyor.",
+      "deduceLocked": "Rota çıkarma Pro planından itibaren kullanılabilir."
+    },
+    "routes": {
+      "empty": "Henüz çıkarılan rota yok. Çağrıları kaydediniz, ardından yakalamaların altındaki “Rotaları çıkar” düğmesini kullanınız — istekler burada ve kenar çubuğundaki Rotalar satırının altında görünür.",
+      "proCallout": "Yakalanan çağrılardan rota çıkarma Pro planından itibaren kullanılabilir. Kayıt herkese açık kalır.",
+      "subscribe": "Planları görün",
+      "count_one": "{{count}} çıkarılan istek",
+      "count_other": "{{count}} çıkarılan istek",
+      "hint": "Çıkarılan istekler sıradan isteklerdir: serbestçe düzenleyiniz; yeniden çıkarma değişikliklerinizi korur ve yalnızca yeni rotaları ekler."
     }
   },
   "mcp": {

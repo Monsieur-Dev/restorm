@@ -2877,7 +2877,16 @@
       "applyConfirmOk": "应用并移除",
       "deduce": "推导路由",
       "deduceWhileRecording": "请先停止录制再推导路由。",
-      "deduceUnavailable": "路由推导尚不可用。"
+      "deduceUnavailable": "路由推导尚不可用。",
+      "deduceLocked": "推导路由需要 Pro 及以上套餐。"
+    },
+    "routes": {
+      "empty": "尚未推导出任何路由。请先录制调用，然后使用捕获下方的“推导路由”——请求会显示在此处以及侧栏的“路由”行下方。",
+      "proCallout": "从捕获的调用推导路由需要 Pro 及以上套餐。录制功能对所有人开放。",
+      "subscribe": "查看套餐",
+      "count_one": "{{count}} 个推导出的请求",
+      "count_other": "{{count}} 个推导出的请求",
+      "hint": "推导出的请求是普通请求：可自由编辑；再次推导会保留您的修改，只添加新的路由。"
     }
   },
   "mcp": {
