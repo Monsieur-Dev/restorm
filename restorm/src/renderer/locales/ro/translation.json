@@ -2812,6 +2812,11 @@
     "maxEntriesTitle": "Intrări păstrate per istoric",
     "maxEntriesDescription": "Câte intrări păstrează istoricul apelurilor unei cereri și istoricul rulărilor unui scenariu. Intrările fixate sunt păstrate întotdeauna, indiferent de această valoare. Listele de activitate recentă de pe ecranul principal nu sunt afectate."
   },
+  "recording": {
+    "title": "Sesiuni de înregistrare",
+    "maxCapturesTitle": "Apeluri capturate păstrate per sesiune",
+    "maxCapturesDescription": "Câte apeluri capturate păstrează în memorie o sesiune de înregistrare. Odată atinsă limita, cele mai vechi apeluri sunt eliminate primele. Capturile nu sunt niciodată salvate în fișierul proiectului."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Păstrarea jurnalului de apeluri MCP",

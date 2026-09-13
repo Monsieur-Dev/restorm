@@ -907,3 +907,26 @@ export const apiUpdateRefreshFetchResultSchema = z.discriminatedUnion('ok', [
   z.object({ ok: z.literal(true), spec: z.string() }),
   z.object({ ok: z.literal(false), error: z.string() }),
 ])
+
+// ==========================================================================
+// Recording sessions — main-process capture engine
+// ==========================================================================
+
+const recordingProtocolSchema = z.enum(['http', 'websocket', 'graphql', 'grpc-web'])
+export const recordingFilterConfigSchema = z.object({
+  protocols: z.array(recordingProtocolSchema),
+  whitelist: z.array(z.string()),
+  blacklist: z.array(z.string())
+})
+const sessionIdArg = z.string().min(1)
+export const recordingStartArgs = z.tuple([sessionIdArg, tabIdArg, z.string(), recordingFilterConfigSchema])
+export const recordingStopArgs = z.tuple([sessionIdArg])
+export const recordingSetPausedArgs = z.tuple([sessionIdArg, z.boolean()])
+export const recordingStatusArgs = z.tuple([sessionIdArg])
+export const recordingListArgs = z.tuple([sessionIdArg])
+export const recordingRunsArgs = z.tuple([sessionIdArg])
+export const recordingGetArgs = z.tuple([sessionIdArg, z.string().min(1)])
+export const recordingClearRunArgs = z.tuple([sessionIdArg, z.string().min(1)])
+export const recordingRemoveArgs = z.tuple([sessionIdArg, z.array(z.string().min(1))])
+export const recordingSetFiltersArgs = z.tuple([sessionIdArg, recordingFilterConfigSchema])
+export const recordingApplyFiltersArgs = z.tuple([sessionIdArg])

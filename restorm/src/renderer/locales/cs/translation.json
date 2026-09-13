@@ -2813,6 +2813,11 @@
     "maxEntriesTitle": "Počet záznamů uchovávaných v historii",
     "maxEntriesDescription": "Kolik záznamů uchovává historie volání požadavku a historie spuštění scénáře. Připnuté záznamy se uchovávají vždy, bez ohledu na tuto hodnotu. Seznamů nedávné aktivity na úvodní obrazovce se to netýká."
   },
+  "recording": {
+    "title": "Relace nahrávání",
+    "maxCapturesTitle": "Zachycená volání uchovávaná na relaci",
+    "maxCapturesDescription": "Kolik zachycených volání relace nahrávání uchovává v paměti. Po dosažení limitu jsou nejstarší volání odstraněna jako první. Zachycená data se nikdy neukládají do souboru projektu."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Uchování protokolu volání MCP",

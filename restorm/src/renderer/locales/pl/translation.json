@@ -2813,6 +2813,11 @@
     "maxEntriesTitle": "Wpisy przechowywane w każdej historii",
     "maxEntriesDescription": "Ile wpisów przechowują historia wywołań żądania oraz historia uruchomień scenariusza. Przypięte wpisy są zawsze zachowywane, niezależnie od tej wartości. Nie dotyczy to list ostatniej aktywności na ekranie startowym."
   },
+  "recording": {
+    "title": "Sesje nagrywania",
+    "maxCapturesTitle": "Przechwycone wywołania przechowywane na sesję",
+    "maxCapturesDescription": "Ile przechwyconych wywołań sesja nagrywania przechowuje w pamięci. Po osiągnięciu limitu najstarsze wywołania są usuwane w pierwszej kolejności. Przechwycone dane nigdy nie są zapisywane w pliku projektu."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Przechowywanie dziennika wywołań MCP",

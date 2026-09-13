@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Entradas mantidas por histórico",
     "maxEntriesDescription": "Quantas entradas o histórico de chamadas de um pedido e o histórico de execuções de um cenário mantêm cada um. As entradas fixadas são sempre mantidas, qualquer que seja este valor. As listas de atividade recente do ecrã inicial não são afetadas."
   },
+  "recording": {
+    "title": "Sessões de gravação",
+    "maxCapturesTitle": "Chamadas capturadas mantidas por sessão",
+    "maxCapturesDescription": "Quantas chamadas capturadas uma sessão de gravação mantém em memória. Atingido o limite, as chamadas mais antigas são eliminadas primeiro. As capturas nunca são guardadas no ficheiro do projeto."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retenção do registo de chamadas MCP",

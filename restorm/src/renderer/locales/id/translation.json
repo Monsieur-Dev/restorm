@@ -2810,6 +2810,11 @@
     "maxEntriesTitle": "Entri yang disimpan per riwayat",
     "maxEntriesDescription": "Berapa banyak entri yang disimpan oleh riwayat panggilan sebuah permintaan dan riwayat eksekusi sebuah skenario. Entri yang disematkan selalu disimpan, berapa pun nilai ini. Daftar aktivitas terbaru di layar beranda tidak terpengaruh."
   },
+  "recording": {
+    "title": "Sesi perekaman",
+    "maxCapturesTitle": "Panggilan yang ditangkap disimpan per sesi",
+    "maxCapturesDescription": "Berapa banyak panggilan yang ditangkap disimpan di memori oleh sesi perekaman. Setelah batas tercapai, panggilan terlama dihapus terlebih dahulu. Tangkapan tidak pernah disimpan ke berkas proyek."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retensi log panggilan MCP",

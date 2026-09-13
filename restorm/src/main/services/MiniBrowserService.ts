@@ -154,6 +154,17 @@ class MiniBrowserService {
 	}
 
 	/**
+	 * The web contents behind a Mini-Browser tab, for a caller that needs
+	 * to observe it (the recording engine attaches its CDP debugger here).
+	 * `null` when the tab has no view (never created, or destroyed).
+	 */
+	getWebContents(tabId: string): Electron.WebContents | null {
+		const state = this.views.get(tabId)
+		if (!state || state.view.webContents.isDestroyed()) return null
+		return state.view.webContents
+	}
+
+	/**
 	 * Move the view to a different owner window. Used when the user
 	 * detaches the tab into a new window (the cross-group drag inside
 	 * the same window doesn't touch this — `setBounds` covers that).

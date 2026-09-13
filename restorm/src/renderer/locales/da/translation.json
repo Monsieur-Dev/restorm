@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Poster gemt pr. historik",
     "maxEntriesDescription": "Hvor mange poster opkaldshistorikken for en anmodning og kørselshistorikken for et scenarie hver gemmer. Fastgjorte poster gemmes altid, uanset denne værdi. Listerne over seneste aktivitet på startskærmen påvirkes ikke."
   },
+  "recording": {
+    "title": "Optagelsessessioner",
+    "maxCapturesTitle": "Opsamlede kald gemt pr. session",
+    "maxCapturesDescription": "Hvor mange opsamlede kald en optagelsessession holder i hukommelsen. Når grænsen er nået, fjernes de ældste kald først. Optagelser gemmes aldrig i projektfilen."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Opbevaring af MCP-kaldlog",

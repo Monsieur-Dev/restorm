@@ -6,6 +6,7 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
+import { registerRecordingIpc } from './services/recording/recordingIpc'
 import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { attachDraftStoreForFile } from './FileOperations'
@@ -1923,6 +1924,10 @@ export function registerRestormIPC(deps: {
   validatedHandle('miniBrowser:capture', miniBrowserCaptureArgs, async (_event, [tabId]) => {
     return await miniBrowserService.capturePage(tabId)
   })
+
+  // Recording sessions — capture engine commands + live pushes. See
+  // `services/recording/recordingIpc.ts`.
+  registerRecordingIpc()
 
   validatedHandle('import:import', importImportArgs, async (_event, [input]) => {
     logger.info('[IPC] Import requested:', { input })

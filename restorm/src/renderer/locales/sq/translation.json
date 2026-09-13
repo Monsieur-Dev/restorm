@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Hyrjet e ruajtura për çdo historik",
     "maxEntriesDescription": "Sa hyrje ruajnë historiku i thirrjeve të një kërkese dhe historiku i ekzekutimeve të një skenari. Hyrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë. Listat e aktivitetit të fundit në ekranin kryesor nuk preken."
   },
+  "recording": {
+    "title": "Sesionet e regjistrimit",
+    "maxCapturesTitle": "Thirrjet e kapura që ruhen për sesion",
+    "maxCapturesDescription": "Sa thirrje të kapura ruan në memorie një sesion regjistrimi. Pasi arrihet kufiri, thirrjet më të vjetra hiqen të parat. Kapjet nuk ruhen kurrë në skedarin e projektit."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Ruajtja e regjistrit të thirrjeve MCP",

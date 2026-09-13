@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus } from '../../shared/types/recordingCapture'
 import { cloneForEventBus } from '../../shared/utils/cloneForEventBus'
 // Import from core-ui preload modules using relative paths
 // This works in both dev and prod because:
@@ -815,6 +816,72 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Clear all context data (when file is closed) */
     clearAll: async (): Promise<void> => {
       await ipcRenderer.invoke('context:clear-all')
+    }
+  },
+  recording: {
+    /** Start capturing the network traffic of a Mini-Browser tab for a
+     * recording session. The tab's view must exist (`miniBrowser.create`). */
+    start: async (sessionId: string, tabId: string, url: string, config: RecordingFilterConfig): Promise<{ ok: true; status: RecordingStatus } | { ok: false; error: string }> => {
+      return await ipcRenderer.invoke('recording:start', sessionId, tabId, url, config) as { ok: true; status: RecordingStatus } | { ok: false; error: string }
+    },
+    stop: async (sessionId: string): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:stop', sessionId) as RecordingStatus
+    },
+    /** Pause = keep listening, store nothing; resume picks up instantly. */
+    setPaused: async (sessionId: string, paused: boolean): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:set-paused', sessionId, paused) as RecordingStatus
+    },
+    status: async (sessionId: string): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:status', sessionId) as RecordingStatus
+    },
+    /** Light rows only — headers, bodies and frames come with `get`. */
+    list: async (sessionId: string): Promise<RecordedCallSummary[]> => {
+      return await ipcRenderer.invoke('recording:list', sessionId) as RecordedCallSummary[]
+    },
+    runs: async (sessionId: string): Promise<RecordingRun[]> => {
+      return await ipcRenderer.invoke('recording:runs', sessionId) as RecordingRun[]
+    },
+    get: async (sessionId: string, captureId: string): Promise<RecordedCallDetail | null> => {
+      return await ipcRenderer.invoke('recording:get', sessionId, captureId) as RecordedCallDetail | null
+    },
+    clearRun: async (sessionId: string, runId: string): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:clear-run', sessionId, runId) as { removed: string[] }
+    },
+    remove: async (sessionId: string, ids: string[]): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:remove', sessionId, ids) as { removed: string[] }
+    },
+    /** Live update of the gate for the NEXT calls. */
+    setFilters: async (sessionId: string, config: RecordingFilterConfig): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('recording:set-filters', sessionId, config) as { ok: boolean }
+    },
+    /** Destructive: drop the stored calls the current lists would refuse. */
+    applyFilters: async (sessionId: string): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:apply-filters', sessionId) as { removed: string[] }
+    },
+    onCaptureAdded: (callback: (summary: RecordedCallSummary) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, summary: RecordedCallSummary): void => { callback(summary) }
+      ipcRenderer.on('recording:capture-added', handler)
+      return () => { ipcRenderer.removeListener('recording:capture-added', handler) }
+    },
+    onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, summary: RecordedCallSummary): void => { callback(summary) }
+      ipcRenderer.on('recording:capture-updated', handler)
+      return () => { ipcRenderer.removeListener('recording:capture-updated', handler) }
+    },
+    onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { sessionId: string; ids: string[] }): void => { callback(payload) }
+      ipcRenderer.on('recording:captures-removed', handler)
+      return () => { ipcRenderer.removeListener('recording:captures-removed', handler) }
+    },
+    onRunChanged: (callback: (run: RecordingRun) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, run: RecordingRun): void => { callback(run) }
+      ipcRenderer.on('recording:run-changed', handler)
+      return () => { ipcRenderer.removeListener('recording:run-changed', handler) }
+    },
+    onStatusChanged: (callback: (status: RecordingStatus) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, status: RecordingStatus): void => { callback(status) }
+      ipcRenderer.on('recording:status-changed', handler)
+      return () => { ipcRenderer.removeListener('recording:status-changed', handler) }
     }
   },
   miniBrowser: {

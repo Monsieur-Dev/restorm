@@ -2810,6 +2810,11 @@
     "maxEntriesTitle": "每個歷史記錄保留的項目數",
     "maxEntriesDescription": "請求的呼叫歷史記錄和情境的執行歷史記錄各自保留的項目數。已釘選的項目一律保留，與此值無關。主畫面的近期活動清單不受影響。"
   },
+  "recording": {
+    "title": "錄製工作階段",
+    "maxCapturesTitle": "每個工作階段保留的已擷取呼叫數",
+    "maxCapturesDescription": "錄製工作階段在記憶體中保留的已擷取呼叫數量。達到上限後，最早的呼叫會優先被捨棄。擷取內容永遠不會儲存到專案檔中。"
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 呼叫記錄保留",

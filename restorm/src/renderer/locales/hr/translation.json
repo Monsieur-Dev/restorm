@@ -2812,6 +2812,11 @@
     "maxEntriesTitle": "Zadržani unosi po povijesti",
     "maxEntriesDescription": "Koliko unosa zadržavaju povijest poziva zahtjeva i povijest izvođenja scenarija. Prikvačeni unosi uvijek se zadržavaju, bez obzira na ovu vrijednost. Popisi nedavne aktivnosti na početnom zaslonu nisu obuhvaćeni."
   },
+  "recording": {
+    "title": "Sesije snimanja",
+    "maxCapturesTitle": "Zabilježeni pozivi zadržani po sesiji",
+    "maxCapturesDescription": "Koliko zabilježenih poziva sesija snimanja zadržava u memoriji. Nakon dosezanja ograničenja najstariji se pozivi uklanjaju prvi. Snimke se nikada ne spremaju u datoteku projekta."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Zadržavanje zapisa MCP poziva",

@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Entries kept per history",
     "maxEntriesDescription": "How many entries the request call history and the scenario run history each keep. Pinned entries are always kept, whatever this is set to. The home screen's recent-activity lists are not affected."
   },
+  "recording": {
+    "title": "Recording sessions",
+    "maxCapturesTitle": "Captured calls kept per session",
+    "maxCapturesDescription": "How many captured calls a recording session keeps in memory. Once the cap is reached, the oldest calls are dropped first. Captures are never saved in the project file."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP call-log retention",

@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Pro Verlauf aufbewahrte Einträge",
     "maxEntriesDescription": "Wie viele Einträge der Aufrufverlauf einer Anfrage und der Ausführungsverlauf eines Szenarios jeweils behalten. Angeheftete Einträge bleiben unabhängig von diesem Wert immer erhalten. Die Listen der letzten Aktivitäten auf der Startseite sind nicht betroffen."
   },
+  "recording": {
+    "title": "Aufnahmesitzungen",
+    "maxCapturesTitle": "Erfasste Aufrufe pro Sitzung",
+    "maxCapturesDescription": "Wie viele erfasste Aufrufe eine Aufnahmesitzung im Speicher behält. Ist die Obergrenze erreicht, werden die ältesten Aufrufe zuerst verworfen. Aufzeichnungen werden nie in der Projektdatei gespeichert."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Aufbewahrung des MCP-Aufrufprotokolls",

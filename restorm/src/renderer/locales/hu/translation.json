@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Előzményenként megőrzött bejegyzések",
     "maxEntriesDescription": "Hány bejegyzést őriz meg egy kérés hívási előzménye és egy forgatókönyv futtatási előzménye. A rögzített bejegyzések ettől az értéktől függetlenül mindig megmaradnak. A kezdőképernyő legutóbbi tevékenységeit tartalmazó listákat ez nem érinti."
   },
+  "recording": {
+    "title": "Felvételi munkamenetek",
+    "maxCapturesTitle": "Munkamenetenként megőrzött rögzített hívások",
+    "maxCapturesDescription": "Hány rögzített hívást tart meg a memóriában egy felvételi munkamenet. A korlát elérése után először a legrégebbi hívások törlődnek. A felvételek soha nem kerülnek a projektfájlba."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP-hívásnapló megőrzése",

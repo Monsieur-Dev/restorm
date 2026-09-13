@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Entrées conservées par historique",
     "maxEntriesDescription": "Nombre d'entrées conservées dans l'historique des appels d'une requête et dans l'historique des exécutions d'un scénario. Les entrées épinglées sont toujours conservées, quelle que soit cette valeur. Les listes d'activité récente de l'accueil ne sont pas concernées."
   },
+  "recording": {
+    "title": "Sessions d’enregistrement",
+    "maxCapturesTitle": "Appels capturés conservés par session",
+    "maxCapturesDescription": "Nombre d’appels capturés qu’une session d’enregistrement garde en mémoire. Une fois le plafond atteint, les appels les plus anciens sont supprimés en premier. Les captures ne sont jamais enregistrées dans le fichier du projet."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Rétention du journal d’appels MCP",

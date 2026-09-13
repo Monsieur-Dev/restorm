@@ -80,6 +80,22 @@ groups:
             min: 1
             max: 1000
             integer: true
+  - id: "recording"
+    titleKey: "recording.title"
+    items:
+      # Captures are runtime data held in the main process only — never in the
+      # project file — so this cap bounds memory, not disk. Per session; the
+      # oldest calls go first.
+      - setting:
+          id: "maxCaptures"
+          titleKey: "recording.maxCapturesTitle"
+          descriptionKey: "recording.maxCapturesDescription"
+          type: "number"
+          default: 1000
+          params:
+            min: 10
+            max: 100000
+            integer: true
   - id: "mcp"
     titleKey: "mcp.title"
     items:

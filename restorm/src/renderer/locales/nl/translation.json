@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Bewaarde items per geschiedenis",
     "maxEntriesDescription": "Hoeveel items de aanroepgeschiedenis van een verzoek en de uitvoeringsgeschiedenis van een scenario elk bewaren. Vastgezette items blijven altijd bewaard, ongeacht deze waarde. De lijsten met recente activiteit op het startscherm worden niet beïnvloed."
   },
+  "recording": {
+    "title": "Opnamesessies",
+    "maxCapturesTitle": "Vastgelegde aanroepen bewaard per sessie",
+    "maxCapturesDescription": "Hoeveel vastgelegde aanroepen een opnamesessie in het geheugen bewaart. Zodra de limiet is bereikt, worden de oudste aanroepen eerst verwijderd. Opnamen worden nooit in het projectbestand opgeslagen."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Bewaring van MCP-aanroeplogboek",

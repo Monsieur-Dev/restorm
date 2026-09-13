@@ -15,6 +15,7 @@ import type {
   GitState
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus } from '../../../shared/types/recordingCapture'
 import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
 import type { DesignIssueView } from '../../../shared/design/describeDesignIssue'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
@@ -272,6 +273,24 @@ declare global {
         onCodeSnippetsUpdated: (callback: (result: CodeSnippetsResult) => void) => (() => void)
         onAvailableVariables: (callback: (result: AvailableVariablesResult) => void) => (() => void)
         clearAll: () => Promise<void>
+      }
+      recording: {
+        start: (sessionId: string, tabId: string, url: string, config: RecordingFilterConfig) => Promise<{ ok: true; status: RecordingStatus } | { ok: false; error: string }>
+        stop: (sessionId: string) => Promise<RecordingStatus>
+        setPaused: (sessionId: string, paused: boolean) => Promise<RecordingStatus>
+        status: (sessionId: string) => Promise<RecordingStatus>
+        list: (sessionId: string) => Promise<RecordedCallSummary[]>
+        runs: (sessionId: string) => Promise<RecordingRun[]>
+        get: (sessionId: string, captureId: string) => Promise<RecordedCallDetail | null>
+        clearRun: (sessionId: string, runId: string) => Promise<{ removed: string[] }>
+        remove: (sessionId: string, ids: string[]) => Promise<{ removed: string[] }>
+        setFilters: (sessionId: string, config: RecordingFilterConfig) => Promise<{ ok: boolean }>
+        applyFilters: (sessionId: string) => Promise<{ removed: string[] }>
+        onCaptureAdded: (callback: (summary: RecordedCallSummary) => void) => (() => void)
+        onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void) => (() => void)
+        onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void) => (() => void)
+        onRunChanged: (callback: (run: RecordingRun) => void) => (() => void)
+        onStatusChanged: (callback: (status: RecordingStatus) => void) => (() => void)
       }
       miniBrowser: {
         create: (tabId: string, initialUrl?: string) => Promise<{ ok: boolean }>

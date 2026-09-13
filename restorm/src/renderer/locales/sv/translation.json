@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Poster som sparas per historik",
     "maxEntriesDescription": "Hur många poster anropshistoriken för en begäran och körhistoriken för ett scenario var för sig sparar. Fästa poster sparas alltid, oavsett detta värde. Listorna över senaste aktivitet på startskärmen påverkas inte."
   },
+  "recording": {
+    "title": "Inspelningssessioner",
+    "maxCapturesTitle": "Infångade anrop som behålls per session",
+    "maxCapturesDescription": "Hur många infångade anrop en inspelningssession behåller i minnet. När gränsen nås tas de äldsta anropen bort först. Inspelningar sparas aldrig i projektfilen."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Lagring av MCP-anropslogg",

@@ -2810,6 +2810,11 @@
     "maxEntriesTitle": "每个历史记录保留的条目数",
     "maxEntriesDescription": "请求的调用历史记录和场景的运行历史记录各自保留的条目数。已固定的条目始终保留，与此值无关。主屏幕的近期活动列表不受影响。"
   },
+  "recording": {
+    "title": "录制会话",
+    "maxCapturesTitle": "每个会话保留的已捕获调用数",
+    "maxCapturesDescription": "录制会话在内存中保留的已捕获调用数量。达到上限后，最早的调用会被优先丢弃。捕获内容永远不会保存到项目文件中。"
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 调用日志保留",

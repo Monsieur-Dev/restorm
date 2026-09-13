@@ -2810,6 +2810,11 @@
     "maxEntriesTitle": "Số mục được giữ trong mỗi lịch sử",
     "maxEntriesDescription": "Số mục mà lịch sử lệnh gọi của một yêu cầu và lịch sử chạy của một kịch bản mỗi loại giữ lại. Các mục đã ghim luôn được giữ lại, bất kể giá trị này. Các danh sách hoạt động gần đây trên màn hình chính không bị ảnh hưởng."
   },
+  "recording": {
+    "title": "Phiên ghi",
+    "maxCapturesTitle": "Số lệnh gọi đã ghi được giữ lại cho mỗi phiên",
+    "maxCapturesDescription": "Số lệnh gọi đã ghi mà một phiên ghi giữ trong bộ nhớ. Khi đạt giới hạn, các lệnh gọi cũ nhất bị loại bỏ trước. Dữ liệu ghi không bao giờ được lưu vào tệp dự án."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Lưu giữ nhật ký lệnh gọi MCP",

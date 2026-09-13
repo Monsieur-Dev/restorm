@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Geçmiş başına saklanan girdiler",
     "maxEntriesDescription": "Bir isteğin çağrı geçmişinin ve bir senaryonun çalıştırma geçmişinin her birinin sakladığı girdi sayısı. Sabitlenen girdiler, bu değerden bağımsız olarak her zaman saklanır. Başlangıç ekranındaki son etkinlik listeleri etkilenmez."
   },
+  "recording": {
+    "title": "Kayıt oturumları",
+    "maxCapturesTitle": "Oturum başına saklanan yakalanan çağrılar",
+    "maxCapturesDescription": "Bir kayıt oturumunun bellekte kaç yakalanan çağrı sakladığı. Sınıra ulaşıldığında önce en eski çağrılar silinir. Yakalamalar hiçbir zaman proje dosyasına kaydedilmez."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP çağrı günlüğü saklama",

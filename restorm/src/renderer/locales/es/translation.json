@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Entradas conservadas por historial",
     "maxEntriesDescription": "Cuántas entradas conservan el historial de llamadas de una solicitud y el historial de ejecuciones de un escenario. Las entradas ancladas se conservan siempre, sea cual sea este valor. Las listas de actividad reciente de la pantalla de inicio no se ven afectadas."
   },
+  "recording": {
+    "title": "Sesiones de grabación",
+    "maxCapturesTitle": "Llamadas capturadas conservadas por sesión",
+    "maxCapturesDescription": "Cuántas llamadas capturadas conserva en memoria una sesión de grabación. Una vez alcanzado el límite, las llamadas más antiguas se descartan primero. Las capturas nunca se guardan en el archivo del proyecto."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retención del registro de llamadas MCP",

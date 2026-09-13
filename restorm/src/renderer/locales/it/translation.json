@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Voci conservate per cronologia",
     "maxEntriesDescription": "Quante voci conservano la cronologia delle chiamate di una richiesta e la cronologia delle esecuzioni di uno scenario. Le voci fissate vengono sempre conservate, indipendentemente da questo valore. Gli elenchi delle attività recenti nella schermata iniziale non sono interessati."
   },
+  "recording": {
+    "title": "Sessioni di registrazione",
+    "maxCapturesTitle": "Chiamate acquisite conservate per sessione",
+    "maxCapturesDescription": "Quante chiamate acquisite una sessione di registrazione conserva in memoria. Raggiunto il limite, le chiamate più vecchie vengono eliminate per prime. Le acquisizioni non vengono mai salvate nel file del progetto."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Conservazione del log delle chiamate MCP",

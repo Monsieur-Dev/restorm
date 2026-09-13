@@ -93,6 +93,8 @@ import { existsSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs
 import { spawn, execFile } from 'node:child_process'
 import { searchIndexService, contextService, apiDesignValidationService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService, updateService } from './services'
 import { activateHistoryRetention, applyHistoryRetentionNow } from './services/historyRetention'
+import { activateRecordingRetention } from './services/recording/recordingRetention'
+import { recordingCaptureEngine } from './services/recording/RecordingCaptureEngine'
 import { armSecretsSidecarWatcher, disarmSecretsSidecarWatcher } from './services/secretsSidecarWatcher'
 import { registerUpdateIpc } from './ipc/updateHandlers'
 import { registerCliTokenIpc } from './ipc/cliTokenHandlers'
@@ -849,6 +851,9 @@ void app.whenReady().then(() => {
 // Layer A's `onBeforeRequest` callbacks don't leave Chromium
 // requests hanging while the app is being torn down.
 app.on('before-quit', () => {
+  // Detach every recording debugger so a mini-browser being torn down does
+  // not fire CDP events into a store that is going away.
+  recordingCaptureEngine.stopAll()
   permissionService.denyAllPending()
   // Flush any pending persistent cookies to disk before the process exits, so
   // the last edits within the debounce window aren't lost on quit.
@@ -1021,6 +1026,7 @@ void app.whenReady().then(() => {
 // stored — the exact behaviour the setting is expected to have.
 void app.whenReady().then(() => {
   activateHistoryRetention()
+  activateRecordingRetention()
   logger.info('History retention listeners activated')
 })
 

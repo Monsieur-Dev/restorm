@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Säilytettävät merkinnät historiaa kohden",
     "maxEntriesDescription": "Kuinka monta merkintää pyynnön kutsuhistoria ja skenaarion suoritushistoria kumpikin säilyttävät. Kiinnitetyt merkinnät säilytetään aina tästä arvosta riippumatta. Aloitusnäytön viimeaikaisen toiminnan luettelot eivät muutu."
   },
+  "recording": {
+    "title": "Tallennusistunnot",
+    "maxCapturesTitle": "Istuntoa kohden säilytettävät kaapatut kutsut",
+    "maxCapturesDescription": "Kuinka monta kaapattua kutsua tallennusistunto säilyttää muistissa. Kun raja on saavutettu, vanhimmat kutsut poistetaan ensin. Kaappauksia ei koskaan tallenneta projektitiedostoon."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP-kutsulokin säilytys",

@@ -2811,6 +2811,11 @@
     "maxEntriesTitle": "Oppføringer som beholdes per historikk",
     "maxEntriesDescription": "Hvor mange oppføringer kallhistorikken for en forespørsel og kjørehistorikken for et scenario hver beholder. Festede oppføringer beholdes alltid, uansett denne verdien. Listene over nylig aktivitet på startskjermen påvirkes ikke."
   },
+  "recording": {
+    "title": "Opptakssesjoner",
+    "maxCapturesTitle": "Fangede kall beholdt per sesjon",
+    "maxCapturesDescription": "Hvor mange fangede kall en opptakssesjon holder i minnet. Når grensen er nådd, fjernes de eldste kallene først. Opptak lagres aldri i prosjektfilen."
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Oppbevaring av MCP-kallogg",
