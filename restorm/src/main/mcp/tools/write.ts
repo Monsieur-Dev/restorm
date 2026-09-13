@@ -406,6 +406,13 @@ export function registerWriteTools(mcp: McpService): void {
       const newParentId = typeof newParentIdRaw === 'string' && newParentIdRaw.length > 0 ? newParentIdRaw : undefined
       const indexRaw = argRecord['index']
       const index = typeof indexRaw === 'number' ? indexRaw : undefined
+      // The sidebar's placement rules: nothing is dropped INTO a recording
+      // session (its routes are deduced, not moved in), and a session never
+      // lives inside a scenario.
+      const moved = collectionStore.findById(itemId)
+      const destination = newParentId !== undefined ? collectionStore.findById(newParentId) : null
+      if (destination && isRecordingSession(destination)) return errorReply(`newParentId ${newParentId ?? ''} is a recording session — its routes are deduced from the captures, items are not moved into it`)
+      if (moved && isRecordingSession(moved) && destination && isScenario(destination)) return errorReply('a recording session cannot live inside a scenario')
       const result = collectionStore.moveItem(itemId, newParentId, index)
       if (!result.ok) return errorReply(result.error)
       broadcastTreeReplace()

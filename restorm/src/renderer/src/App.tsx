@@ -2430,12 +2430,17 @@ const App: React.FC = () => {
   // request prefilled from its last successful call and given the calls as
   // its response history (the reference one pinned). Then the Routes node
   // opens on the result.
+  const deducingSessionsRef = useRef(new Set<string>())
   const handleDeduceRecordingRoutes = useCallback((sessionId: string): void => {
     const api = window.restorm?.recording
     if (!api) return
+    // One deduction at a time per session: a second click while the first
+    // is still reading captures would merge twice over the same items.
+    if (deducingSessionsRef.current.has(sessionId)) return
     const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
     if (!item || !isRecordingSession(item)) return
     const session = item
+    deducingSessionsRef.current.add(sessionId)
     void (async () => {
       const captures = await api.list(sessionId)
       const tree = deduceRoutes(captures)
@@ -2463,7 +2468,7 @@ const App: React.FC = () => {
       openRecordingTab(session, 'routes', breadcrumbs, { temporary: false })
     })().catch((error: unknown) => {
       logger.error('[App] Route deduction failed', { sessionId, error: String(error) })
-    })
+    }).finally(() => { deducingSessionsRef.current.delete(sessionId) })
   }, [rootItems, setRootItems, setExpandedIds, openRecordingTab])
 
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).

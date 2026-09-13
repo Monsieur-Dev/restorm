@@ -102,4 +102,29 @@ describe('materializeDeducedTree — deduced routes as real tree items', () => {
     expect(request && isRequest(request) && request.type === 'graphql' ? { query: request.query, name: request.operationName, vars: request.variables } : null)
       .toEqual({ query: 'query Pets($n: Int) { pets(first: $n) { id } }', name: 'Pets', vars: JSON.stringify({ n: 2 }, null, 2) })
   })
+
+  it('merges on what identifies a route per protocol: GraphQL operation, WebSocket message type, gRPC service + method', () => {
+    const endpoint = 'http://localhost:8080/graphql'
+    const pets: CaptureSummary = { id: 'g1', protocol: 'graphql', timestamp: 1, method: 'POST', url: endpoint, status: 200, graphql: { operationType: 'query', operationName: 'Pets' } }
+    const addPet: CaptureSummary = { id: 'g2', protocol: 'graphql', timestamp: 2, method: 'POST', url: endpoint, status: 200, graphql: { operationType: 'mutation', operationName: 'AddPet' } }
+    const chat: CaptureSummary = { id: 'w1', protocol: 'websocket', timestamp: 3, method: 'WS', url: 'ws://localhost:8080/socket', status: 101, websocket: { messageType: 'chat' } }
+    const presence: CaptureSummary = { id: 'w2', protocol: 'websocket', timestamp: 4, method: 'WS', url: 'ws://localhost:8080/socket', status: 101, websocket: { messageType: 'presence' } }
+    const list: CaptureSummary = { id: 'r1', protocol: 'grpc-web', timestamp: 5, method: 'POST', url: 'http://localhost:8080/pets.PetService/ListPets', status: 200, grpc: { service: 'pets.PetService', method: 'ListPets' } }
+    const get: CaptureSummary = { id: 'r2', protocol: 'grpc-web', timestamp: 6, method: 'POST', url: 'http://localhost:8080/pets.PetService/GetPet', status: 200, grpc: { service: 'pets.PetService', method: 'GetPet' } }
+    const captures = [pets, addPet, chat, presence, list, get]
+    const references = new Map(captures.map((c) => {
+      const body = c.protocol === 'graphql' ? JSON.stringify({ query: `${c.graphql?.operationType ?? ''} ${c.graphql?.operationName ?? ''} { id }` }) : null
+      const frames = c.protocol === 'websocket' ? [{ direction: 'sent' as const, timestamp: c.timestamp, opcode: 1, payload: JSON.stringify({ type: c.websocket?.messageType }) }] : undefined
+      return [c.id, { ...detail(c, body), ...(frames !== undefined ? { websocketFrames: frames } : {}) }]
+    }))
+    const first = materializeDeducedTree(deduceRoutes(captures), references, undefined, newId)
+    // Two operations on one endpoint, two message types on one socket, two
+    // methods of one service: six requests, not three.
+    expect(first.summary).toMatchObject({ routes: 6, newRoutes: 6 })
+    // Deducing again over the same calls adds nothing — every route matches
+    // the request it produced, gRPC included (its url is the origin only).
+    const again = materializeDeducedTree(deduceRoutes(captures), references, first.items, newId)
+    expect(again.summary).toMatchObject({ routes: 6, newRoutes: 0 })
+    expect(again.created).toEqual([])
+  })
 })

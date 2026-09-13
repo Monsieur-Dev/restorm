@@ -672,6 +672,38 @@ class SearchIndexService {
       })
     )
 
+    // Recording sessions: the session document + its deduced routes follow
+    // the same create / update (re-walk) / delete pattern as designs — a
+    // deduction is an update of the session (its `items` grew).
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.RECORDING_CREATED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_CREATED', { id: payload.id })
+        if (isRecordingData(payload.document)) {
+          const ancestry = designAncestry(payload.id)
+          indexRecordingRecursively(payload.document, ancestry.path, ancestry.names)
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.RECORDING_UPDATED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_UPDATED', { id: payload.id })
+        if (isRecordingData(payload.document)) {
+          const ancestry = designAncestry(payload.id)
+          indexRecordingRecursively(payload.document, ancestry.path, ancestry.names)
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.RECORDING_DELETED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_DELETED', { id: payload.id })
+        // The event carries no document: drop whatever is indexed under it.
+        searchService.removeDocument(payload.id)
+        publishIndexUpdate('removed', payload.id, 'recording')
+      })
+    )
+
     this.initialized = true
     logger.info('[SearchIndexService] Initialized successfully')
   }

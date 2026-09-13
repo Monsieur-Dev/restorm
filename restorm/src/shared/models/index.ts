@@ -38,9 +38,11 @@ export function isEnvironmentFolder(item: BaseFolderItem | FolderItem): item is 
   )
 }
 
-/** Type guard: check if item is a Folder (but not an EnvironmentFolder) */
+/** Type guard: check if item is a Folder (but not an EnvironmentFolder).
+ *  A recording session carries `items` too once its routes are deduced: it
+ *  is a container, not a folder — the guard must not mistake it for one. */
 export function isFolder(item: BaseFolderItem | FolderItem): item is Folder {
-  return (item instanceof Folder || 'items' in item) && !isEnvironmentFolder(item)
+  return (item instanceof Folder || 'items' in item) && !isEnvironmentFolder(item) && !isRecordingSession(item)
 }
 
 /** Type guard: check if item is any kind of folder */

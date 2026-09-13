@@ -26,6 +26,11 @@ export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ se
   // view); it reads the LIVE session through a ref synced after each render.
   const sessionRef = useRef(session)
   useEffect(() => { sessionRef.current = session }, [session])
+  // Same for the stop callback: an inline arrow from the parent changes on
+  // every render, and a driver that followed it would re-create the view
+  // (reload + focus steal) at each click anywhere in the app.
+  const onStopRef = useRef(onStop)
+  useEffect(() => { onStopRef.current = onStop }, [onStop])
   const startedRef = useRef(false)
 
   const driver = useMemo<MiniBrowserDriver>(() => ({
@@ -40,7 +45,14 @@ export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ se
         // The view started loading the page before the engine attached: reload
         // it now, so the calls the page makes while loading (and a WebSocket
         // it opens at load — only reported at connection time) are captured.
-        if (started?.ok === true) await miniBrowserDriver.reload(viewTabId)
+        if (started?.ok === true) {
+          await miniBrowserDriver.reload(viewTabId)
+        } else {
+          // Nothing is recording: close the browser tab again so the Record
+          // button starts from scratch instead of finding a tab it cannot re-arm.
+          startedRef.current = false
+          onStopRef.current(live.id)
+        }
       }
       return created
     }

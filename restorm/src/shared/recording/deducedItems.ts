@@ -15,7 +15,7 @@ import type { RecordingProtocol } from '../types/recordingSession'
 import type { RecordedCallDetail } from '../types/recordingCapture'
 import type { DeducedFolder, DeducedRoute, DeducedTree } from './routeDeduction'
 import { createTypedKeyValue } from '../utils/createTypedKeyValue'
-import { graphqlOperationOf, headerValue } from './classifyCapture'
+import { graphqlOperationOf, headerValue, websocketMessageTypeOf } from './classifyCapture'
 import { isAnyFolder, isRequest } from '../types/folderTypes'
 
 /** What the history step needs per created request. */
@@ -71,10 +71,30 @@ function requestKey(protocol: string, method: string, url: string): string {
   return `${protocol}|${method.toUpperCase()}|${url}`
 }
 
+/** The identity a deduced route is merged on: what makes two calls "the same
+ *  request" for each protocol — the operation for GraphQL, the message type
+ *  for WebSocket, the service + method for gRPC-web, the method for HTTP. */
+function routeKey(route: DeducedRoute): string {
+  switch (route.protocol) {
+    case 'graphql': return requestKey('graphql', `${route.graphql?.operationType ?? 'query'}:${route.graphql?.operationName ?? ''}`, route.url)
+    case 'websocket': return requestKey('websocket', `WS:${route.websocket?.messageType ?? ''}`, route.url)
+    case 'grpc-web': return requestKey('grpc-web', 'POST', `${route.origin}/${route.grpc?.service ?? ''}/${route.grpc?.method ?? ''}`)
+    default: return requestKey(route.protocol, route.method, route.url)
+  }
+}
+
+/** The same identity read back from an existing (possibly edited) request. */
 function existingRequestKey(item: Request): string {
-  const protocol = item.type === 'grpc' ? 'grpc-web' : item.type
-  const method = item.type === 'http' ? item.method : item.type === 'websocket' ? 'WS' : 'POST'
-  return requestKey(protocol, method, item.url)
+  switch (item.type) {
+    case 'graphql': {
+      const op = graphqlOperationOf(item.query, item.operationName ?? null) ?? { operationType: item.operationType, operationName: item.operationName ?? null }
+      return requestKey('graphql', `${op.operationType}:${op.operationName ?? ''}`, item.url)
+    }
+    case 'websocket': return requestKey('websocket', `WS:${websocketMessageTypeOf(item.message) ?? ''}`, item.url)
+    case 'grpc': return requestKey('grpc-web', 'POST', `${item.url}/${item.service}/${item.method}`)
+    case 'http': return requestKey('http', item.method, item.url)
+    default: return requestKey(item.type, 'POST', item.url)
+  }
 }
 
 function newHttpRequest(route: DeducedRoute, reference: RecordedCallDetail | undefined, id: string): HTTPRequest {
@@ -142,7 +162,11 @@ function newGrpcRequest(route: DeducedRoute, reference: RecordedCallDetail | und
 }
 
 function newWebSocketRequest(route: DeducedRoute, reference: RecordedCallDetail | undefined, id: string): WebSocketRequest {
-  const firstSent = reference?.websocketFrames?.find((f) => f.direction === 'sent' && f.opcode === 1)
+  // The prefilled message is the frame of the route's own message type (the
+  // identity a later deduction merges on), else the first text frame sent.
+  const sent = reference?.websocketFrames?.filter((f) => f.direction === 'sent' && f.opcode === 1) ?? []
+  const type = route.websocket?.messageType ?? null
+  const firstSent = (type !== null ? sent.find((f) => websocketMessageTypeOf(f.payload) === type) : undefined) ?? sent[0]
   return {
     type: 'websocket',
     id,
@@ -189,7 +213,7 @@ export function materializeDeducedTree(
   const place = (container: FolderItem[], parentId: string | null, folder: DeducedFolder | DeducedTree, announce: boolean): void => {
     for (const route of folder.routes) {
       routes += 1
-      const key = requestKey(route.protocol, route.method, route.url)
+      const key = routeKey(route)
       const already = container.find((item): item is Request => isRequest(item) && existingRequestKey(item) === key)
       if (already) continue
       newRoutes += 1

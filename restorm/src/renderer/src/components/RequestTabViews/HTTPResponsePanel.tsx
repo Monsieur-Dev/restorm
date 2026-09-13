@@ -11,7 +11,7 @@ import type { OperationDocumentation } from '../../../../shared/types/apiDocumen
 import { ResponseInfoStatusCodeTooltip } from '../documentation/StatusCodeTooltip'
 import { statusCodeColor } from '../documentation/statusCodeColor'
 import { ResponseBodyViewer } from './ResponseBodyViewer'
-import { formatBytes } from './responseBody'
+import { classifyResponseBody, formatBytes } from './responseBody'
 
 const flexRowStyle: CSSProperties = { display: 'flex', gap: 8 }
 const boldLabelStyle: CSSProperties = { fontWeight: 600 }
@@ -290,7 +290,9 @@ export function buildHttpResponseViewData(
   // The body: an always-present Download button + a viewer picked from the
   // Content-Type (image / video / audio / markdown / code editor / binary
   // notice). Shared with the history and the recording capture pane.
-  const responseContent = response ? (
+  // A response without a body (204, an error page with nothing to show…)
+  // keeps no Response tab, so the Infos tab stays the landing tab.
+  const responseContent = response && classifyResponseBody(response).kind !== 'empty' ? (
     <ResponseBodyViewer response={response} t={labels?.t ?? i18n.t} />
   ) : null
 

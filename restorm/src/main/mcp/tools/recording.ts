@@ -265,7 +265,7 @@ export function registerRecordingTools(mcp: McpService): void {
         'the page `url` (http, https or file) and optionally the `protocols` to capture (default: all of ' +
         'http, websocket, graphql, grpc-web) and regex `whitelist` / `blacklist` filters on the called ' +
         'urls (a call is kept when it matches at least one whitelist entry — or the list is empty — and ' +
-        'no blacklist entry). `parentId` places it under a folder, env-folder or scenario; omit for the ' +
+        'no blacklist entry). `parentId` places it under a folder or env-folder (never a scenario); omit for the ' +
         'root. Then `start_recording`, drive the page, `stop_recording`, and `deduce_recording_routes`. ' +
         'Returns the session summary (see `list_recording_sessions`).',
       inputSchema: {
@@ -284,8 +284,10 @@ export function registerRecordingTools(mcp: McpService): void {
       const parentId = stringArg(args, 'parentId')
       if (parentId !== null) {
         const parent = collectionStore.findById(parentId)
-        if (!parent || (!isAnyFolder(parent) && !isScenario(parent))) {
-          return errorReply(`parentId ${parentId} doesn't point at a folder, env-folder or scenario`)
+        // Same placement rule as the sidebar's Add menu: a session lives at
+        // the root, in a folder or in an env folder — never inside a scenario.
+        if (!parent || !isAnyFolder(parent)) {
+          return errorReply(`parentId ${parentId} doesn't point at a folder or env-folder (a recording session cannot live inside a scenario)`)
         }
       }
       const url = typeof args['url'] === 'string' ? args['url'] : ''
