@@ -60,7 +60,8 @@ describe('a recording session row', () => {
     expect(row.isExpandable).toBe(true)
     expect(row.isExpanded).toBe(true)
     expect(row.children?.map((c) => c.id)).toEqual([recordingNodeRowId('rec-1', 'captures'), recordingNodeRowId('rec-1', 'routes')])
-    expect(row.children?.every((c) => c.draggable === false)).toBe(true)
+    // Draggable onto the workbench (side-by-side open), never moved in the tree.
+    expect(row.children?.every((c) => c.draggable === true)).toBe(true)
   })
 
   it('hangs the deduced routes under the routes row', () => {

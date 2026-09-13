@@ -717,3 +717,48 @@ When('I click the capture {string}', async ({}, route: string) => {
   await row.click()
   await p.waitForTimeout(300)
 })
+
+// ── Drag a node row onto the workbench ───────────────────────────────
+
+const LIST_VIEW_DRAG_MIME = 'application/x-listview-item'
+
+/** Manual HTML5 DnD sequence sharing one DataTransfer with the ListView
+ *  payload, released at a relative position of the target — Playwright's
+ *  mouse drag is unreliable for HTML5 DnD under xvfb. */
+async function dragRowIdToTarget(p: Page, itemId: string, targetSelector: string, relX: number, relY: number): Promise<void> {
+  await p.locator(targetSelector).first().waitFor({ state: 'visible', timeout: 10000 })
+  await p.evaluate(({ itemId, targetSelector, relX, relY, mime }) => {
+    const target = document.querySelector(targetSelector)
+    if (!target) throw new Error(`drop target not found: ${targetSelector}`)
+    const rect = target.getBoundingClientRect()
+    const clientX = Math.round(rect.left + rect.width * relX)
+    const clientY = Math.round(rect.top + rect.height * relY)
+    const dt = new DataTransfer()
+    dt.setData('text/plain', itemId)
+    dt.setData(mime, itemId)
+    const fire = (type: string): void => {
+      const ev = new DragEvent(type, { bubbles: true, cancelable: true, clientX, clientY })
+      Object.defineProperty(ev, 'dataTransfer', { value: dt })
+      target.dispatchEvent(ev)
+    }
+    fire('dragenter')
+    fire('dragover')
+    fire('drop')
+  }, { itemId, targetSelector, relX, relY, mime: LIST_VIEW_DRAG_MIME })
+  await p.waitForTimeout(400)
+}
+
+Then('the workbench has {int} editor group', async ({}, count: number) => {
+  await expect(requirePage().locator('.editor-group-container')).toHaveCount(count, { timeout: 5000 })
+})
+
+Then('the workbench has {int} editor groups', async ({}, count: number) => {
+  await expect(requirePage().locator('.editor-group-container')).toHaveCount(count, { timeout: 5000 })
+})
+
+When('I drag the session {string} row onto the open tab {string} edge', async ({}, kind: string, edge: string) => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  const rel = edge === 'right' ? { x: 0.95, y: 0.5 } : edge === 'left' ? { x: 0.05, y: 0.5 } : edge === 'top' ? { x: 0.5, y: 0.05 } : { x: 0.5, y: 0.95 }
+  await dragRowIdToTarget(p, nodeRowId(id, kind), '.editor-group-content-placeholder', rel.x, rel.y)
+})

@@ -406,7 +406,10 @@ function recordingSessionToListViewItem(
       id: rowId,
       title: label,
       icon: toListViewIcon(node.icon, ''),
-      draggable: false,
+      // Draggable onto the WORKBENCH (open the node's tab beside another),
+      // never re-parented or reordered: the sidebar's drop check refuses a
+      // node row as source or target.
+      draggable: true,
       ...(isRoutes && routes.length > 0
         ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: routes }
         : {})

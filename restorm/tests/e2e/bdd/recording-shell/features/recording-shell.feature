@@ -23,6 +23,15 @@ Feature: Recording session sidebar nodes and tabs
     When I click the session row
     Then the recording "config" tab is open
 
+  Scenario: A node row drags onto the workbench to open its tab side by side
+    Given a project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    And I click the session row
+    Then the workbench has 1 editor group
+    When I drag the session "captures" row onto the open tab "right" edge
+    Then the workbench has 2 editor groups
+    And the recording "captures" tab is open
+
   Scenario: A scenario's Add menu offers no recording session
     Given a project with an env folder is open
     When I add a scenario from the env folder's context menu

@@ -124,7 +124,10 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const base: React.CSSProperties = {
 			position: 'absolute',
 			inset: 0,
-			zIndex: 10,
+			// Above a SCOPED modal (`.ecu-modal-overlay[data-scoped]`, z 50) that
+			// an editor may keep open inside its tab: the split zones must stay
+			// visible over it, or a drag onto that tab looks dead.
+			zIndex: 60,
 			// Only start intercepting events when an editor tab is being dragged
 			pointerEvents: splitTarget && isEditorDrag ? 'auto' : 'none',
 			backgroundColor: 'rgba(0, 0, 0, 0.40)',

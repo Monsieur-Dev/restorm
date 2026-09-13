@@ -53,7 +53,7 @@ import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
 import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
 import { RecordingSession as RecordingSessionClass } from '../../shared/models/RecordingSession'
-import { recordingTabId, recordingNodeRowId } from '../../shared/recording/recordingSections'
+import { recordingTabId, recordingNodeRowId, parseRecordingNodeRowId } from '../../shared/recording/recordingSections'
 import { deduceRoutes, flattenRoutes } from '../../shared/recording/routeDeduction'
 import { materializeDeducedTree } from '../../shared/recording/deducedItems'
 import type { RecordedCallDetail } from '../../shared/types/recordingCapture'
@@ -3867,9 +3867,9 @@ const App: React.FC = () => {
     const itemId = event.dataTransfer?.getData('text/plain')
     if (!itemId) return
     // Only open items that exist in the tree (request / folder / env-folder
-    // / scenario). Unknown ids (a foreign drag that happened to carry our
-    // marker MIME) are ignored.
-    if (!resolveBoundItem(itemId)) return
+    // / scenario…) or a recording session's node rows. Unknown ids (a foreign
+    // drag that happened to carry our marker MIME) are ignored.
+    if (!resolveBoundItem(itemId) && parseRecordingNodeRowId(itemId) === null) return
     openItemAtSplit(itemId, targetGroupId, direction)
   }, [resolveBoundItem, openItemAtSplit])
 

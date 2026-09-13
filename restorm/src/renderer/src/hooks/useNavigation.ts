@@ -474,9 +474,18 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // dropped it there). No navigation-service event: a split drop is a
   // layout gesture, not a back/forward-history navigation.
   const openItemAtSplit = useCallback((itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => {
+    const placement = { targetGroupId, zone }
+    // A recording node row (browser / captures / routes) is virtual: it opens
+    // that node's tab at the drop placement — side by side with the session.
+    const recordingNode = parseRecordingNodeRowId(itemId)
+    if (recordingNode !== null) {
+      const session = findItemWithBreadcrumbs(rootItems, recordingNode.sessionId)
+      if (!session.item || !isRecordingSession(session.item)) return
+      openRecordingTab(session.item, recordingNode.kind, session.breadcrumbs, { placement })
+      return
+    }
     const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
-    const placement = { targetGroupId, zone }
 
     if (isEnvironmentFolder(item)) {
       openEnvironmentFolderTab(item, breadcrumbs, { placement })

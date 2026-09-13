@@ -106,6 +106,8 @@ A pinned tab and the special/singleton tabs are never temporary. The temporary f
 
 Each tab's content (`renderTabContent(tab)`) is rendered **exactly once**, by `EditorWorkbench`, into a stable per-tab detached host `<div>` — *above* the split-pane group tree. Each `EditorGroupView` only renders an empty slot per tab; the host node is relocated into the current slot (or the fullscreen modal body) with `appendChild`.
 
+The split-positioning overlay a drag lights over a group (`-group-<id>-overlay`) sits at `z-index: 60`: above a **scoped** [`Modal`](../Modal/README.md) (`data-scoped`, z 50) an editor may keep open inside its tab, so the split zones stay visible over it, and below the viewport-level modals (z 10000).
+
 The consequence consumers can rely on: a tab keeps its **single React instance** — and therefore all of its state (an in-flight HTTP response, unsaved edits, scroll position, sub-tab selection) — when it is **moved between groups**, dragged to a split, or maximized / restored. None of those is a remount.
 
 The host node carries a `data-tab-host-id="{tabId}"` attribute — a stable hook for debugging or for asserting in tests that a tab kept its instance across a relocation.
