@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Opnamesessie"
       },
       "cut": "Knippen",
       "copy": "Kopiëren",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Opnamesessies",
     "maxCapturesTitle": "Vastgelegde aanroepen bewaard per sessie",
-    "maxCapturesDescription": "Hoeveel vastgelegde aanroepen een opnamesessie in het geheugen bewaart. Zodra de limiet is bereikt, worden de oudste aanroepen eerst verwijderd. Opnamen worden nooit in het projectbestand opgeslagen."
+    "maxCapturesDescription": "Hoeveel vastgelegde aanroepen een opnamesessie in het geheugen bewaart. Zodra de limiet is bereikt, worden de oudste aanroepen eerst verwijderd. Opnamen worden nooit in het projectbestand opgeslagen.",
+    "newSessionName": "Nieuwe opnamesessie",
+    "node": {
+      "browser": "Browser",
+      "captures": "Opnamen",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Opnamen: {{name}}",
+      "routesTitle": "Routes: {{name}}"
+    },
+    "placeholder": {
+      "config": "De sessie-instellingen (pagina-URL, protocollen, witte en zwarte lijst) verschijnen hier.",
+      "browser": "De opnamebrowser verschijnt hier.",
+      "captures": "Nog geen aanroep vastgelegd. Start een opname vanuit de sessie-instellingen om de aanroepen van de pagina hier te zien verschijnen.",
+      "routes": "Nog geen route afgeleid. Neem enkele aanroepen op en leid daarna de routes af uit de opnamen."
+    }
   },
   "mcp": {
     "title": "MCP",

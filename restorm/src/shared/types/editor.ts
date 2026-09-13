@@ -1,5 +1,6 @@
 import type { EditorTab } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
+import type { RecordingTabNode } from '../recording/recordingSections'
 import type {
   Folder,
   EnvironmentFolder,
@@ -20,7 +21,8 @@ import type {
   KafkaRequest,
   Environment,
   Scenario,
-  ApiDesign
+  ApiDesign,
+  RecordingSession
 } from './collections'
 
 /** Breadcrumb item for navigation */
@@ -215,6 +217,14 @@ export interface DesignTab extends BaseRestormTab {
   design: ApiDesign
 }
 
+/** A recording session opens ONE tab per node: its config (the session row
+ * itself), the live browser, the captures list, the deduced routes. */
+export interface RecordingTab extends BaseRestormTab {
+  tabType: 'recording'
+  session: RecordingSession
+  node: RecordingTabNode
+}
+
 /** Tab displaying the firewall + outgoing-request console.
  * Singleton — there is at most one open at any time, identified
  * by the constant `tabId` `console:singleton`. The tab content
@@ -300,6 +310,7 @@ export type RestormEditorTab =
   | KafkaRequestTab
   | ScenarioEditorTab
   | DesignTab
+  | RecordingTab
   | ConsoleTab
   | FirewallTab
   | MiniBrowserTab
@@ -377,6 +388,10 @@ export function isScenarioEditorTab(tab: RestormEditorTab): tab is ScenarioEdito
 /** Type guard for DesignTab */
 export function isDesignTab(tab: RestormEditorTab): tab is DesignTab {
   return tab.tabType === 'design'
+}
+
+export function isRecordingTab(tab: RestormEditorTab): tab is RecordingTab {
+  return tab.tabType === 'recording'
 }
 
 /** Type guard for GraphQLRequestTab */

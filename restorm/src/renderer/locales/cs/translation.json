@@ -319,7 +319,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Návrh API"
+        "design": "Návrh API",
+        "recording": "Relace nahrávání"
       },
       "cut": "Vyjmout",
       "copy": "Kopírovat",
@@ -2816,7 +2817,24 @@
   "recording": {
     "title": "Relace nahrávání",
     "maxCapturesTitle": "Zachycená volání uchovávaná na relaci",
-    "maxCapturesDescription": "Kolik zachycených volání relace nahrávání uchovává v paměti. Po dosažení limitu jsou nejstarší volání odstraněna jako první. Zachycená data se nikdy neukládají do souboru projektu."
+    "maxCapturesDescription": "Kolik zachycených volání relace nahrávání uchovává v paměti. Po dosažení limitu jsou nejstarší volání odstraněna jako první. Zachycená data se nikdy neukládají do souboru projektu.",
+    "newSessionName": "Nová relace nahrávání",
+    "node": {
+      "browser": "Prohlížeč",
+      "captures": "Zachycená volání",
+      "routes": "Trasy"
+    },
+    "tab": {
+      "browserTitle": "Prohlížeč: {{name}}",
+      "capturesTitle": "Zachycená volání: {{name}}",
+      "routesTitle": "Trasy: {{name}}"
+    },
+    "placeholder": {
+      "config": "Nastavení relace (URL stránky, protokoly, bílá a černá listina) se zobrazí zde.",
+      "browser": "Prohlížeč pro nahrávání se zobrazí zde.",
+      "captures": "Zatím nebylo zachyceno žádné volání. Spusťte nahrávání v nastavení relace a volání stránky se zobrazí zde.",
+      "routes": "Zatím nebyla odvozena žádná trasa. Nahrajte volání a poté odvoďte trasy ze zachycených volání."
+    }
   },
   "mcp": {
     "title": "MCP",

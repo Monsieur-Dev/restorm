@@ -1,0 +1,14 @@
+/* Wrapper that hosts a recording session's badge + its "on air" border-beam.
+ * Same geometry as the scenario running badge: an inline box hugging the
+ * badge, so the absolutely-positioned beam inherits its corner radius. */
+.recording-on-air-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 3px;
+}
+
+/* Paused recording: the beam stays but its lap freezes where it is. */
+.recording-on-air-badge--paused .ecu-border-beam-trail {
+  animation-play-state: paused;
+}

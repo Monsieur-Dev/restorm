@@ -183,6 +183,11 @@ function findItemByIdInTree(container: TreeContainer, id: string): FolderItem | 
 
 /** Find any item (folder or request) by ID across multiple root folders */
 /** Find a design anywhere in the tree by its id. */
+export function findRecordingSessionById(rootItems: FolderItem[], id: string): RecordingSession | undefined {
+  const item = findItemById(rootItems, id)
+  return item !== null && isRecordingSession(item) ? item : undefined
+}
+
 export function findDesignById(rootItems: FolderItem[], id: string): ApiDesign | undefined {
   const item = findItemById(rootItems, id)
   return item !== null && isApiDesign(item) ? item : undefined

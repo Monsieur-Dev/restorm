@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-suunnittelu"
+        "design": "API-suunnittelu",
+        "recording": "Tallennusistunto"
       },
       "cut": "Leikkaa",
       "copy": "Kopioi",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Tallennusistunnot",
     "maxCapturesTitle": "Istuntoa kohden säilytettävät kaapatut kutsut",
-    "maxCapturesDescription": "Kuinka monta kaapattua kutsua tallennusistunto säilyttää muistissa. Kun raja on saavutettu, vanhimmat kutsut poistetaan ensin. Kaappauksia ei koskaan tallenneta projektitiedostoon."
+    "maxCapturesDescription": "Kuinka monta kaapattua kutsua tallennusistunto säilyttää muistissa. Kun raja on saavutettu, vanhimmat kutsut poistetaan ensin. Kaappauksia ei koskaan tallenneta projektitiedostoon.",
+    "newSessionName": "Uusi tallennusistunto",
+    "node": {
+      "browser": "Selain",
+      "captures": "Kaappaukset",
+      "routes": "Reitit"
+    },
+    "tab": {
+      "browserTitle": "Selain: {{name}}",
+      "capturesTitle": "Kaappaukset: {{name}}",
+      "routesTitle": "Reitit: {{name}}"
+    },
+    "placeholder": {
+      "config": "Istunnon asetukset (sivun URL, protokollat, sallittujen ja estettyjen luettelot) näkyvät tässä.",
+      "browser": "Tallennusselain näkyy tässä.",
+      "captures": "Kutsuja ei ole vielä kaapattu. Aloittakaa tallennus istunnon asetuksista, jotta sivun kutsut näkyvät tässä.",
+      "routes": "Reittejä ei ole vielä päätelty. Tallentakaa kutsuja ja päätelkää sitten reitit kaappauksista."
+    }
   },
   "mcp": {
     "title": "MCP",

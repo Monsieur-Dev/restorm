@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-terv"
+        "design": "API-terv",
+        "recording": "Felvételi munkamenet"
       },
       "cut": "Kivágás",
       "copy": "Másolás",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Felvételi munkamenetek",
     "maxCapturesTitle": "Munkamenetenként megőrzött rögzített hívások",
-    "maxCapturesDescription": "Hány rögzített hívást tart meg a memóriában egy felvételi munkamenet. A korlát elérése után először a legrégebbi hívások törlődnek. A felvételek soha nem kerülnek a projektfájlba."
+    "maxCapturesDescription": "Hány rögzített hívást tart meg a memóriában egy felvételi munkamenet. A korlát elérése után először a legrégebbi hívások törlődnek. A felvételek soha nem kerülnek a projektfájlba.",
+    "newSessionName": "Új felvételi munkamenet",
+    "node": {
+      "browser": "Böngésző",
+      "captures": "Rögzítések",
+      "routes": "Útvonalak"
+    },
+    "tab": {
+      "browserTitle": "Böngésző: {{name}}",
+      "capturesTitle": "Rögzítések: {{name}}",
+      "routesTitle": "Útvonalak: {{name}}"
+    },
+    "placeholder": {
+      "config": "A munkamenet beállításai (az oldal URL-je, protokollok, fehér- és feketelista) itt jelennek meg.",
+      "browser": "A felvételi böngésző itt jelenik meg.",
+      "captures": "Még nincs rögzített hívás. Indítson felvételt a munkamenet beállításaiból, hogy az oldal hívásai itt megjelenjenek.",
+      "routes": "Még nincs levezetett útvonal. Rögzítsen hívásokat, majd vezesse le az útvonalakat a rögzítésekből."
+    }
   },
   "mcp": {
     "title": "MCP",

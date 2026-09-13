@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design API"
+        "design": "Design API",
+        "recording": "Sessione di registrazione"
       },
       "cut": "Taglia",
       "copy": "Copia",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Sessioni di registrazione",
     "maxCapturesTitle": "Chiamate acquisite conservate per sessione",
-    "maxCapturesDescription": "Quante chiamate acquisite una sessione di registrazione conserva in memoria. Raggiunto il limite, le chiamate più vecchie vengono eliminate per prime. Le acquisizioni non vengono mai salvate nel file del progetto."
+    "maxCapturesDescription": "Quante chiamate acquisite una sessione di registrazione conserva in memoria. Raggiunto il limite, le chiamate più vecchie vengono eliminate per prime. Le acquisizioni non vengono mai salvate nel file del progetto.",
+    "newSessionName": "Nuova sessione di registrazione",
+    "node": {
+      "browser": "Browser",
+      "captures": "Acquisizioni",
+      "routes": "Route"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Acquisizioni: {{name}}",
+      "routesTitle": "Route: {{name}}"
+    },
+    "placeholder": {
+      "config": "Le impostazioni della sessione (URL della pagina, protocolli, liste bianca e nera) appariranno qui.",
+      "browser": "Il browser di registrazione apparirà qui.",
+      "captures": "Nessuna chiamata acquisita per ora. Avvii una registrazione dalle impostazioni della sessione per vedere qui le chiamate della pagina.",
+      "routes": "Nessuna route dedotta per ora. Registri alcune chiamate, poi deduca le route dalle acquisizioni."
+    }
   },
   "mcp": {
     "title": "MCP",

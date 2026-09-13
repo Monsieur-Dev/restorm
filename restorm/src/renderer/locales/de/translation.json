@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-Design"
+        "design": "API-Design",
+        "recording": "Aufnahmesitzung"
       },
       "cut": "Ausschneiden",
       "copy": "Kopieren",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Aufnahmesitzungen",
     "maxCapturesTitle": "Erfasste Aufrufe pro Sitzung",
-    "maxCapturesDescription": "Wie viele erfasste Aufrufe eine Aufnahmesitzung im Speicher behält. Ist die Obergrenze erreicht, werden die ältesten Aufrufe zuerst verworfen. Aufzeichnungen werden nie in der Projektdatei gespeichert."
+    "maxCapturesDescription": "Wie viele erfasste Aufrufe eine Aufnahmesitzung im Speicher behält. Ist die Obergrenze erreicht, werden die ältesten Aufrufe zuerst verworfen. Aufzeichnungen werden nie in der Projektdatei gespeichert.",
+    "newSessionName": "Neue Aufnahmesitzung",
+    "node": {
+      "browser": "Browser",
+      "captures": "Aufzeichnungen",
+      "routes": "Routen"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Aufzeichnungen: {{name}}",
+      "routesTitle": "Routen: {{name}}"
+    },
+    "placeholder": {
+      "config": "Die Einstellungen der Sitzung (Seiten-URL, Protokolle, Positiv- und Negativliste) erscheinen hier.",
+      "browser": "Der Aufnahme-Browser erscheint hier.",
+      "captures": "Noch kein Aufruf erfasst. Starten Sie eine Aufnahme in den Sitzungseinstellungen, damit die Aufrufe der Seite hier erscheinen.",
+      "routes": "Noch keine Route abgeleitet. Erfassen Sie Aufrufe und leiten Sie anschließend die Routen aus den Aufzeichnungen ab."
+    }
   },
   "mcp": {
     "title": "MCP",

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Opptakssesjon"
       },
       "cut": "Klipp ut",
       "copy": "Kopier",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Opptakssesjoner",
     "maxCapturesTitle": "Fangede kall beholdt per sesjon",
-    "maxCapturesDescription": "Hvor mange fangede kall en opptakssesjon holder i minnet. Når grensen er nådd, fjernes de eldste kallene først. Opptak lagres aldri i prosjektfilen."
+    "maxCapturesDescription": "Hvor mange fangede kall en opptakssesjon holder i minnet. Når grensen er nådd, fjernes de eldste kallene først. Opptak lagres aldri i prosjektfilen.",
+    "newSessionName": "Ny opptakssesjon",
+    "node": {
+      "browser": "Nettleser",
+      "captures": "Opptak",
+      "routes": "Ruter"
+    },
+    "tab": {
+      "browserTitle": "Nettleser: {{name}}",
+      "capturesTitle": "Opptak: {{name}}",
+      "routesTitle": "Ruter: {{name}}"
+    },
+    "placeholder": {
+      "config": "Sesjonsinnstillingene (sidens URL, protokoller, hvite- og svarteliste) vises her.",
+      "browser": "Opptaksnettleseren vises her.",
+      "captures": "Ingen kall er fanget ennå. Start et opptak fra sesjonsinnstillingene for å se sidens kall her.",
+      "routes": "Ingen ruter er utledet ennå. Ta opp noen kall, og utled deretter rutene fra opptakene."
+    }
   },
   "mcp": {
     "title": "MCP",

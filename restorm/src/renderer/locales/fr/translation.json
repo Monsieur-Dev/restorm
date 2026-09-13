@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design d'API"
+        "design": "Design d'API",
+        "recording": "Session d’enregistrement"
       },
       "cut": "Couper",
       "copy": "Copier",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Sessions d’enregistrement",
     "maxCapturesTitle": "Appels capturés conservés par session",
-    "maxCapturesDescription": "Nombre d’appels capturés qu’une session d’enregistrement garde en mémoire. Une fois le plafond atteint, les appels les plus anciens sont supprimés en premier. Les captures ne sont jamais enregistrées dans le fichier du projet."
+    "maxCapturesDescription": "Nombre d’appels capturés qu’une session d’enregistrement garde en mémoire. Une fois le plafond atteint, les appels les plus anciens sont supprimés en premier. Les captures ne sont jamais enregistrées dans le fichier du projet.",
+    "newSessionName": "Nouvelle session d’enregistrement",
+    "node": {
+      "browser": "Navigateur",
+      "captures": "Captures",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Navigateur : {{name}}",
+      "capturesTitle": "Captures : {{name}}",
+      "routesTitle": "Routes : {{name}}"
+    },
+    "placeholder": {
+      "config": "Les paramètres de la session (url de la page, protocoles, listes blanche et noire) apparaîtront ici.",
+      "browser": "Le navigateur d’enregistrement apparaîtra ici.",
+      "captures": "Aucun appel capturé pour le moment. Lancez un enregistrement depuis les paramètres de la session pour voir apparaître ici les appels de la page.",
+      "routes": "Aucune route déduite pour le moment. Enregistrez des appels, puis déduisez les routes à partir des captures."
+    }
   },
   "mcp": {
     "title": "MCP",

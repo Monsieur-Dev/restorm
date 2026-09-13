@@ -8,7 +8,10 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, AmqpRequest, Scenario, Environment, Request, ApiDesign, RecordingSession } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isAmqpRequest, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import { SIDEBAR_DESIGN_SECTIONS, DESIGN_CODICON, designSectionRowId } from '../../../shared/design/designSections'
-import { RECORDING_CODICON } from '../../../shared/recording/recordingSections'
+import { RECORDING_NODES, recordingNodeRowId } from '../../../shared/recording/recordingSections'
+import { RegistryBadge } from '../components/common/RegistryBadge'
+import { RecordingOnAirBadge } from '../components/common/RecordingOnAirBadge'
+import { getRecordingStatus, primeRecordingStatus } from './recordingStatusStore'
 import { getDesignClients, designClientRowId } from './designClientsStore'
 import { designSectionChildren, designSectionRowMenu, type DesignEntityActionHandler } from './designSidebarNodes'
 import { validateApiDesignCached } from '../../../shared/design/validateApiDesign'
@@ -370,23 +373,51 @@ function scenarioToListViewItem(
 }
 
 /**
- * Convert a recording session to a ListViewItemData. The session row
- * carries the `record` codicon; its deduced routes (`items`) are shown as
- * ordinary children. (The live browser / captures / routes virtual rows
- * arrive with the recording sidebar work.)
+ * Convert a recording session to a ListViewItemData: the session row (its
+ * "on air" badge beams while it records) plus its VIRTUAL node rows —
+ * browser (only while recording), captures (always), routes (always last,
+ * hanging the deduced routes = `session.items`, real items). The node rows
+ * are not tree items: their ids parse via `parseRecordingNodeRowId`, a
+ * click opens the node's own tab, and drag & drop refuses them.
  */
 function recordingSessionToListViewItem(
   session: RecordingSession,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  const isExpanded = options.expandedIds.has(session.id)
-  const children = (session.items ?? []).map((item) => folderItemToListViewItem(item, options))
+  primeRecordingStatus(session.id)
+  const status = getRecordingStatus(session.id)
+  const badge = React.createElement(
+    RecordingOnAirBadge,
+    { sessionId: session.id },
+    React.createElement(RegistryBadge, { badgeId: 'recording' })
+  )
+  const routes = (session.items ?? []).map((item) => folderItemToListViewItem(item, options))
+  const children: ListViewItemData[] = RECORDING_NODES.flatMap((node) => {
+    if (node.key === 'browser' && status.state === 'idle') return []
+    const rowId = recordingNodeRowId(session.id, node.key)
+    const isRoutes = node.key === 'routes'
+    const isCaptures = node.key === 'captures'
+    const label: ReactNode = isCaptures && status.captureCount > 0
+      ? React.createElement(React.Fragment, null,
+        i18n.t(node.labelKey),
+        React.createElement('span', { className: 'design-section-count' }, ` (${status.captureCount})`))
+      : i18n.t(node.labelKey)
+    return [{
+      id: rowId,
+      title: label,
+      icon: toListViewIcon(node.icon, ''),
+      draggable: false,
+      ...(isRoutes && routes.length > 0
+        ? { isExpandable: true, isExpanded: options.expandedIds.has(rowId), children: routes }
+        : {})
+    }]
+  })
   return {
     id: session.id,
     title: session.name,
-    isExpandable: children.length > 0,
-    isExpanded,
-    icon: RECORDING_CODICON,
+    isExpandable: true,
+    isExpanded: options.expandedIds.has(session.id),
+    icon: badge,
     children
   }
 }
@@ -687,7 +718,15 @@ export function collectExpandableIds(item: FolderItem): string[] {
   }
   // A scenario is a container too, but it carries `type:'scenario'` and an
   // optional `items` — branch it first (an empty scenario isn't expandable).
-  if (isScenario(item) || isRecordingSession(item)) {
+  // A recording session expands into its virtual node rows — always
+  // expandable; the routes row expands further when routes were deduced.
+  if (isRecordingSession(item)) {
+    const children = childItemsOf(item)
+    return children.length > 0
+      ? [item.id, recordingNodeRowId(item.id, 'routes'), ...children.flatMap(collectExpandableIds)]
+      : [item.id]
+  }
+  if (isScenario(item)) {
     const children = childItemsOf(item)
     return children.length > 0 ? [item.id, ...children.flatMap(collectExpandableIds)] : []
   }

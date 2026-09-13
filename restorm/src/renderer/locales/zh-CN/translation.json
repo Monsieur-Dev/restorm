@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API 设计"
+        "design": "API 设计",
+        "recording": "录制会话"
       },
       "cut": "剪切",
       "copy": "复制",
@@ -2813,7 +2814,24 @@
   "recording": {
     "title": "录制会话",
     "maxCapturesTitle": "每个会话保留的已捕获调用数",
-    "maxCapturesDescription": "录制会话在内存中保留的已捕获调用数量。达到上限后，最早的调用会被优先丢弃。捕获内容永远不会保存到项目文件中。"
+    "maxCapturesDescription": "录制会话在内存中保留的已捕获调用数量。达到上限后，最早的调用会被优先丢弃。捕获内容永远不会保存到项目文件中。",
+    "newSessionName": "新建录制会话",
+    "node": {
+      "browser": "浏览器",
+      "captures": "捕获",
+      "routes": "路由"
+    },
+    "tab": {
+      "browserTitle": "浏览器：{{name}}",
+      "capturesTitle": "捕获：{{name}}",
+      "routesTitle": "路由：{{name}}"
+    },
+    "placeholder": {
+      "config": "会话设置（页面 URL、协议、白名单和黑名单）将显示在此处。",
+      "browser": "录制浏览器将显示在此处。",
+      "captures": "尚未捕获任何调用。请在会话设置中开始录制，页面的调用便会显示在此处。",
+      "routes": "尚未推导出任何路由。请先录制一些调用，然后从捕获中推导路由。"
+    }
   },
   "mcp": {
     "title": "MCP",

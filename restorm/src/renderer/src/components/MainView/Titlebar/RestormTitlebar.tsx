@@ -54,6 +54,7 @@ function searchResultDragData(result: SearchResult): Record<string, string> | un
     // A design ENTITY result drags as its owning design (entities are
     // not tree items).
     nav?.['type'] === 'design' ? nav['designId'] :
+    nav?.['type'] === 'recording' ? nav['recordingId'] :
     undefined
   if (typeof id !== 'string' || id.length === 0) return undefined
   return { 'text/plain': id, [LIST_VIEW_DRAG_MIME]: id }

@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Desain API"
+        "design": "Desain API",
+        "recording": "Sesi perekaman"
       },
       "cut": "Potong",
       "copy": "Salin",
@@ -2813,7 +2814,24 @@
   "recording": {
     "title": "Sesi perekaman",
     "maxCapturesTitle": "Panggilan yang ditangkap disimpan per sesi",
-    "maxCapturesDescription": "Berapa banyak panggilan yang ditangkap disimpan di memori oleh sesi perekaman. Setelah batas tercapai, panggilan terlama dihapus terlebih dahulu. Tangkapan tidak pernah disimpan ke berkas proyek."
+    "maxCapturesDescription": "Berapa banyak panggilan yang ditangkap disimpan di memori oleh sesi perekaman. Setelah batas tercapai, panggilan terlama dihapus terlebih dahulu. Tangkapan tidak pernah disimpan ke berkas proyek.",
+    "newSessionName": "Sesi perekaman baru",
+    "node": {
+      "browser": "Peramban",
+      "captures": "Tangkapan",
+      "routes": "Rute"
+    },
+    "tab": {
+      "browserTitle": "Peramban: {{name}}",
+      "capturesTitle": "Tangkapan: {{name}}",
+      "routesTitle": "Rute: {{name}}"
+    },
+    "placeholder": {
+      "config": "Pengaturan sesi (URL halaman, protokol, daftar putih dan hitam) akan muncul di sini.",
+      "browser": "Peramban perekaman akan muncul di sini.",
+      "captures": "Belum ada panggilan yang ditangkap. Mulai perekaman dari pengaturan sesi agar panggilan halaman muncul di sini.",
+      "routes": "Belum ada rute yang disimpulkan. Rekam beberapa panggilan, lalu simpulkan rute dari tangkapan."
+    }
   },
   "mcp": {
     "title": "MCP",

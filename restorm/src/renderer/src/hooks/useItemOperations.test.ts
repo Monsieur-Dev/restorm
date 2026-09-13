@@ -168,6 +168,7 @@ describe('useItemOperations.handleCloneItem', () => {
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab: vi.fn(),
     openDesignTab: vi.fn(),
+    openRecordingTab: vi.fn(),
     projectUuid: 'project-1'
   })
 
@@ -218,6 +219,7 @@ describe('useItemOperations.handleItemDrop', () => {
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab: vi.fn(),
     openDesignTab: vi.fn(),
+    openRecordingTab: vi.fn(),
     projectUuid: 'project-1'
   })
 
@@ -328,6 +330,7 @@ describe('useItemOperations.handleSidebarItemRename', () => {
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab: vi.fn(),
     openDesignTab: vi.fn(),
+    openRecordingTab: vi.fn(),
     projectUuid: 'project-1'
   })
 
@@ -423,6 +426,7 @@ describe('useItemOperations.confirmDelete', () => {
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab: vi.fn(),
     openDesignTab: vi.fn(),
+    openRecordingTab: vi.fn(),
     projectUuid: 'project-1'
   })
 
@@ -525,6 +529,7 @@ describe('inline rename on creation', () => {
     openEnvironmentFolderTab: vi.fn(),
     openAnyRequestTab: vi.fn(),
     openDesignTab: vi.fn(),
+    openRecordingTab: vi.fn(),
     projectUuid: 'project-1'
   })
 

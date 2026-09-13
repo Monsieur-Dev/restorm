@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API 디자인"
+        "design": "API 디자인",
+        "recording": "기록 세션"
       },
       "cut": "잘라내기",
       "copy": "복사",
@@ -2813,7 +2814,24 @@
   "recording": {
     "title": "기록 세션",
     "maxCapturesTitle": "세션별로 보관하는 기록된 호출 수",
-    "maxCapturesDescription": "기록 세션이 메모리에 보관하는 기록된 호출의 수입니다. 상한에 도달하면 가장 오래된 호출부터 삭제됩니다. 기록 내용은 프로젝트 파일에 저장되지 않습니다."
+    "maxCapturesDescription": "기록 세션이 메모리에 보관하는 기록된 호출의 수입니다. 상한에 도달하면 가장 오래된 호출부터 삭제됩니다. 기록 내용은 프로젝트 파일에 저장되지 않습니다.",
+    "newSessionName": "새 기록 세션",
+    "node": {
+      "browser": "브라우저",
+      "captures": "캡처",
+      "routes": "경로"
+    },
+    "tab": {
+      "browserTitle": "브라우저: {{name}}",
+      "capturesTitle": "캡처: {{name}}",
+      "routesTitle": "경로: {{name}}"
+    },
+    "placeholder": {
+      "config": "세션 설정(페이지 URL, 프로토콜, 허용 목록과 차단 목록)이 여기에 표시됩니다.",
+      "browser": "기록 브라우저가 여기에 표시됩니다.",
+      "captures": "아직 기록된 호출이 없습니다. 세션 설정에서 기록을 시작하면 페이지의 호출이 여기에 표시됩니다.",
+      "routes": "아직 추론된 경로가 없습니다. 호출을 기록한 뒤 캡처에서 경로를 추론하십시오."
+    }
   },
   "mcp": {
     "title": "MCP",

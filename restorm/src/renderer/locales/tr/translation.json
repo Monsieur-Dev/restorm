@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API tasarımı"
+        "design": "API tasarımı",
+        "recording": "Kayıt oturumu"
       },
       "cut": "Kes",
       "copy": "Kopyala",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Kayıt oturumları",
     "maxCapturesTitle": "Oturum başına saklanan yakalanan çağrılar",
-    "maxCapturesDescription": "Bir kayıt oturumunun bellekte kaç yakalanan çağrı sakladığı. Sınıra ulaşıldığında önce en eski çağrılar silinir. Yakalamalar hiçbir zaman proje dosyasına kaydedilmez."
+    "maxCapturesDescription": "Bir kayıt oturumunun bellekte kaç yakalanan çağrı sakladığı. Sınıra ulaşıldığında önce en eski çağrılar silinir. Yakalamalar hiçbir zaman proje dosyasına kaydedilmez.",
+    "newSessionName": "Yeni kayıt oturumu",
+    "node": {
+      "browser": "Tarayıcı",
+      "captures": "Yakalamalar",
+      "routes": "Rotalar"
+    },
+    "tab": {
+      "browserTitle": "Tarayıcı: {{name}}",
+      "capturesTitle": "Yakalamalar: {{name}}",
+      "routesTitle": "Rotalar: {{name}}"
+    },
+    "placeholder": {
+      "config": "Oturum ayarları (sayfa URL'si, protokoller, beyaz ve kara listeler) burada görünecektir.",
+      "browser": "Kayıt tarayıcısı burada görünecektir.",
+      "captures": "Henüz yakalanan çağrı yok. Sayfanın çağrılarını burada görmek için oturum ayarlarından bir kayıt başlatınız.",
+      "routes": "Henüz çıkarılan rota yok. Çağrıları kaydediniz, ardından rotaları yakalamalardan çıkarınız."
+    }
   },
   "mcp": {
     "title": "MCP",

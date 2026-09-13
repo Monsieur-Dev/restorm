@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Thiết kế API"
+        "design": "Thiết kế API",
+        "recording": "Phiên ghi"
       },
       "cut": "Cắt",
       "copy": "Sao chép",
@@ -2813,7 +2814,24 @@
   "recording": {
     "title": "Phiên ghi",
     "maxCapturesTitle": "Số lệnh gọi đã ghi được giữ lại cho mỗi phiên",
-    "maxCapturesDescription": "Số lệnh gọi đã ghi mà một phiên ghi giữ trong bộ nhớ. Khi đạt giới hạn, các lệnh gọi cũ nhất bị loại bỏ trước. Dữ liệu ghi không bao giờ được lưu vào tệp dự án."
+    "maxCapturesDescription": "Số lệnh gọi đã ghi mà một phiên ghi giữ trong bộ nhớ. Khi đạt giới hạn, các lệnh gọi cũ nhất bị loại bỏ trước. Dữ liệu ghi không bao giờ được lưu vào tệp dự án.",
+    "newSessionName": "Phiên ghi mới",
+    "node": {
+      "browser": "Trình duyệt",
+      "captures": "Bản ghi",
+      "routes": "Tuyến"
+    },
+    "tab": {
+      "browserTitle": "Trình duyệt: {{name}}",
+      "capturesTitle": "Bản ghi: {{name}}",
+      "routesTitle": "Tuyến: {{name}}"
+    },
+    "placeholder": {
+      "config": "Cài đặt của phiên (URL trang, giao thức, danh sách trắng và đen) sẽ xuất hiện ở đây.",
+      "browser": "Trình duyệt ghi sẽ xuất hiện ở đây.",
+      "captures": "Chưa có lệnh gọi nào được ghi. Hãy bắt đầu ghi từ cài đặt của phiên để thấy các lệnh gọi của trang xuất hiện ở đây.",
+      "routes": "Chưa có tuyến nào được suy ra. Hãy ghi một số lệnh gọi, rồi suy ra các tuyến từ các bản ghi."
+    }
   },
   "mcp": {
     "title": "MCP",

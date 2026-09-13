@@ -6,11 +6,14 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewDropPosition, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
-import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
+import type { Environment, Folder, EnvironmentFolder, Request, FolderItem, RecordingSession } from '../../../shared/types/collections'
+import { RECORDING_PROTOCOLS } from '../../../shared/types/collections'
+import { parseRecordingNodeRowId, type RecordingTabNode } from '../../../shared/recording/recordingSections'
 import { isAnyFolder, isScenario, isApiDesign, isRecordingSession, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import { parseDesignSectionRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
 import { assignDesignSection, patchModel, replaceGroup } from '../components/Design/designMutations'
 import { canDropDesignEntity, applyDesignEntityDrop } from '../services/designEntityDrop'
+import { recordingTabTitle } from '../utils/recordingTabTitle'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -34,7 +37,7 @@ import { mapAllWorkbenchTabs, tabBackingItemId, tabReferencesItem } from '../uti
 import { requestTabTitle } from '../../../shared/protocolRegistry'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab, RestormEditorTab } from '../../../shared/types/editor'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem, makeReactiveApiDesign } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveFolderItem, makeReactiveApiDesign, makeReactiveRecordingSession } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -114,6 +117,7 @@ export interface UseItemOperationsOptions {
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
   openDesignTab: (design: import('../../../shared/types/collections').ApiDesign, breadcrumbs: BreadcrumbItem[]) => void
+  openRecordingTab: (session: RecordingSession, node: RecordingTabNode, breadcrumbs: BreadcrumbItem[]) => void
   /** Project UUID. When the deleted subtree contains favorited items,
    * each id is removed from the favorites store under this key. */
   projectUuid: string | null
@@ -262,7 +266,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     projectUuid,
     onStructureChanged
   } = options
-  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab } = options
+  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, openRecordingTab } = options
   const { t } = useTranslation()
 
   // Coherence rules for a (possibly multi-item) sidebar drag. Shared verbatim
@@ -277,6 +281,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // a selection carrying one refuses the drop WHOLESALE (the design
     // itself, a real item, stays draggable).
     if (sourceIds.some((id) => parseDesignSectionRowId(id) !== null)) return false
+    // A recording session's virtual node rows (browser / captures / routes)
+    // never move and never receive a drop.
+    if (sourceIds.some((id) => parseRecordingNodeRowId(id) !== null) || parseRecordingNodeRowId(targetId) !== null) return false
 
     // A design model / enum / route(-group) node can be dragged ONLY within its
     // own design + section — never onto a folder, a request, another design,
@@ -320,11 +327,26 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const intoContainer = position === 'into' && (isAnyFolder(target) || isScenario(target))
     const destinationChainIds = (intoContainer ? breadcrumbs : breadcrumbs.slice(0, -1)).map((bc) => bc.id)
 
+    // The recording session a chain of ancestors passes through, if any.
+    const sessionInChain = (chainIds: string[]): string | null => {
+      for (const chainId of chainIds) {
+        const container = findItemById(rootItems, chainId)
+        if (container && isRecordingSession(container)) return container.id
+      }
+      return null
+    }
+    const destinationSession = sessionInChain(destinationChainIds)
+
     for (const sourceId of sourceIds) {
       const source = findItemById(rootItems, sourceId)
       if (!source) return false
       // A container can never land inside its own subtree.
       if (isDescendant(sourceId, targetId)) return false
+      // A recording session's deduced routes stay inside their session, and
+      // nothing from outside joins them: the destination must pass through
+      // the same session the source lives in (or none, for both).
+      const sourceSession = sessionInChain(findItemWithBreadcrumbs(rootItems, sourceId).breadcrumbs.slice(0, -1).map((bc) => bc.id))
+      if (sourceSession !== destinationSession) return false
       // An ENVIRONMENT FOLDER can only live outside every other environment
       // folder and outside every scenario — checked recursively over the
       // whole destination chain, not just the direct target: dropping one
@@ -341,6 +363,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         for (const chainId of destinationChainIds) {
           const container = findItemById(rootItems, chainId)
           if (container && (isEnvironmentFolder(container) || isScenario(container))) return false
+        }
+      }
+      // A recording session may live at the root, in a folder or in an env
+      // folder — never inside a scenario (checked over the whole chain, and
+      // for a session hidden anywhere in the dragged subtree).
+      const subtreeHasSession = (node: FolderItem): boolean => {
+        if (isRecordingSession(node)) return true
+        if (!('items' in node)) return false
+        return (node.items ?? []).some((child) => subtreeHasSession(child))
+      }
+      if (subtreeHasSession(source)) {
+        for (const chainId of destinationChainIds) {
+          const container = findItemById(rootItems, chainId)
+          if (container && isScenario(container)) return false
         }
       }
     }
@@ -576,12 +612,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openFolderTab(reactiveClone, breadcrumbs)
       } else if (isApiDesign(reactiveClone)) {
         openDesignTab(reactiveClone, breadcrumbs)
+      } else if (isRecordingSession(reactiveClone)) {
+        openRecordingTab(reactiveClone, 'config', breadcrumbs)
       } else if (isRequest(reactiveClone)) {
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         openAnyRequestTab(reactiveClone, breadcrumbs, envs)
       }
     }
-  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab])
+  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, openRecordingTab])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -833,6 +871,14 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         if ('folder' in renamed) {
           return { ...renamed, folder: { ...renamed.folder, name: newName }, title: newName, titleString: newName }
         }
+        if ('session' in renamed) {
+          // Every tab of the session (config + nodes) carries it; only the
+          // config tab is titled by the bare name — the node tabs re-derive
+          // their translated "<Node>: name" title.
+          const session = { ...renamed.session, name: newName }
+          const title = recordingTabTitle(session, renamed.node)
+          return { ...renamed, session, title, titleString: title }
+        }
         if ('scenario' in renamed) {
           return { ...renamed, scenario: { ...renamed.scenario, name: newName }, title: newName, titleString: newName }
         }
@@ -871,6 +917,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
   const defaultNameFor = useCallback((kind: AddChildKind): string => {
     switch (kind) {
       case 'folder': return t('sidebar.newFolder')
+      case 'recording': return t('recording.newSessionName')
       case 'http-get': return 'New GET request'
       case 'http-post': return 'New POST request'
       case 'http-put': return 'New PUT request'
@@ -940,6 +987,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // containers for requests authored inside them).
     const parentIsContainer = !!parent && (isAnyFolder(parent) || isScenario(parent))
     if (!isRoot && !parentIsContainer) return null
+    // A recording session lives at the root, in a folder or in an env folder —
+    // never inside a scenario (its Add menu hides the entry; this is the guard).
+    if (kind === 'recording' && parent !== null && isScenario(parent)) return null
     const parentBreadcrumbs = parentLookup?.breadcrumbs ?? []
     const name = defaultNameFor(kind)
     const id = generateUniqueId()
@@ -970,7 +1020,31 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
     let pushedItem: FolderItem
-    if (kind === 'design') {
+    if (kind === 'recording') {
+      const session: RecordingSession = {
+        type: 'recording',
+        id,
+        name,
+        url: '',
+        protocols: [...RECORDING_PROTOCOLS],
+        whitelist: [],
+        blacklist: []
+      }
+      const sessionParentId = isRoot
+        ? undefined
+        : (parent && isAnyFolder(parent) ? parent.id : undefined)
+      const reactive = sessionParentId !== undefined
+        ? makeReactiveRecordingSession(session, sessionParentId)
+        : makeReactiveRecordingSession(session)
+      mountChild(reactive as unknown as FolderItem)
+      pushedItem = reactive as unknown as FolderItem
+      emitBothBuses(DocumentEvents.RECORDING_CREATED, {
+        id: reactive.id,
+        type: 'recording',
+        document: cloneForEventBus(reactive as unknown as FolderItem),
+        ...(sessionParentId !== undefined ? { parentFolderId: sessionParentId } : {})
+      } as DocumentChangedPayload)
+    } else if (kind === 'design') {
       const design: import('../../../shared/types/collections').ApiDesign = {
         type: 'design',
         id,
@@ -1227,7 +1301,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // A freshly created design is expanded so its Models / Enums / Routes
     // sub-tree is visible right away — matches the from-imported-API path in
     // App (`makeReactiveApiDesign` handler). Its own id, not just the parent's.
-    if (!silent && kind === 'design') {
+    if (!silent && (kind === 'design' || kind === 'recording')) {
       setExpandedIds((prev) => Array.from(new Set([...prev, id])))
     }
     if (!silent) setSelectedItemId(id)
@@ -1246,6 +1320,8 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         openScenarioEditorTab(pushedItem, breadcrumbs)
       } else if (isApiDesign(pushedItem)) {
         openDesignTab(pushedItem, breadcrumbs)
+      } else if (isRecordingSession(pushedItem)) {
+        openRecordingTab(pushedItem, 'config', breadcrumbs)
       } else if (isRequest(pushedItem)) {
         openAnyRequestTab(pushedItem, breadcrumbs, envs)
       }
@@ -1255,7 +1331,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       startInlineRename(id)
     }
     return id
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, openDesignTab, defaultNameFor, startInlineRename])
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, openDesignTab, openRecordingTab, defaultNameFor, startInlineRename])
 
   const handleCreateRootEnvironmentFolder = useCallback(() => {
     const newFolder: EnvironmentFolder = {

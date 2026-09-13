@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design de API"
+        "design": "Design de API",
+        "recording": "Sessão de gravação"
       },
       "cut": "Cortar",
       "copy": "Copiar",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Sessões de gravação",
     "maxCapturesTitle": "Chamadas capturadas mantidas por sessão",
-    "maxCapturesDescription": "Quantas chamadas capturadas uma sessão de gravação mantém em memória. Atingido o limite, as chamadas mais antigas são eliminadas primeiro. As capturas nunca são guardadas no ficheiro do projeto."
+    "maxCapturesDescription": "Quantas chamadas capturadas uma sessão de gravação mantém em memória. Atingido o limite, as chamadas mais antigas são eliminadas primeiro. As capturas nunca são guardadas no ficheiro do projeto.",
+    "newSessionName": "Nova sessão de gravação",
+    "node": {
+      "browser": "Navegador",
+      "captures": "Capturas",
+      "routes": "Rotas"
+    },
+    "tab": {
+      "browserTitle": "Navegador: {{name}}",
+      "capturesTitle": "Capturas: {{name}}",
+      "routesTitle": "Rotas: {{name}}"
+    },
+    "placeholder": {
+      "config": "As definições da sessão (URL da página, protocolos, listas branca e negra) aparecerão aqui.",
+      "browser": "O navegador de gravação aparecerá aqui.",
+      "captures": "Ainda não foi capturada nenhuma chamada. Inicie uma gravação a partir das definições da sessão para ver aqui as chamadas da página.",
+      "routes": "Ainda não foi deduzida nenhuma rota. Grave algumas chamadas e depois deduza as rotas a partir das capturas."
+    }
   },
   "mcp": {
     "title": "MCP",

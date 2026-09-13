@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Inspelningssession"
       },
       "cut": "Klipp ut",
       "copy": "Kopiera",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Inspelningssessioner",
     "maxCapturesTitle": "Infångade anrop som behålls per session",
-    "maxCapturesDescription": "Hur många infångade anrop en inspelningssession behåller i minnet. När gränsen nås tas de äldsta anropen bort först. Inspelningar sparas aldrig i projektfilen."
+    "maxCapturesDescription": "Hur många infångade anrop en inspelningssession behåller i minnet. När gränsen nås tas de äldsta anropen bort först. Inspelningar sparas aldrig i projektfilen.",
+    "newSessionName": "Ny inspelningssession",
+    "node": {
+      "browser": "Webbläsare",
+      "captures": "Inspelningar",
+      "routes": "Rutter"
+    },
+    "tab": {
+      "browserTitle": "Webbläsare: {{name}}",
+      "capturesTitle": "Inspelningar: {{name}}",
+      "routesTitle": "Rutter: {{name}}"
+    },
+    "placeholder": {
+      "config": "Sessionens inställningar (sidans URL, protokoll, vit- och svartlista) visas här.",
+      "browser": "Inspelningswebbläsaren visas här.",
+      "captures": "Inga anrop har fångats ännu. Starta en inspelning från sessionens inställningar för att se sidans anrop här.",
+      "routes": "Inga rutter har härletts ännu. Spela in några anrop och härled sedan rutterna från inspelningarna."
+    }
   },
   "mcp": {
     "title": "MCP",

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Dizajn API"
+        "design": "Dizajn API",
+        "recording": "Sesion regjistrimi"
       },
       "cut": "Pre",
       "copy": "Kopjo",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Sesionet e regjistrimit",
     "maxCapturesTitle": "Thirrjet e kapura që ruhen për sesion",
-    "maxCapturesDescription": "Sa thirrje të kapura ruan në memorie një sesion regjistrimi. Pasi arrihet kufiri, thirrjet më të vjetra hiqen të parat. Kapjet nuk ruhen kurrë në skedarin e projektit."
+    "maxCapturesDescription": "Sa thirrje të kapura ruan në memorie një sesion regjistrimi. Pasi arrihet kufiri, thirrjet më të vjetra hiqen të parat. Kapjet nuk ruhen kurrë në skedarin e projektit.",
+    "newSessionName": "Sesion regjistrimi i ri",
+    "node": {
+      "browser": "Shfletuesi",
+      "captures": "Kapjet",
+      "routes": "Rrugët"
+    },
+    "tab": {
+      "browserTitle": "Shfletuesi: {{name}}",
+      "capturesTitle": "Kapjet: {{name}}",
+      "routesTitle": "Rrugët: {{name}}"
+    },
+    "placeholder": {
+      "config": "Cilësimet e sesionit (URL-ja e faqes, protokollet, lista e bardhë dhe e zezë) do të shfaqen këtu.",
+      "browser": "Shfletuesi i regjistrimit do të shfaqet këtu.",
+      "captures": "Asnjë thirrje nuk është kapur ende. Nisni një regjistrim nga cilësimet e sesionit për të parë këtu thirrjet e faqes.",
+      "routes": "Asnjë rrugë nuk është nxjerrë ende. Regjistroni thirrje dhe më pas nxirrni rrugët nga kapjet."
+    }
   },
   "mcp": {
     "title": "MCP",

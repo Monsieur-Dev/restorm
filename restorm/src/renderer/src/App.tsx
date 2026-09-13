@@ -198,7 +198,7 @@ import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findScenarioById,
-  findDesignById,
+  findDesignById, findRecordingSessionById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
@@ -1332,6 +1332,7 @@ const App: React.FC = () => {
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     promoteTemporaryTab,
@@ -1778,6 +1779,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     openDesignTab,
+    openRecordingTab,
     projectUuid,
     // A moved SCENARIO has no save-unit document of its own, so nothing
     // marks it unsaved. Route it through the same debounced whole-file
@@ -2213,6 +2215,7 @@ const App: React.FC = () => {
     const typeOf = (it: FolderItem): string => {
       if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
       if ((it as { type?: unknown }).type === 'design') return 'design'
+      if ((it as { type?: unknown }).type === 'recording') return 'recording'
       if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
       if ('items' in it) return 'folder'
       return 'request'
@@ -3171,6 +3174,7 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
   const getDesignByIdCb = useCallback((id: string) => findDesignById(rootItems, id), [rootItems])
+  const getRecordingSessionByIdCb = useCallback((id: string) => findRecordingSessionById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -3686,6 +3690,7 @@ const App: React.FC = () => {
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     selectedItemId,
@@ -4018,6 +4023,7 @@ const App: React.FC = () => {
               getFolderById={getFolderByIdCb}
               getScenarioById={getScenarioByIdCb}
               getDesignById={getDesignByIdCb}
+              getRecordingSessionById={getRecordingSessionByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -4108,6 +4114,7 @@ const App: React.FC = () => {
             getFolderById={(id) => findFolderById(rootItems, id)}
             getScenarioById={(id) => findScenarioById(rootItems, id)}
             getDesignById={(id) => findDesignById(rootItems, id)}
+            getRecordingSessionById={(id) => findRecordingSessionById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

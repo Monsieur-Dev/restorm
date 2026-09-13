@@ -318,7 +318,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design API"
+        "design": "Design API",
+        "recording": "Sesiune de înregistrare"
       },
       "cut": "Decupează",
       "copy": "Copiază",
@@ -2815,7 +2816,24 @@
   "recording": {
     "title": "Sesiuni de înregistrare",
     "maxCapturesTitle": "Apeluri capturate păstrate per sesiune",
-    "maxCapturesDescription": "Câte apeluri capturate păstrează în memorie o sesiune de înregistrare. Odată atinsă limita, cele mai vechi apeluri sunt eliminate primele. Capturile nu sunt niciodată salvate în fișierul proiectului."
+    "maxCapturesDescription": "Câte apeluri capturate păstrează în memorie o sesiune de înregistrare. Odată atinsă limita, cele mai vechi apeluri sunt eliminate primele. Capturile nu sunt niciodată salvate în fișierul proiectului.",
+    "newSessionName": "Sesiune de înregistrare nouă",
+    "node": {
+      "browser": "Browser",
+      "captures": "Capturi",
+      "routes": "Rute"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Capturi: {{name}}",
+      "routesTitle": "Rute: {{name}}"
+    },
+    "placeholder": {
+      "config": "Setările sesiunii (URL-ul paginii, protocoalele, listele albă și neagră) vor apărea aici.",
+      "browser": "Browserul de înregistrare va apărea aici.",
+      "captures": "Niciun apel capturat încă. Porniți o înregistrare din setările sesiunii pentru a vedea aici apelurile paginii.",
+      "routes": "Nicio rută dedusă încă. Înregistrați apeluri, apoi deduceți rutele din capturi."
+    }
   },
   "mcp": {
     "title": "MCP",

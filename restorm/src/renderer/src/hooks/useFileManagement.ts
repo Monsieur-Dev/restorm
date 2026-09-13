@@ -20,6 +20,7 @@ import { EnvironmentFolder as EnvironmentFolderClass } from '../../../shared/mod
 import { Environment as EnvironmentClass } from '../../../shared/models/Environment'
 import { KeyValue as KeyValueClass } from '../../../shared/models/KeyValue'
 import { ApiDesign as ApiDesignClass } from '../../../shared/models/ApiDesign'
+import { RecordingSession as RecordingSessionClass } from '../../../shared/models/RecordingSession'
 import { HTTPRequest } from '../../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../../shared/models/requests/GrpcRequest'
@@ -61,6 +62,9 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   // cleansed) as a Folder — a shape the save-unit bridge never produces,
   // so its drafts would never match and the unit would stay dirty.
   if (type === 'design') return ApiDesignClass
+  // A recording session is its own save unit too (its deduced routes are
+  // ordinary child units, walked like a scenario's).
+  if (type === 'recording') return RecordingSessionClass
   // Everything without a `type` discriminator is a folder-like node.
   // Descendants of an EnvironmentFolder are regular Folders; everything
   // under a Folder stays a Folder.

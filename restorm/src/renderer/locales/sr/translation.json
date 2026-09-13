@@ -318,7 +318,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Dizajn API-ja"
+        "design": "Dizajn API-ja",
+        "recording": "Sesija snimanja"
       },
       "cut": "Iseci",
       "copy": "Kopiraj",
@@ -2815,7 +2816,24 @@
   "recording": {
     "title": "Sesije snimanja",
     "maxCapturesTitle": "Zabeleženi pozivi zadržani po sesiji",
-    "maxCapturesDescription": "Koliko zabeleženih poziva sesija snimanja zadržava u memoriji. Kada se dostigne ograničenje, najstariji pozivi se uklanjaju prvi. Snimci se nikada ne čuvaju u datoteci projekta."
+    "maxCapturesDescription": "Koliko zabeleženih poziva sesija snimanja zadržava u memoriji. Kada se dostigne ograničenje, najstariji pozivi se uklanjaju prvi. Snimci se nikada ne čuvaju u datoteci projekta.",
+    "newSessionName": "Nova sesija snimanja",
+    "node": {
+      "browser": "Pregledač",
+      "captures": "Snimci",
+      "routes": "Rute"
+    },
+    "tab": {
+      "browserTitle": "Pregledač: {{name}}",
+      "capturesTitle": "Snimci: {{name}}",
+      "routesTitle": "Rute: {{name}}"
+    },
+    "placeholder": {
+      "config": "Podešavanja sesije (URL stranice, protokoli, bela i crna lista) pojaviće se ovde.",
+      "browser": "Pregledač za snimanje pojaviće se ovde.",
+      "captures": "Još nije zabeležen nijedan poziv. Pokrenite snimanje iz podešavanja sesije da bi se pozivi stranice pojavili ovde.",
+      "routes": "Još nije izvedena nijedna ruta. Snimite pozive, a zatim izvedite rute iz snimaka."
+    }
   },
   "mcp": {
     "title": "MCP",

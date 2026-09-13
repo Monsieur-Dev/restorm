@@ -319,7 +319,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Projekt API"
+        "design": "Projekt API",
+        "recording": "Sesja nagrywania"
       },
       "cut": "Wytnij",
       "copy": "Kopiuj",
@@ -2816,7 +2817,24 @@
   "recording": {
     "title": "Sesje nagrywania",
     "maxCapturesTitle": "Przechwycone wywołania przechowywane na sesję",
-    "maxCapturesDescription": "Ile przechwyconych wywołań sesja nagrywania przechowuje w pamięci. Po osiągnięciu limitu najstarsze wywołania są usuwane w pierwszej kolejności. Przechwycone dane nigdy nie są zapisywane w pliku projektu."
+    "maxCapturesDescription": "Ile przechwyconych wywołań sesja nagrywania przechowuje w pamięci. Po osiągnięciu limitu najstarsze wywołania są usuwane w pierwszej kolejności. Przechwycone dane nigdy nie są zapisywane w pliku projektu.",
+    "newSessionName": "Nowa sesja nagrywania",
+    "node": {
+      "browser": "Przeglądarka",
+      "captures": "Przechwycenia",
+      "routes": "Trasy"
+    },
+    "tab": {
+      "browserTitle": "Przeglądarka: {{name}}",
+      "capturesTitle": "Przechwycenia: {{name}}",
+      "routesTitle": "Trasy: {{name}}"
+    },
+    "placeholder": {
+      "config": "Ustawienia sesji (adres URL strony, protokoły, biała i czarna lista) pojawią się tutaj.",
+      "browser": "Przeglądarka nagrywania pojawi się tutaj.",
+      "captures": "Nie przechwycono jeszcze żadnego wywołania. Proszę rozpocząć nagrywanie w ustawieniach sesji, aby zobaczyć tutaj wywołania strony.",
+      "routes": "Nie wywnioskowano jeszcze żadnej trasy. Proszę nagrać wywołania, a następnie wywnioskować trasy z przechwyceń."
+    }
   },
   "mcp": {
     "title": "MCP",

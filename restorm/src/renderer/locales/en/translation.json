@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API design"
+        "design": "API design",
+        "recording": "Recording session"
       },
       "cut": "Cut",
       "copy": "Copy",
@@ -2814,7 +2815,24 @@
   "recording": {
     "title": "Recording sessions",
     "maxCapturesTitle": "Captured calls kept per session",
-    "maxCapturesDescription": "How many captured calls a recording session keeps in memory. Once the cap is reached, the oldest calls are dropped first. Captures are never saved in the project file."
+    "maxCapturesDescription": "How many captured calls a recording session keeps in memory. Once the cap is reached, the oldest calls are dropped first. Captures are never saved in the project file.",
+    "newSessionName": "New recording session",
+    "node": {
+      "browser": "Browser",
+      "captures": "Captures",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Captures: {{name}}",
+      "routesTitle": "Routes: {{name}}"
+    },
+    "placeholder": {
+      "config": "The session settings (page url, protocols, white and black lists) will appear here.",
+      "browser": "The recording browser will appear here.",
+      "captures": "No call captured yet. Start a recording from the session settings to see the calls of the page appear here.",
+      "routes": "No route deduced yet. Record some calls, then deduce the routes from the captures."
+    }
   },
   "mcp": {
     "title": "MCP",
