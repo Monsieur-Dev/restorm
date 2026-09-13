@@ -32,6 +32,7 @@ import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { GrpcReflectionImportModal } from './GrpcReflectionImportModal'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys, isLargeImport } from './importSelectionHelpers'
+import { prettyPrintedPaste } from './importPaste'
 import { describeImportError, flattenImportError, type DisplayedImportError } from './importErrorDisplay'
 import { describeImportWarning, type DisplayedImportWarning } from './importWarningDisplay'
 import type { ImportWarningDescriptor } from '../../../../shared/config/importWarnings'
@@ -882,6 +883,53 @@ export function ImportModal({
   // field. Never in refresh mode (the URL is read-only).
   const isSplit = !refreshContext && /[\r\n]/.test(input)
 
+  // Focus follows the source field across the single-line ↔ split swap: a
+  // paste that grows the field into the editor, or a clear that shrinks it
+  // back, must not drop the keyboard focus on the body. `sourceFocusedRef`
+  // is kept by capture-phase focus/blur on the scope (a blur is NOT fired
+  // when the focused element unmounts, which is exactly the case we want to
+  // remember); the swap then focuses the control that replaced the old one.
+  const sourceFocusedRef = useRef(false)
+  const sourceInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null)
+  const sourceEditorRef = useRef<{ focus: () => void } | null>(null)
+  const focusEditorWhenMountedRef = useRef(false)
+  const handleSourceFocus = useCallback(() => { sourceFocusedRef.current = true }, [])
+  const handleSourceBlur = useCallback((event: React.FocusEvent<HTMLDivElement>) => {
+    // Focus moving within the scope (Monaco's inner widgets) is not a leave.
+    if (event.currentTarget.contains(event.relatedTarget)) return
+    sourceFocusedRef.current = false
+  }, [])
+  const handleSourceEditorMount = useCallback((editor: { focus: () => void }) => {
+    sourceEditorRef.current = editor
+    if (focusEditorWhenMountedRef.current) {
+      focusEditorWhenMountedRef.current = false
+      editor.focus()
+    }
+  }, [])
+  const wasSplitForFocusRef = useRef(isSplit)
+  useEffect(() => {
+    if (wasSplitForFocusRef.current === isSplit) return
+    wasSplitForFocusRef.current = isSplit
+    if (!sourceFocusedRef.current) return
+    if (isSplit) {
+      // The editor mounts asynchronously (Monaco loader): focus it on mount,
+      // or right away if it is already there.
+      if (sourceEditorRef.current) sourceEditorRef.current.focus()
+      else focusEditorWhenMountedRef.current = true
+    } else {
+      sourceEditorRef.current = null
+      requestAnimationFrame(() => { sourceInputRef.current?.focus() })
+    }
+  }, [isSplit])
+
+  const handleSourcePaste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
+    if (refreshContext) return
+    const pretty = prettyPrintedPaste(input, event.clipboardData.getData('text/plain'))
+    if (pretty === null) return
+    event.preventDefault()
+    handleInputChange(pretty)
+  }, [refreshContext, input, handleInputChange])
+
   // ECUI vertical sash driving the left (text) pane's width. `containerRef`
   // attaches to `.import-modal`; the Sash reads `layoutProvider` for its
   // position and the hook clamps the width so neither pane collapses. Persisted
@@ -958,6 +1006,11 @@ export function ImportModal({
           <label className="import-label">
             {t('import.source.label')}
           </label>
+          {/* A whole JSON document pasted into the empty field lands
+              pretty-printed (so it opens in the split editor readable, not
+              on one line). Capture phase: the InputBox and the Monaco editor
+              both surface the paste from an inner element. */}
+          <div onPasteCapture={handleSourcePaste} onFocusCapture={handleSourceFocus} onBlurCapture={handleSourceBlur} className="import-source-paste-scope">
           {refreshContext ? (
             // Refresh mode: the URL is bound to the env folder's
             // stored apiUpdate config and isn't editable here. Render
@@ -991,12 +1044,14 @@ export function ImportModal({
                 applyEditorSettings={false}
                 options={{ wordWrap: 'off', scrollBeyondLastLine: false }}
                 onChange={(next) => { handleInputChange(next ?? '') }}
+                onEditorMount={handleSourceEditorMount}
               />
             </div>
           ) : (
             <InputBox
               value={input}
               onChange={handleInputChange}
+              inputRef={sourceInputRef}
               options={{
                 placeholder: t('import.source.placeholder'),
                 flexibleHeight: true,
@@ -1005,6 +1060,7 @@ export function ImportModal({
               data-testid="source-input"
             />
           )}
+          </div>
         </div>
         {/* ECUI vertical sash between the source pane and everything else —
             only present in split mode. Positioned by the useVerticalSash
