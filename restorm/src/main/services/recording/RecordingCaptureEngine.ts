@@ -111,8 +111,11 @@ interface PendingCall {
   responseHeaders: CdpHeaders
 }
 
+// Assets and the page's own navigation are not API calls: a `document` is
+// the page (or an iframe) loading — since the recording attaches before the
+// page loads, capturing it would deduce a spurious `GET /` route.
 const SKIPPED_RESOURCE_TYPES = new Set([
-  'script', 'stylesheet', 'image', 'font', 'media', 'manifest', 'texttrack', 'prefetch', 'signedexchange', 'cspviolationreport', 'preflight'
+  'document', 'script', 'stylesheet', 'image', 'font', 'media', 'manifest', 'texttrack', 'prefetch', 'signedexchange', 'cspviolationreport', 'preflight'
 ])
 
 const RESOURCE_TYPES: ReadonlySet<CaptureResourceType> = new Set<CaptureResourceType>([

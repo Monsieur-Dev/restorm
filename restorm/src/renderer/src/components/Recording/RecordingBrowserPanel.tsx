@@ -35,7 +35,12 @@ export const RecordingBrowserPanel: React.FC<RecordingBrowserPanelProps> = ({ se
       if (!startedRef.current && takePendingRecordingStart(sessionRef.current.id)) {
         startedRef.current = true
         const live = sessionRef.current
-        await window.restorm?.recording.start(live.id, viewTabId, initialUrl ?? live.url, recordingFilterConfigOf(live))
+        const url = initialUrl ?? live.url
+        const started = await window.restorm?.recording.start(live.id, viewTabId, url, recordingFilterConfigOf(live))
+        // The view started loading the page before the engine attached: reload
+        // it now, so the calls the page makes while loading (and a WebSocket
+        // it opens at load — only reported at connection time) are captured.
+        if (started?.ok === true) await miniBrowserDriver.reload(viewTabId)
       }
       return created
     }

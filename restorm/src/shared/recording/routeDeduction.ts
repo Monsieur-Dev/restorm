@@ -419,7 +419,6 @@ function segmentValueAt(capture: CaptureSummary, index: number): string | null {
 }
 
 interface EmitContext {
-  origin: string
   options: ResolvedOptions
 }
 
@@ -442,13 +441,14 @@ function emitRoutes(node: TrieNode, segments: PathSegment[], folder: DeducedFold
     const first = captures[0]
     if (first === undefined) continue
     const protocol = first.protocol
+    const origin = originOf(first)
     const route: DeducedRoute = {
-      key: `${protocol}|${methodKey}|${ctx.origin}${template}`,
+      key: `${protocol}|${methodKey}|${origin}${template}`,
       protocol,
       method: first.method.toUpperCase(),
-      origin: ctx.origin,
+      origin,
       template,
-      url: ctx.origin + template,
+      url: origin + template,
       segments,
       pathParams,
       queryParams: queryParamsOf(captures, lastSuccess),
@@ -523,7 +523,7 @@ function pruneEmpty(folder: DeducedFolder): boolean {
 // gRPC-web
 // ---------------------------------------------------------------------------
 
-function emitGrpc(captures: CaptureSummary[], root: DeducedFolder, origin: string): void {
+function emitGrpc(captures: CaptureSummary[], root: DeducedFolder): void {
   const byRoute = new Map<string, CaptureSummary[]>()
   for (const capture of captures) {
     const url = tryParseUrl(capture.url)
@@ -540,6 +540,7 @@ function emitGrpc(captures: CaptureSummary[], root: DeducedFolder, origin: strin
     const [service, method] = key.split('/') as [string, string]
     const lastSuccess = lastSuccessOf(captures)
     const firstCapture = captures[0]
+    const origin = firstCapture === undefined ? '' : originOf(firstCapture)
     const url = firstCapture === undefined ? null : tryParseUrl(firstCapture.url)
     const prefix = url ? pathSegmentsOf(url).slice(0, -2) : []
     let folder = root
@@ -574,33 +575,35 @@ export function deduceRoutes(captures: readonly CaptureSummary[], options: Deduc
     collapseSingletonIds: options.collapseSingletonIds ?? true
   }
 
-  const byOrigin = new Map<string, { trie: TrieNode; grpc: CaptureSummary[] }>()
+  // One bucket per HOST: a site's `http://` and `ws://` (or `https://`)
+  // calls are one site for the user, not two origins deserving two folders.
+  // Each route still keeps the origin (scheme included) of its own captures.
+  const byHost = new Map<string, { trie: TrieNode; grpc: CaptureSummary[] }>()
   for (const capture of captures) {
     const url = tryParseUrl(capture.url)
     if (url === null) continue
-    const origin = url.origin === 'null' ? `${url.protocol}//${url.host}` : url.origin
-    let bucket = byOrigin.get(origin)
+    let bucket = byHost.get(url.host)
     if (!bucket) {
       bucket = { trie: newNode(null), grpc: [] }
-      byOrigin.set(origin, bucket)
+      byHost.set(url.host, bucket)
     }
     if (capture.protocol === 'grpc-web') bucket.grpc.push(capture)
     else insert(bucket.trie, pathSegmentsOf(url), capture)
   }
 
-  const origins = [...byOrigin.keys()].sort()
+  const hosts = [...byHost.keys()].sort()
   const tree: DeducedTree = { folders: [], routes: [] }
-  for (const origin of origins) {
-    const bucket = byOrigin.get(origin)
+  for (const host of hosts) {
+    const bucket = byHost.get(host)
     if (bucket === undefined) continue
     collapse(bucket.trie, resolved)
-    const target: DeducedFolder = origins.length > 1
-      ? ensureFolder({ name: '', folders: tree.folders, routes: tree.routes }, hostLabel(origin))
+    const target: DeducedFolder = hosts.length > 1
+      ? ensureFolder({ name: '', folders: tree.folders, routes: tree.routes }, host)
       : { name: '', folders: tree.folders, routes: tree.routes }
-    emitRoutes(bucket.trie, [], target, { origin, options: resolved })
-    emitGrpc(bucket.grpc, target, origin)
+    emitRoutes(bucket.trie, [], target, { options: resolved })
+    emitGrpc(bucket.grpc, target)
     target.folders = target.folders.filter((f) => pruneEmpty(f))
-    if (origins.length === 1) {
+    if (hosts.length === 1) {
       tree.folders = target.folders
       tree.routes = target.routes
     }
@@ -608,9 +611,11 @@ export function deduceRoutes(captures: readonly CaptureSummary[], options: Deduc
   return tree
 }
 
-function hostLabel(origin: string): string {
-  const url = tryParseUrl(origin)
-  return url ? url.host : origin
+/** The origin (scheme + host) a capture was made against. */
+function originOf(capture: CaptureSummary): string {
+  const url = tryParseUrl(capture.url)
+  if (url === null) return ''
+  return url.origin === 'null' ? `${url.protocol}//${url.host}` : url.origin
 }
 
 /** Every route of a tree, depth-first — handy for tests and for the merge. */

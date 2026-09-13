@@ -168,16 +168,17 @@ describe('recording capture engine — HTTP exchanges', () => {
     expect(store.get('s1', row?.id ?? '')?.response?.body).toMatchObject({ encoding: 'base64', size: 5 })
   })
 
-  it('skips page assets and CORS preflights at the door', async () => {
+  it('skips page assets, the page navigation itself and CORS preflights at the door', async () => {
     const { store, dbg } = await startEngine()
     httpExchange(dbg, 'r1', { url: 'http://localhost:8080/app.js', type: 'Script', mime: 'text/javascript', body: 'x' })
     httpExchange(dbg, 'r2', { url: 'http://localhost:8080/logo.png', type: 'Image', mime: 'image/png', body: 'AA==', base64: true })
     httpExchange(dbg, 'r3', { url: 'http://localhost:8080/api/pets', type: 'Preflight', method: 'OPTIONS', status: 204 })
+    // The page loading (the recording attaches before it does) is not an API call.
     httpExchange(dbg, 'r4', { url: 'http://localhost:8080/', type: 'Document', mime: 'text/html', body: '<html>' })
     httpExchange(dbg, 'r5', { url: 'http://localhost:8080/api/pets', type: 'XHR', body: '[]' })
     await flush()
-    expect(store.list('s1').map((c) => `${c.resourceType} ${c.url}`)).toEqual(['document http://localhost:8080/', 'xhr http://localhost:8080/api/pets'])
-    expect(dbg.commands.filter((c) => c.method === 'Network.getResponseBody')).toHaveLength(2)
+    expect(store.list('s1').map((c) => `${c.resourceType} ${c.url}`)).toEqual(['xhr http://localhost:8080/api/pets'])
+    expect(dbg.commands.filter((c) => c.method === 'Network.getResponseBody')).toHaveLength(1)
   })
 
   it('does not fetch bodies for urls the lists refuse', async () => {

@@ -257,6 +257,15 @@ describe('route deduction — origins and noise', () => {
     expect(flattenRoutes(tree).map((r) => r.url).sort()).toEqual(['http://api.test/users', 'https://cdn.test:8443/assets/app.js'])
   })
 
+  it('a site called over http AND ws is ONE host: no host folder, each route keeps its own scheme', () => {
+    const tree = deduceRoutes([
+      http('GET', 'http://app.test/api/pets'),
+      http('WS', 'ws://app.test/ws', 101, { protocol: 'websocket', websocket: { messageType: 'hello', messageTypes: ['hello'], frameCount: 1, closed: false } })
+    ])
+    expect(folderPaths(tree)).toEqual(['api'])
+    expect(flattenRoutes(tree).map((r) => r.url).sort()).toEqual(['http://app.test/api/pets', 'ws://app.test/ws'])
+  })
+
   it('a single origin needs no host folder, and a lone leaf sits at the root', () => {
     const tree = deduceRoutes([http('GET', 'http://api.test/users')])
     expect(folderPaths(tree)).toEqual([])

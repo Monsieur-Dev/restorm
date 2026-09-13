@@ -125,3 +125,43 @@ Feature: Recording session sidebar nodes and tabs
     When I create a recording session over MCP pointing at the local page
     Then the sidebar shows the session created over MCP
     And deducing the routes over MCP is refused as a Pro feature
+
+  Scenario: The reference harness — mock servers in a scenario, a page calling them, filters, deduction
+    Given the recording harness project is open on Pro
+    When I run the recording servers scenario
+    And I add a recording session from the env folder's context menu
+    And I set the session url to the harness page
+    And I add the blacklist pattern "/api/health" in the session config
+    And I click the record button
+    Then the session is on air
+    When I click the session "captures" row
+    Then the captures list shows a call to "/api/pets"
+    And the captures list shows a call to "/api/pets/2"
+    And the captures list shows a call to "Pets"
+    And the captures list shows a call to "pets.PetService/ListPets"
+    And the captures list shows a call to "/ws"
+    And the captures list shows no call to "/api/health"
+    When I click the capture "/api/pets/2"
+    Then the capture detail shows the response tabs
+    When I add the capture "/api/pets/1" to the black list and apply it
+    Then the captures list shows no call to "/api/pets/1"
+    And the captures list shows a call to "/api/pets/3"
+    When I click the session "browser" row
+    And I click the browser stop button
+    Then the session is idle
+    When I click the session "captures" row
+    And I click the deduce routes button
+    Then the recording "routes" tab is open
+    And the recording routes tab lists 6 deduced request
+    And the Routes row of the session lists the request "GET /api/pets" in the folder "api > pets"
+    And the Routes row of the session lists the request "POST /api/pets" in the folder "api > pets"
+    And the Routes row of the session lists the request "GET /api/pets/{{petId}}" in the folder "api > pets"
+    And the Routes row of the session lists the request "Pets" in the folder ""
+    And the Routes row of the session lists the request "pets.PetService.ListPets" in the folder "pets.PetService"
+    And the Routes row of the session lists the request "WS /ws · hello" in the folder ""
+    And the Routes row of the session lists no request "localhost:8123"
+    And the Routes row of the session lists no request "GET /api/health"
+    When I click the session row
+    Then the session config black list contains 2 patterns
+    When I stop the recording servers scenario
+

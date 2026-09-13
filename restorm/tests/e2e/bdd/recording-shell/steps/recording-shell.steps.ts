@@ -21,6 +21,8 @@ let lastMcpReply: Record<string, unknown> | null = null
 /** The committed creation sample: an env folder + a scenario at the root. */
 const SAMPLE = join(__dirname, '../../../samples/api-design-creation-sample.restorm')
 const ENV_FOLDER_ID = 'env-design-sample'
+/** The env folder the current scenario adds sessions to (the harness sample has its own). */
+let envFolderId = ENV_FOLDER_ID
 const DEFAULT_SESSION_NAME = 'New recording session'
 
 function requirePage(): Page {
@@ -50,7 +52,7 @@ function nodeRowId(id: string, kind: string): string {
   return `recording-node:${id}:${kind}`
 }
 
-async function openProject(): Promise<void> {
+async function openProject(rowId: string = ENV_FOLDER_ID): Promise<void> {
   const p = requirePage()
   await p.evaluate(async (path: string) => {
     const w = window as unknown as { restorm?: { file?: { openPath?: (p: string) => Promise<unknown> } } }
@@ -58,7 +60,7 @@ async function openProject(): Promise<void> {
     if (typeof fn !== 'function') throw new Error('window.restorm.file.openPath is not available')
     await fn(path)
   }, projectPath)
-  await expect(sidebarRow(p, ENV_FOLDER_ID)).toBeVisible({ timeout: 10000 })
+  await expect(sidebarRow(p, rowId)).toBeVisible({ timeout: 10000 })
   await p.waitForTimeout(800)
 }
 
@@ -80,6 +82,7 @@ async function launchWithProject(launchApp: (opts?: LaunchOptions) => Promise<{ 
   mcpDiscovery = null
   mcpSessionId = null
   lastMcpReply = null
+  envFolderId = ENV_FOLDER_ID
   const launched = await launchApp({ ...(plan !== undefined ? { plan } : {}), ...(mcp ? { mcp: true } : {}) })
   page = launched.page
   mcpDiscovery = launched.discovery ?? null
@@ -109,7 +112,7 @@ Given('a project with an env folder is open with the MCP server enabled', async 
 
 When("I add a recording session from the env folder's context menu", async () => {
   const p = requirePage()
-  await openAddSubmenu(p, sidebarRow(p, ENV_FOLDER_ID))
+  await openAddSubmenu(p, sidebarRow(p, envFolderId))
   const entry = p.locator('[data-testid="sidebar-context-menu-add-recording"]')
   await expect(entry).toBeVisible({ timeout: 5000 })
   await entry.click()
@@ -375,20 +378,28 @@ Then('the recording routes tab lists {int} deduced request', async ({}, count: n
   await expect(p.locator('[data-testid="recording-routes-summary"]')).toContainText(String(count), { timeout: 5000 })
 })
 
-Then('the Routes row of the session lists the request {string} in the folder {string}', async ({}, name: string, folder: string) => {
+Then('the Routes row of the session lists the request {string} in the folder {string}', async ({}, name: string, folders: string) => {
   const p = requirePage()
   const id = await sessionId(p)
   await expect(sidebarRow(p, nodeRowId(id, 'routes'))).toBeVisible({ timeout: 5000 })
   // The UI flow expands the Routes node itself; an MCP deduction does not.
   await expandRowIfCollapsed(sidebarRow(p, nodeRowId(id, 'routes')))
   // The deduction groups the routes by static path prefix, so the request
-  // lives in a (collapsed) folder under the Routes node.
+  // lives in (collapsed) folders under the Routes node — `folders` is the
+  // path from the Routes node, `>`-separated.
   const rows = p.locator('[data-testid="sidebar-listview"] .list-view-row')
-  const folderRow = rows.filter({ has: p.getByText(folder, { exact: true }) }).first()
-  await expect(folderRow).toBeVisible({ timeout: 10000 })
-  await expandRowIfCollapsed(folderRow)
+  for (const folder of folders.split('>').map((f) => f.trim()).filter((f) => f.length > 0)) {
+    const folderRow = rows.filter({ has: p.getByText(folder, { exact: true }) }).first()
+    await expect(folderRow).toBeVisible({ timeout: 10000 })
+    await expandRowIfCollapsed(folderRow)
+  }
   const row = rows.filter({ has: p.getByText(name, { exact: true }) }).first()
   await expect(row).toBeVisible({ timeout: 10000 })
+})
+
+Then('the Routes row of the session lists no request {string}', async ({}, name: string) => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="sidebar-listview"] .list-view-row').filter({ has: p.getByText(name, { exact: true }) })).toHaveCount(0)
 })
 
 /** Click a sidebar row's Expand chevron when the row is collapsed. */
@@ -512,4 +523,125 @@ Then('deducing the routes over MCP is refused as a Pro feature', async () => {
   const { reply } = await mcpCall('deduce_recording_routes', { sessionId: await sessionId(p) })
   expect(reply.isError).toBe(true)
   expect(reply.content?.[0]?.text ?? '').toContain('Restorm Pro')
+})
+
+// ── Reference harness: mock servers in a scenario + the page they serve ──
+
+const HARNESS_SAMPLE = join(__dirname, '../../../samples/recording-harness-sample.restorm')
+const HARNESS_ENV_FOLDER_ID = 'rec-harness-env'
+const HARNESS_SCENARIO_ID = 'rec-harness-scenario'
+const HARNESS_PAGE_URL = 'http://localhost:8123/'
+/** Server requests of the harness whose listening state the test polls. */
+const HARNESS_SERVERS: { ns: 'http' | 'graphql'; id: string }[] = [
+  { ns: 'http', id: 'rec-srv-page' },
+  { ns: 'http', id: 'rec-srv-pets' },
+  { ns: 'http', id: 'rec-srv-pet-3' },
+  { ns: 'http', id: 'rec-srv-grpcweb' },
+  { ns: 'graphql', id: 'rec-srv-graphql' }
+]
+
+Given('the recording harness project is open on Pro', async ({ launchApp }) => {
+  await launchWithProject(launchApp, 'pro')
+  // Swap the creation sample for the harness: every mock the page calls
+  // lives in one scenario, on one port (same origin as the page: no CORS).
+  projectPath = join(RECORDING_SHELL_TEMP_DIR, 'recording-harness.restorm')
+  copyFileSync(HARNESS_SAMPLE, projectPath)
+  envFolderId = HARNESS_ENV_FOLDER_ID
+  await openProject(HARNESS_ENV_FOLDER_ID)
+})
+
+async function harnessListening(p: Page): Promise<boolean> {
+  return p.evaluate(async (servers: { ns: string; id: string }[]) => {
+    const w = window as unknown as { restorm?: Record<string, { isListening?: (id: string) => Promise<boolean> }> }
+    for (const { ns, id } of servers) {
+      const fn = w.restorm?.[ns]?.isListening
+      if (typeof fn !== 'function') return false
+      if (!(await fn(id))) return false
+    }
+    return true
+  }, HARNESS_SERVERS)
+}
+
+async function openHarnessScenario(p: Page): Promise<void> {
+  await expandRowIfCollapsed(sidebarRow(p, HARNESS_ENV_FOLDER_ID))
+  await sidebarRow(p, HARNESS_SCENARIO_ID).click()
+  await expect(p.locator('[data-testid="scenario-editor"]')).toBeVisible({ timeout: 15000 })
+  await expect(p.locator('[data-testid="scenario-inspector-toolbar"]')).toBeVisible({ timeout: 15000 })
+}
+
+When('I run the recording servers scenario', async () => {
+  const p = requirePage()
+  await openHarnessScenario(p)
+  // No node selected → the whole scenario: every listen node starts at once
+  // and the run stays in progress while the servers are up.
+  await p.locator('[data-testid="scenario-inspector-run"]').click()
+  await expect.poll(() => harnessListening(p), { timeout: 30000, intervals: [500] }).toBe(true)
+  // The page itself answers over plain HTTP from the test process too.
+  const response = await fetch(HARNESS_PAGE_URL)
+  expect(response.status).toBe(200)
+  expect(response.headers.get('content-type') ?? '').toContain('text/html')
+  expect(await response.text()).toContain('Recording harness')
+})
+
+When('I stop the recording servers scenario', async () => {
+  const p = requirePage()
+  await openHarnessScenario(p)
+  await p.locator('[data-testid="scenario-inspector-stop"]').click()
+  await expect.poll(() => harnessListening(p), { timeout: 30000, intervals: [500] }).toBe(false)
+})
+
+When('I set the session url to the harness page', async () => {
+  const p = requirePage()
+  const input = p.locator('[data-testid="recording-config-url-input"]')
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await input.fill(HARNESS_PAGE_URL)
+  await p.waitForTimeout(700)
+})
+
+When('I add the blacklist pattern {string} in the session config', async ({}, pattern: string) => {
+  const p = requirePage()
+  await p.locator('[data-testid="recording-config-blacklist-add"]').click()
+  const input = p.locator('[data-testid="recording-config-blacklist-input-0-input"]')
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await input.fill(pattern)
+  // The InputBox debounces its onChange; let the value land on the session.
+  await p.waitForTimeout(700)
+})
+
+Then('the captures list shows no call to {string}', async ({}, route: string) => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid^="recording-capture-row-"]').filter({ hasText: route })).toHaveCount(0, { timeout: 5000 })
+})
+
+When('I add the capture {string} to the black list and apply it', async ({}, route: string) => {
+  const p = requirePage()
+  const row = p.locator('[data-testid^="recording-capture-row-"]').filter({ hasText: route }).first()
+  await expect(row).toBeVisible({ timeout: 15000 })
+  await row.click({ button: 'right' })
+  const entry = p.getByRole('menuitem', { name: /black list|liste noire/i }).first()
+  await expect(entry).toBeVisible({ timeout: 5000 })
+  await entry.click()
+  const modal = p.locator('[data-testid="recording-filter-modal"]')
+  await expect(modal).toBeVisible({ timeout: 5000 })
+  // The pattern is prefilled with the captured url, escaped for a regex.
+  await expect(modal.locator('[data-testid="recording-filter-modal-pattern-input"]')).toHaveValue(new RegExp(route.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')))
+  await modal.locator('[data-testid="recording-filter-modal-add-apply"]').click()
+  await expect(modal.locator('[data-testid="recording-filter-modal-confirm-message"]')).toBeVisible({ timeout: 5000 })
+  await modal.locator('[data-testid="recording-filter-modal-confirm-ok"]').click()
+  await expect(modal).not.toBeVisible({ timeout: 5000 })
+})
+
+Then('the session config black list contains {int} patterns', async ({}, count: number) => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid^="recording-config-blacklist-row-"]')).toHaveCount(count, { timeout: 5000 })
+})
+
+When('I click the capture {string}', async ({}, route: string) => {
+  const p = requirePage()
+  const row = p.locator('[data-testid^="recording-capture-row-"]').filter({ hasText: route }).first()
+  await expect(row).toBeVisible({ timeout: 15000 })
+  await row.click()
+  await p.waitForTimeout(300)
 })
