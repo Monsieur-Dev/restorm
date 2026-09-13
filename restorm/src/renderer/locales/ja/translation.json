@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "録画セッションを一覧表示",
+    "createRecordingSession": "録画セッションを作成",
+    "updateRecordingSession": "録画セッションを更新",
+    "setRecordingFilters": "録画セッションの URL フィルターを設定",
+    "startRecording": "セッションの録画を開始",
+    "stopRecording": "セッションの録画を停止",
+    "getRecordingStatus": "録画セッションの状態を取得",
+    "listRecordingCaptures": "録画セッションでキャプチャした呼び出しを一覧表示",
+    "getRecordingCapture": "キャプチャした呼び出しの詳細を取得",
+    "deduceRecordingRoutes": "録画セッションからルートを推定",
     "answerScenarioInput": "シナリオ入力に応答",
     "arrangeScenario": "シナリオを自動整列",
     "cancelRequest": "リクエストをキャンセル",

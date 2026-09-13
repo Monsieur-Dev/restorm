@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Liệt kê các phiên ghi",
+    "createRecordingSession": "Tạo một phiên ghi",
+    "updateRecordingSession": "Cập nhật một phiên ghi",
+    "setRecordingFilters": "Đặt bộ lọc URL cho một phiên ghi",
+    "startRecording": "Bắt đầu ghi một phiên",
+    "stopRecording": "Dừng ghi một phiên",
+    "getRecordingStatus": "Lấy trạng thái của một phiên ghi",
+    "listRecordingCaptures": "Liệt kê các lời gọi đã bắt của một phiên ghi",
+    "getRecordingCapture": "Lấy đầy đủ một lời gọi đã bắt",
+    "deduceRecordingRoutes": "Suy ra các route của một phiên ghi",
     "answerScenarioInput": "Trả lời đầu vào kịch bản",
     "arrangeScenario": "Tự sắp xếp kịch bản",
     "cancelRequest": "Hủy yêu cầu",

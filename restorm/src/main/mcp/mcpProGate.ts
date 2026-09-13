@@ -71,6 +71,17 @@ export const FREE_MCP_TOOLS: ReadonlySet<string> = new Set([
   'cancel_request',
   'get_response',
   'get_response_history',
+  // recording sessions — recording a page and reading its captures is open
+  // to every plan (mirrors the UI: only the route deduction is paid).
+  'list_recording_sessions',
+  'create_recording_session',
+  'update_recording_session',
+  'set_recording_filters',
+  'start_recording',
+  'stop_recording',
+  'get_recording_status',
+  'list_recording_captures',
+  'get_recording_capture',
   'read_stream',
   'send_message',
   // batch — chains other (independently gated) tool calls
@@ -265,6 +276,9 @@ export const PRO_MCP_TOOLS: ReadonlySet<string> = new Set([
   // serve button (Yoann 2026-08-17). Code GENERATION was split OUT to free
   // (2026-09-03, in the free set above) — only the mock RUN stays Pro+.
   'serve_design',
+  // recording sessions: turning the captured calls into requests is the
+  // paid step (RECORDING_DEDUCE_CAPABILITY on the UI's deduce button).
+  'deduce_recording_routes',
   'stop_design_server',
   'set_design_route_response',
   'get_design_server_status',

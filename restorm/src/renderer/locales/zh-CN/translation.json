@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "列出录制会话",
+    "createRecordingSession": "创建录制会话",
+    "updateRecordingSession": "更新录制会话",
+    "setRecordingFilters": "设置录制会话的 URL 过滤器",
+    "startRecording": "开始录制会话",
+    "stopRecording": "停止录制会话",
+    "getRecordingStatus": "获取录制会话的状态",
+    "listRecordingCaptures": "列出录制会话捕获的调用",
+    "getRecordingCapture": "获取一次捕获调用的完整内容",
+    "deduceRecordingRoutes": "推断录制会话的路由",
     "answerScenarioInput": "回答场景输入",
     "arrangeScenario": "自动排列场景",
     "cancelRequest": "取消请求",

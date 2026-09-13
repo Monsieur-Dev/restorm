@@ -2931,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listați sesiunile de înregistrare",
+    "createRecordingSession": "Creați o sesiune de înregistrare",
+    "updateRecordingSession": "Actualizați o sesiune de înregistrare",
+    "setRecordingFilters": "Setați filtrele URL ale unei sesiuni de înregistrare",
+    "startRecording": "Porniți înregistrarea unei sesiuni",
+    "stopRecording": "Opriți înregistrarea unei sesiuni",
+    "getRecordingStatus": "Obțineți starea unei sesiuni de înregistrare",
+    "listRecordingCaptures": "Listați apelurile capturate ale unei sesiuni de înregistrare",
+    "getRecordingCapture": "Obțineți un apel capturat în întregime",
+    "deduceRecordingRoutes": "Deduceți rutele unei sesiuni de înregistrare",
     "answerScenarioInput": "Răspunde la o intrare de scenariu",
     "arrangeScenario": "Aranjează automat scenariul",
     "cancelRequest": "Anulează o cerere",

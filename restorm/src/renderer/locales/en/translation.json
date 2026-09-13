@@ -2924,6 +2924,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "List recording sessions",
+    "createRecordingSession": "Create a recording session",
+    "updateRecordingSession": "Update a recording session",
+    "setRecordingFilters": "Set the url filters of a recording session",
+    "startRecording": "Start recording a session",
+    "stopRecording": "Stop recording a session",
+    "getRecordingStatus": "Get the status of a recording session",
+    "listRecordingCaptures": "List the captured calls of a recording session",
+    "getRecordingCapture": "Get one captured call in full",
+    "deduceRecordingRoutes": "Deduce the routes of a recording session",
     "answerScenarioInput": "Answer a scenario input",
     "arrangeScenario": "Auto-arrange the scenario",
     "cancelRequest": "Cancel a request",

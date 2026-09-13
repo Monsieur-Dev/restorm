@@ -2,8 +2,9 @@ import { test as base } from 'playwright-bdd'
 import { _electron as electron, type ElectronApplication, type Page, expect } from '@playwright/test'
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join, resolve } from 'path'
+import { tmpdir } from 'os'
 import electronPath from 'electron'
-import { installSystemModalsMockingForE2E } from 'electron-core-ui/testing'
+import { installSystemModalsMockingForE2E, readMcpDiscoveryWithRetry, type McpDiscovery } from 'electron-core-ui/testing'
 import { withE2ECoverageEnv } from '../../helpers/coverage'
 import { createIsolatedUserDataDir } from '../../helpers/userdata-isolation'
 import { collectBlockingRendererMessages, summariseBlockingMessages } from '../../helpers/renderer-log-guard'
@@ -15,13 +16,23 @@ const RESTORM_ROOT = resolve(__dirname, '../../../..')
 export interface LaunchedApp {
   app: ElectronApplication
   page: Page
+  /** The MCP endpoint, when launched with `mcp: true`. */
+  discovery?: McpDiscovery
+}
+
+export interface LaunchOptions {
+  /** Seeds the dev-only entitlement plan (absent = Community). */
+  plan?: 'pro' | 'enterprise'
+  /** Expose the embedded MCP server and return its discovery record. */
+  mcp?: boolean
 }
 
 export interface RecordingShellFixtures {
   restormRoot: string
   /** Launch the app. `plan` seeds the dev-only entitlement plan
-   * (absent = Community — the gate scenarios rely on both states). */
-  launchApp: (opts?: { plan?: 'pro' | 'enterprise' }) => Promise<LaunchedApp>
+   * (absent = Community — the gate scenarios rely on both states);
+   * `mcp` also exposes the MCP server for the agent-driven scenarios. */
+  launchApp: (opts?: LaunchOptions) => Promise<LaunchedApp>
 }
 
 export const test = base.extend<RecordingShellFixtures>({
@@ -44,7 +55,7 @@ export const test = base.extend<RecordingShellFixtures>({
       mainJsPath
     ]
 
-    const launcher = async (opts?: { plan?: 'pro' | 'enterprise' }): Promise<LaunchedApp> => {
+    const launcher = async (opts?: LaunchOptions): Promise<LaunchedApp> => {
       // A fresh isolated userData per launch: the gate scenarios launch
       // twice (community, then pro) and must not share entitlement state.
       const isolatedUserDataDir = createIsolatedUserDataDir(restormRoot)
@@ -63,9 +74,15 @@ export const test = base.extend<RecordingShellFixtures>({
       bootstrap.process().kill('SIGKILL')
       await new Promise((r) => setTimeout(r, 500))
 
+      // MCP is on by default (headless rule kept on by xvfb's DISPLAY); the
+      // discovery file is how the test learns the port + token.
+      const discoveryPath = opts?.mcp === true
+        ? join(tmpdir(), `restorm-mcp-recording-${String(Date.now())}-${String(Math.floor(Math.random() * 1_000_000))}.json`)
+        : null
+      if (discoveryPath !== null) { try { rmSync(discoveryPath, { force: true }) } catch { /* fine */ } }
       const app = await electron.launch({
         executablePath: electronExePath,
-        args: launchArgs,
+        args: discoveryPath !== null ? [...launchArgs, `--mcp-discovery-file=${discoveryPath}`] : launchArgs,
         env: baseEnv
       })
 
@@ -104,7 +121,9 @@ export const test = base.extend<RecordingShellFixtures>({
       }
 
       launched.push({ app, logs })
-      return { app, page }
+      if (discoveryPath === null) return { app, page }
+      const discovery = await readMcpDiscoveryWithRetry(discoveryPath)
+      return { app, page, discovery }
     }
 
     await use(launcher)

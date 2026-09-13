@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listaa tallennusistunnot",
+    "createRecordingSession": "Luo tallennusistunto",
+    "updateRecordingSession": "Päivitä tallennusistunto",
+    "setRecordingFilters": "Aseta tallennusistunnon URL-suodattimet",
+    "startRecording": "Aloita istunnon tallennus",
+    "stopRecording": "Lopeta istunnon tallennus",
+    "getRecordingStatus": "Hae tallennusistunnon tila",
+    "listRecordingCaptures": "Listaa tallennusistunnon tallennetut kutsut",
+    "getRecordingCapture": "Hae yksi tallennettu kutsu kokonaan",
+    "deduceRecordingRoutes": "Päättele tallennusistunnon reitit",
     "answerScenarioInput": "Vastaa skenaarion syötteeseen",
     "arrangeScenario": "Järjestä skenaario automaattisesti",
     "cancelRequest": "Peruuta pyyntö",

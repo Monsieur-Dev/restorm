@@ -2932,6 +2932,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Wyświetl sesje nagrywania",
+    "createRecordingSession": "Utwórz sesję nagrywania",
+    "updateRecordingSession": "Zaktualizuj sesję nagrywania",
+    "setRecordingFilters": "Ustaw filtry adresów URL sesji nagrywania",
+    "startRecording": "Rozpocznij nagrywanie sesji",
+    "stopRecording": "Zatrzymaj nagrywanie sesji",
+    "getRecordingStatus": "Pobierz stan sesji nagrywania",
+    "listRecordingCaptures": "Wyświetl przechwycone wywołania sesji nagrywania",
+    "getRecordingCapture": "Pobierz pełne dane jednego przechwyconego wywołania",
+    "deduceRecordingRoutes": "Wywnioskuj trasy sesji nagrywania",
     "answerScenarioInput": "Odpowiedz na dane wejściowe scenariusza",
     "arrangeScenario": "Automatycznie ułóż scenariusz",
     "cancelRequest": "Anuluj żądanie",

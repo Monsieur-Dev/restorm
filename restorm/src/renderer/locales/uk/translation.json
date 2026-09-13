@@ -2932,6 +2932,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Показати сеанси запису",
+    "createRecordingSession": "Створити сеанс запису",
+    "updateRecordingSession": "Оновити сеанс запису",
+    "setRecordingFilters": "Задати URL-фільтри сеансу запису",
+    "startRecording": "Почати запис сеансу",
+    "stopRecording": "Зупинити запис сеансу",
+    "getRecordingStatus": "Отримати стан сеансу запису",
+    "listRecordingCaptures": "Показати захоплені виклики сеансу запису",
+    "getRecordingCapture": "Отримати один захоплений виклик повністю",
+    "deduceRecordingRoutes": "Вивести маршрути сеансу запису",
     "answerScenarioInput": "Відповісти на вхід сценарію",
     "arrangeScenario": "Автоматично впорядкувати сценарій",
     "cancelRequest": "Скасувати запит",

@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "列出錄製工作階段",
+    "createRecordingSession": "建立錄製工作階段",
+    "updateRecordingSession": "更新錄製工作階段",
+    "setRecordingFilters": "設定錄製工作階段的 URL 篩選器",
+    "startRecording": "開始錄製工作階段",
+    "stopRecording": "停止錄製工作階段",
+    "getRecordingStatus": "取得錄製工作階段的狀態",
+    "listRecordingCaptures": "列出錄製工作階段擷取的呼叫",
+    "getRecordingCapture": "取得一次擷取呼叫的完整內容",
+    "deduceRecordingRoutes": "推斷錄製工作階段的路由",
     "answerScenarioInput": "回答情境輸入",
     "arrangeScenario": "自動排列情境",
     "cancelRequest": "取消請求",

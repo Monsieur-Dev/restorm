@@ -40,7 +40,7 @@ export interface ListedScenario {
 export interface CurrentTabInfo {
   tabId: string | null
   itemId: string | null
-  kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null
+  kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null
 }
 
 export interface ResolvedEnvVariable {

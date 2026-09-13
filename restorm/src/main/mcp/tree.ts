@@ -11,13 +11,23 @@ import {
   type FolderItem,
   type Request,
   type Scenario,
+  type RecordingSession,
   isAnyFolder,
   isEnvironmentFolder,
   isFolder,
   isRequest,
-  isScenario
+  isScenario,
+  isRecordingSession
 } from '../../shared/models'
 import type { ListedFolder, ListedRequest, ListedScenario, FolderKind } from './types'
+
+/** The child items of a container, read as tree items. A scenario's and a
+ * recording's `items` are typed with the base item shape (and are optional);
+ * the tree walks them with the same guards as any folder child. */
+function containerItems(container: Folder | EnvironmentFolder | Scenario | RecordingSession): FolderItem[] {
+  if (isScenario(container) || isRecordingSession(container)) return (container.items ?? []) as unknown as FolderItem[]
+  return container.items as unknown as FolderItem[]
+}
 
 /**
  * Default protocol value when a request type field is unexpectedly
@@ -80,10 +90,10 @@ export function projectRequest(request: Request, parentId: string | null): Liste
  * subfolders and requests; callers filter by kind. Throws when the
  * argument isn't a folder so callers can rely on the type narrowing.
  */
-export function listChildren(folder: Folder | EnvironmentFolder | Scenario): { folders: ListedFolder[]; requests: ListedRequest[] } {
+export function listChildren(folder: Folder | EnvironmentFolder | Scenario | RecordingSession): { folders: ListedFolder[]; requests: ListedRequest[] } {
   const folders: ListedFolder[] = []
   const requests: ListedRequest[] = []
-  const items = isScenario(folder) ? (folder.items ?? []) : folder.items
+  const items = containerItems(folder)
   for (const item of items) {
     // `isScenario` must be tested before the folder guards: at runtime a
     // scenario carries both `items` and `configuration`, so `isAnyFolder`
@@ -111,7 +121,7 @@ export function flattenTree(roots: readonly FolderItem[]): { folders: ListedFold
     // The root is not folders-only: the sidebar lets a scenario or a request
     // sit there as a sibling of a collection. Dispatch per kind exactly as
     // `walkAndCollect` does one level down, with a `null` parentId.
-    if (isScenario(root)) {
+    if (isScenario(root) || isRecordingSession(root)) {
       walkAndCollect(root, folders, requests)
     } else if (isFolder(root) || isEnvironmentFolder(root)) {
       folders.push(projectFolder(root, null))
@@ -124,19 +134,21 @@ export function flattenTree(roots: readonly FolderItem[]): { folders: ListedFold
 }
 
 function walkAndCollect(
-  container: Folder | EnvironmentFolder | Scenario,
+  container: Folder | EnvironmentFolder | Scenario | RecordingSession,
   folders: ListedFolder[],
   requests: ListedRequest[]
 ): void {
-  const items = isScenario(container) ? (container.items ?? []) : container.items
+  const items = containerItems(container)
   for (const item of items) {
     // `isScenario` is tested first: at runtime a scenario satisfies the folder
     // guards (it carries `items` + `configuration`), so without this it would
     // be projected as a `kind: "folder"`. A scenario is folder-like and may
     // hold requests / sub-folders / sub-scenarios, so we still descend to keep
     // those children reachable — but the scenario itself stays out of the
-    // `folders` list (`list_scenarios` owns that surface).
-    if (isScenario(item)) {
+    // `folders` list (`list_scenarios` owns that surface). Same for a
+    // recording session (`list_recording_sessions`): its deduced routes are
+    // listed as ordinary folders + requests under it.
+    if (isScenario(item) || isRecordingSession(item)) {
       walkAndCollect(item, folders, requests)
     } else if (isFolder(item) || isEnvironmentFolder(item)) {
       folders.push(projectFolder(item, container.id))
@@ -187,7 +199,7 @@ function walkForScenarios(
   parentId: string,
   out: ListedScenario[]
 ): void {
-  const items = isScenario(container) ? (container.items ?? []) : container.items
+  const items = containerItems(container)
   for (const item of items) {
     if (isScenario(item)) {
       const path = `${prefix} / ${item.name}`
@@ -209,7 +221,7 @@ function walkForScenarios(
 export interface TreeNode {
   id: string
   name: string
-  kind: FolderKind | 'request' | 'scenario'
+  kind: FolderKind | 'request' | 'scenario' | 'recording'
   protocol?: string
   children?: TreeNode[]
 }
@@ -231,7 +243,17 @@ function toTreeNode(item: FolderItem): TreeNode {
       id: item.id,
       name: item.name,
       kind: 'scenario',
-      children: (item.items ?? []).map(toTreeNode)
+      children: containerItems(item).map(toTreeNode)
+    }
+  }
+  // A recording session is a container too: its children are the routes
+  // deduced from the captured calls (folders by path prefix + requests).
+  if (isRecordingSession(item)) {
+    return {
+      id: item.id,
+      name: item.name,
+      kind: 'recording',
+      children: containerItems(item).map(toTreeNode)
     }
   }
   if (isFolder(item) || isEnvironmentFolder(item)) {
@@ -239,7 +261,7 @@ function toTreeNode(item: FolderItem): TreeNode {
       id: item.id,
       name: item.name,
       kind: folderKind(item),
-      children: item.items.map(toTreeNode)
+      children: containerItems(item).map(toTreeNode)
     }
   }
   // Request leaf — read the discriminant off the typed shape (the

@@ -4,12 +4,19 @@ import { join, resolve } from 'path'
 import { createServer, type Server } from 'http'
 import type { AddressInfo } from 'net'
 import type { Page, Locator } from '@playwright/test'
-import { test, expect, RECORDING_SHELL_TEMP_DIR } from '../../fixtures/recording-shell.fixture'
+import { callMcpToolOverJsonRpc, type McpDiscovery, type McpToolReply } from 'electron-core-ui/testing'
+import { test, expect, RECORDING_SHELL_TEMP_DIR, type LaunchOptions } from '../../fixtures/recording-shell.fixture'
 
 const { Given, When, Then } = createBdd(test)
 
 let page: Page | null = null
 let projectPath = ''
+/** Set when the scenario launched with the MCP server exposed. */
+let mcpDiscovery: McpDiscovery | null = null
+/** The session an MCP scenario created — `sessionId()` prefers it over the
+ * default-named UI session. */
+let mcpSessionId: string | null = null
+let lastMcpReply: Record<string, unknown> | null = null
 
 /** The committed creation sample: an env folder + a scenario at the root. */
 const SAMPLE = join(__dirname, '../../../samples/api-design-creation-sample.restorm')
@@ -31,6 +38,7 @@ function sidebarRowByTitle(p: Page, title: string): Locator {
 
 /** The tree item id behind the session row (a UUID minted at creation). */
 async function sessionId(p: Page): Promise<string> {
+  if (mcpSessionId !== null) return mcpSessionId
   const row = sidebarRowByTitle(p, DEFAULT_SESSION_NAME)
   await expect(row).toBeVisible({ timeout: 5000 })
   const id = await row.getAttribute('data-item-id')
@@ -68,10 +76,14 @@ async function openAddSubmenu(p: Page, row: Locator): Promise<void> {
   await p.waitForTimeout(500)
 }
 
-async function launchWithProject(launchApp: (opts?: { plan?: 'pro' | 'enterprise' }) => Promise<{ page: Page }>, plan?: 'pro'): Promise<void> {
-  const launched = await launchApp(plan !== undefined ? { plan } : undefined)
+async function launchWithProject(launchApp: (opts?: LaunchOptions) => Promise<{ page: Page; discovery?: McpDiscovery }>, plan?: 'pro', mcp = false): Promise<void> {
+  mcpDiscovery = null
+  mcpSessionId = null
+  lastMcpReply = null
+  const launched = await launchApp({ ...(plan !== undefined ? { plan } : {}), ...(mcp ? { mcp: true } : {}) })
   page = launched.page
-  projectPath = join(RECORDING_SHELL_TEMP_DIR, `recording-shell-${plan ?? 'community'}.restorm`)
+  mcpDiscovery = launched.discovery ?? null
+  projectPath = join(RECORDING_SHELL_TEMP_DIR, `recording-shell-${plan ?? 'community'}${mcp ? '-mcp' : ''}.restorm`)
   copyFileSync(SAMPLE, projectPath)
   await openProject()
   if (plan === 'pro') {
@@ -85,6 +97,14 @@ Given('a project with an env folder is open', async ({ launchApp }) => {
 
 Given('a Pro project with an env folder is open', async ({ launchApp }) => {
   await launchWithProject(launchApp, 'pro')
+})
+
+Given('a Pro project with an env folder is open with the MCP server enabled', async ({ launchApp }) => {
+  await launchWithProject(launchApp, 'pro', true)
+})
+
+Given('a project with an env folder is open with the MCP server enabled', async ({ launchApp }) => {
+  await launchWithProject(launchApp, undefined, true)
 })
 
 When("I add a recording session from the env folder's context menu", async () => {
@@ -359,12 +379,137 @@ Then('the Routes row of the session lists the request {string} in the folder {st
   const p = requirePage()
   const id = await sessionId(p)
   await expect(sidebarRow(p, nodeRowId(id, 'routes'))).toBeVisible({ timeout: 5000 })
+  // The UI flow expands the Routes node itself; an MCP deduction does not.
+  await expandRowIfCollapsed(sidebarRow(p, nodeRowId(id, 'routes')))
   // The deduction groups the routes by static path prefix, so the request
   // lives in a (collapsed) folder under the Routes node.
   const rows = p.locator('[data-testid="sidebar-listview"] .list-view-row')
   const folderRow = rows.filter({ has: p.getByText(folder, { exact: true }) }).first()
   await expect(folderRow).toBeVisible({ timeout: 10000 })
-  await folderRow.getByRole('button', { name: /^(Expand|Développer)$/ }).click()
+  await expandRowIfCollapsed(folderRow)
   const row = rows.filter({ has: p.getByText(name, { exact: true }) }).first()
   await expect(row).toBeVisible({ timeout: 10000 })
+})
+
+/** Click a sidebar row's Expand chevron when the row is collapsed. */
+async function expandRowIfCollapsed(row: Locator): Promise<void> {
+  const expand = row.getByRole('button', { name: /^(Expand|Développer)$/ })
+  if (await expand.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await expand.click()
+    await row.page().waitForTimeout(300)
+  }
+}
+
+// ── MCP-driven flow ───────────────────────────────────────────────────
+
+function requireMcp(): McpDiscovery {
+  if (mcpDiscovery === null) throw new Error('the app was not launched with the MCP server exposed')
+  return mcpDiscovery
+}
+
+async function mcpCall(name: string, args: Record<string, unknown> = {}): Promise<{ reply: McpToolReply; json: Record<string, unknown> | null }> {
+  const reply = await callMcpToolOverJsonRpc(requireMcp(), name, args)
+  const text = reply.content?.[0]?.text ?? ''
+  let json: Record<string, unknown> | null = null
+  try { json = JSON.parse(text) as Record<string, unknown> } catch { json = null }
+  lastMcpReply = json
+  return { reply, json }
+}
+
+When('I create a recording session over MCP pointing at the local page', async () => {
+  const api = await ensureApiServer()
+  const { reply, json } = await mcpCall('create_recording_session', {
+    parentId: ENV_FOLDER_ID,
+    name: 'MCP recording',
+    url: `${LOCAL_PAGE}?api=${encodeURIComponent(api)}`,
+    protocols: ['http'],
+    blacklist: ['\\.png$']
+  })
+  expect(reply.isError, reply.content?.[0]?.text).toBeFalsy()
+  const id = json?.['id']
+  if (typeof id !== 'string' || id.length === 0) throw new Error(`create_recording_session returned no id: ${JSON.stringify(json)}`)
+  mcpSessionId = id
+})
+
+Then('the sidebar shows the session created over MCP', async () => {
+  const p = requirePage()
+  await expect(sidebarRow(p, await sessionId(p))).toBeVisible({ timeout: 10000 })
+  await expect(sidebarRowByTitle(p, 'MCP recording')).toBeVisible({ timeout: 5000 })
+})
+
+Then('MCP lists {int} recording session named {string}', async ({}, count: number, name: string) => {
+  const { json } = await mcpCall('list_recording_sessions')
+  expect(json?.['count']).toBe(count)
+  const sessions = json?.['sessions'] as { name: string; parentId: string | null }[]
+  expect(sessions[0]).toMatchObject({ name, parentId: ENV_FOLDER_ID })
+})
+
+When('I start the recording over MCP', async () => {
+  const p = requirePage()
+  const { reply, json } = await mcpCall('start_recording', { sessionId: await sessionId(p) })
+  expect(reply.isError, reply.content?.[0]?.text).toBeFalsy()
+  expect(json?.['started']).toBe(true)
+})
+
+Then('the MCP recording status reports at least {int} captures', async ({}, min: number) => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect.poll(async () => {
+    const { json } = await mcpCall('get_recording_status', { sessionId: id })
+    return typeof json?.['captureCount'] === 'number' ? json['captureCount'] : -1
+  }, { timeout: 15000, intervals: [500] }).toBeGreaterThanOrEqual(min)
+  const { json } = await mcpCall('list_recording_captures', { sessionId: id, protocol: 'http' })
+  const captures = json?.['captures'] as { id: string; url: string; status?: number }[]
+  const ping = captures.find((c) => c.url.includes('/api/ping'))
+  if (!ping) throw new Error(`no /api/ping capture in ${JSON.stringify(captures)}`)
+  const detail = await mcpCall('get_recording_capture', { sessionId: id, captureId: ping.id })
+  expect(detail.json?.['id']).toBe(ping.id)
+  expect((detail.json?.['response'] as { body: { data: string } }).body.data).toContain('pong')
+})
+
+When('I stop the recording over MCP', async () => {
+  const p = requirePage()
+  const { reply, json } = await mcpCall('stop_recording', { sessionId: await sessionId(p) })
+  expect(reply.isError, reply.content?.[0]?.text).toBeFalsy()
+  expect(json?.['stopped']).toBe(true)
+})
+
+When('I deduce the routes over MCP', async () => {
+  const p = requirePage()
+  const { reply } = await mcpCall('deduce_recording_routes', { sessionId: await sessionId(p) })
+  expect(reply.isError, reply.content?.[0]?.text).toBeFalsy()
+})
+
+Then('the MCP deduction reports {int} new route', async ({}, count: number) => {
+  expect(lastMcpReply?.['newRoutes']).toBe(count)
+})
+
+Then('MCP lists the folder {string} under the session and the request {string} inside it', async ({}, folderName: string, requestName: string) => {
+  const p = requirePage()
+  const folders = await mcpCall('list_folders', { parentId: await sessionId(p) })
+  const listedFolders = JSON.parse(folders.reply.content?.[0]?.text ?? '[]') as { id: string; name: string }[]
+  const folder = listedFolders.find((f) => f.name === folderName)
+  if (!folder) throw new Error(`no folder "${folderName}" under the session: ${JSON.stringify(listedFolders)}`)
+  const requests = await mcpCall('list_requests', { folderId: folder.id })
+  const listed = JSON.parse(requests.reply.content?.[0]?.text ?? '[]') as { name: string }[]
+  expect(listed.map((r) => r.name)).toContain(requestName)
+})
+
+When('I open the session tab over MCP', async () => {
+  const p = requirePage()
+  const { reply } = await mcpCall('open_tab', { itemId: await sessionId(p) })
+  expect(reply.isError, reply.content?.[0]?.text).toBeFalsy()
+  await expect(p.locator('[data-testid="recording-tab-config"]')).toBeVisible({ timeout: 10000 })
+})
+
+When('I expand the session row', async () => {
+  const p = requirePage()
+  await expandRowIfCollapsed(sidebarRow(p, await sessionId(p)))
+})
+
+Then('deducing the routes over MCP is refused as a Pro feature', async () => {
+  const p = requirePage()
+  const { reply } = await mcpCall('deduce_recording_routes', { sessionId: await sessionId(p) })
+  expect(reply.isError).toBe(true)
+  expect(reply.content?.[0]?.text ?? '').toContain('Restorm Pro')
 })

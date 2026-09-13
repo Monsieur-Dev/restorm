@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Visa inspelningssessioner",
+    "createRecordingSession": "Skapa en inspelningssession",
+    "updateRecordingSession": "Uppdatera en inspelningssession",
+    "setRecordingFilters": "Ange URL-filter för en inspelningssession",
+    "startRecording": "Starta inspelning av en session",
+    "stopRecording": "Stoppa inspelning av en session",
+    "getRecordingStatus": "Hämta status för en inspelningssession",
+    "listRecordingCaptures": "Visa de inspelade anropen i en inspelningssession",
+    "getRecordingCapture": "Hämta ett inspelat anrop i sin helhet",
+    "deduceRecordingRoutes": "Härled rutterna i en inspelningssession",
     "answerScenarioInput": "Besvara en scenarioinmatning",
     "arrangeScenario": "Ordna scenariot automatiskt",
     "cancelRequest": "Avbryt en begäran",

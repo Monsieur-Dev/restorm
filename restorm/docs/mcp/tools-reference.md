@@ -136,6 +136,25 @@ For unary protocols, the tool delegates to the renderer's Send-button flow:
 
 For WebSocket, the tool returns immediately with the first frames buffered + a `continuationToken`. The MCP channel stays responsive; the AI pulls subsequent frames via `read_stream`.
 
+## Recording sessions
+
+A recording session browses a web page in the built-in mini-browser and captures the API calls the page makes, so they can be turned into ordinary, replayable requests. Recording and reading the captures are open to every plan; `deduce_recording_routes` is Pro.
+
+| Tool | Summary |
+|---|---|
+| `list_recording_sessions` | Every session with `{ id, name, parentId, url, protocols, whitelist, blacklist, state, captureCount, routeCount }`. |
+| `create_recording_session` | Create a session under `parentId` (or at the root) with its page `url`, the `protocols` to capture (default all) and regex `whitelist` / `blacklist` filters. |
+| `update_recording_session` | Patch `name`, `url`, `notes`, `protocols`. A protocol change applies to a recording in progress. |
+| `set_recording_filters` | Replace the `whitelist` and/or `blacklist`; `applyToExisting: true` also drops the already-captured calls the new filters reject (irreversible). |
+| `start_recording` | Open the session's page in a visible browser tab and attach the capture engine. Blocks until the engine is attached (up to 15 s) and returns an explicit error otherwise. |
+| `stop_recording` | Detach the engine and close the browser tab. The captures stay in memory until the project is closed. |
+| `get_recording_status` | `{ state, runId, captureCount, runs }` — `state` is `idle` / `recording` / `paused`. |
+| `list_recording_captures` | Lightweight list of the captured calls (oldest first, no bodies); filter by `runId` / `protocol`, `limit` keeps the most recent n. |
+| `get_recording_capture` | One captured call in full: request, response, timing and the protocol-specific parts. |
+| `deduce_recording_routes` | Group the captures into routes (`{{param}}` path parameters), build folders by static prefix under the session and create one request per route prefilled from the last successful call, with the captures in its response history. Merges on a second run. **Pro.** |
+
+Source: [`restorm/src/main/mcp/tools/recording.ts`](../../src/main/mcp/tools/recording.ts).
+
 ## Instances (multi-instance lifecycle)
 
 Multiple Restorm instances coexist; each exposes its own MCP endpoint and is addressed by session `name` via the reserved `__session` key on any `tools/call`. These tools manage the set of instances. See [the safety model](./safety.md#instance-lifecycle-create--terminate--cut) for the full rationale.

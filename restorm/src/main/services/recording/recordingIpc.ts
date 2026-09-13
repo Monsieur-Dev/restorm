@@ -14,6 +14,7 @@ import { recordingCaptureEngine } from './RecordingCaptureEngine'
 import { captureToHistoryDetail } from './captureHistory'
 import { responseHistoryService } from '../ResponseHistoryService'
 import { DocumentEvents, type DocumentDeletedPayload } from '../DocumentEvents'
+import type { RecordingHistoryPlanEntry } from '../../../shared/types/recordingCapture'
 import {
   recordingStartArgs,
   recordingStopArgs,
@@ -121,11 +122,21 @@ export function registerRecordingIpc(): void {
   // same format, same cap), the reference call — the last 2xx — pinned so
   // it stands out and outlives the cap.
   validatedHandle('recording:materialize-history', recordingMaterializeHistoryArgs, async (_event, [sessionId, plan]) => {
-    const details = plan.flatMap((entry) => entry.captureIds.flatMap((captureId) => {
-      const call = recordingCaptureStore.get(sessionId, captureId)
-      return call ? [captureToHistoryDetail(entry.requestId, call, captureId === entry.referenceCaptureId)] : []
-    }))
-    const stored = await responseHistoryService.storeCapturedCalls(details)
+    const stored = await materializeRecordingHistory(sessionId, plan)
     return { stored }
   })
+}
+
+/**
+ * Write the captured calls behind freshly deduced requests into the response
+ * history sidecar (normal format, retention cap applied). Shared by the
+ * renderer's deduction (IPC) and the MCP `deduce_recording_routes` tool.
+ * Returns the number of entries stored.
+ */
+export async function materializeRecordingHistory(sessionId: string, plan: readonly RecordingHistoryPlanEntry[]): Promise<number> {
+  const details = plan.flatMap((entry) => entry.captureIds.flatMap((captureId) => {
+    const call = recordingCaptureStore.get(sessionId, captureId)
+    return call ? [captureToHistoryDetail(entry.requestId, call, captureId === entry.referenceCaptureId)] : []
+  }))
+  return responseHistoryService.storeCapturedCalls(details)
 }

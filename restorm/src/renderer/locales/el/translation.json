@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Λίστα συνεδριών καταγραφής",
+    "createRecordingSession": "Δημιουργία συνεδρίας καταγραφής",
+    "updateRecordingSession": "Ενημέρωση συνεδρίας καταγραφής",
+    "setRecordingFilters": "Ορισμός φίλτρων URL συνεδρίας καταγραφής",
+    "startRecording": "Έναρξη καταγραφής συνεδρίας",
+    "stopRecording": "Διακοπή καταγραφής συνεδρίας",
+    "getRecordingStatus": "Λήψη κατάστασης συνεδρίας καταγραφής",
+    "listRecordingCaptures": "Λίστα καταγεγραμμένων κλήσεων συνεδρίας καταγραφής",
+    "getRecordingCapture": "Λήψη μίας καταγεγραμμένης κλήσης πλήρως",
+    "deduceRecordingRoutes": "Συμπερασμός διαδρομών συνεδρίας καταγραφής",
     "answerScenarioInput": "Απάντηση σε είσοδο σεναρίου",
     "arrangeScenario": "Αυτόματη διάταξη σεναρίου",
     "cancelRequest": "Ακύρωση αιτήματος",

@@ -20,7 +20,9 @@ import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import { designServerService } from '../../services/DesignServerService'
 import { designCodegenService } from '../../services/designCodegen/DesignCodegenService'
-import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign, isRecordingSession, KeyValue, Environment, ICON_TYPES } from '../../../shared/models'
+import { recordingCaptureEngine } from '../../services/recording/RecordingCaptureEngine'
+import { recordingCaptureStore } from '../../services/recording/RecordingCaptureStore'
 import type { Icon } from '../../../shared/models'
 import { REQUEST_TYPES } from '../../../shared/protocolRegistry'
 import { isSoapRequest } from '../../../shared/types/requests/index'
@@ -323,7 +325,7 @@ export function registerWriteTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.renameItem',
       title: 'Rename a folder, request or scenario',
       description:
-        'Update the `name` of an existing folder, env-folder, request or scenario. The new name ' +
+        'Update the `name` of an existing folder, env-folder, request, scenario, design or recording session. The new name ' +
         'appears in the sidebar immediately via the renderer\'s GraphQL subscriptions.',
       inputSchema: {
         id: z.string().min(1).describe('Item id to rename.'),
@@ -365,7 +367,14 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: 'design', name: updated.name })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder, request, scenario or design`)
+      if (isRecordingSession(target)) {
+        const updated = collectionStore.updateRecording(id, { name: newName })
+        if (!updated) return errorReply(`updateRecording failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'recording', name: updated.name })
+      }
+      return errorReply(`Item ${id} is not a folder, env-folder, request, scenario, design or recording session`)
     }
   )
 
@@ -375,8 +384,8 @@ export function registerWriteTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.moveItem',
       title: 'Move a folder, request, scenario or design to a new parent or position',
       description:
-        'Reparent and/or reorder an existing sidebar item (request, folder, env-folder, scenario or API design). ' +
-        'With `newParentId`, the item moves under that container (folder, env-folder or scenario); omit ' +
+        'Reparent and/or reorder an existing sidebar item (request, folder, env-folder, scenario, API design or recording session). ' +
+        'With `newParentId`, the item moves under that container (folder, env-folder, scenario or recording session); omit ' +
         'it to keep the current parent and only change the position. `index` is the 0-based slot among ' +
         'the destination parent\'s children, interpreted AFTER the item leaves its current spot (so moving ' +
         'an item earlier shifts the items at/after that slot one position later); omit it to append at the ' +
@@ -612,7 +621,7 @@ export function registerWriteTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.deleteItem',
       title: 'Delete a folder or request',
       description:
-        'Delete a folder, env-folder, request, scenario or design by id. Folder deletes cascade to all child items. ' +
+        'Delete a folder, env-folder, request, scenario, design or recording session by id. Folder deletes cascade to all child items. ' +
         'No confirmation prompt — caller is responsible for guarding destructive deletes.',
       inputSchema: {
         id: z.string().min(1).describe('Item id to delete.')
@@ -656,7 +665,17 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: 'design', deleted: true })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder, scenario, design or request`)
+      if (isRecordingSession(target)) {
+        // A live recording must not outlive its session; its captures go too.
+        recordingCaptureEngine.stop(id)
+        recordingCaptureStore.clearSession(id)
+        const ok = collectionStore.deleteRecording(id)
+        if (!ok) return errorReply(`deleteRecording failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'recording', deleted: true })
+      }
+      return errorReply(`Item ${id} is not a folder, env-folder, scenario, design, recording session or request`)
     }
   )
 

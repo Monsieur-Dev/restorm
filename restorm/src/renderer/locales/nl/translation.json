@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Opnamesessies weergeven",
+    "createRecordingSession": "Een opnamesessie aanmaken",
+    "updateRecordingSession": "Een opnamesessie bijwerken",
+    "setRecordingFilters": "De URL-filters van een opnamesessie instellen",
+    "startRecording": "De opname van een sessie starten",
+    "stopRecording": "De opname van een sessie stoppen",
+    "getRecordingStatus": "De status van een opnamesessie ophalen",
+    "listRecordingCaptures": "De vastgelegde aanroepen van een opnamesessie weergeven",
+    "getRecordingCapture": "Eén vastgelegde aanroep volledig ophalen",
+    "deduceRecordingRoutes": "De routes van een opnamesessie afleiden",
     "answerScenarioInput": "Een scenario-invoer beantwoorden",
     "arrangeScenario": "Het scenario automatisch ordenen",
     "cancelRequest": "Een verzoek annuleren",

@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listar las sesiones de grabación",
+    "createRecordingSession": "Crear una sesión de grabación",
+    "updateRecordingSession": "Actualizar una sesión de grabación",
+    "setRecordingFilters": "Definir los filtros de URL de una sesión de grabación",
+    "startRecording": "Iniciar la grabación de una sesión",
+    "stopRecording": "Detener la grabación de una sesión",
+    "getRecordingStatus": "Obtener el estado de una sesión de grabación",
+    "listRecordingCaptures": "Listar las llamadas capturadas de una sesión de grabación",
+    "getRecordingCapture": "Obtener una llamada capturada completa",
+    "deduceRecordingRoutes": "Deducir las rutas de una sesión de grabación",
     "answerScenarioInput": "Responder a una entrada de escenario",
     "arrangeScenario": "Organizar el escenario",
     "cancelRequest": "Cancelar una solicitud",

@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "녹화 세션 목록 표시",
+    "createRecordingSession": "녹화 세션 만들기",
+    "updateRecordingSession": "녹화 세션 업데이트",
+    "setRecordingFilters": "녹화 세션의 URL 필터 설정",
+    "startRecording": "세션 녹화 시작",
+    "stopRecording": "세션 녹화 중지",
+    "getRecordingStatus": "녹화 세션 상태 가져오기",
+    "listRecordingCaptures": "녹화 세션에서 캡처된 호출 목록 표시",
+    "getRecordingCapture": "캡처된 호출 하나를 전체 가져오기",
+    "deduceRecordingRoutes": "녹화 세션의 경로 추론",
     "answerScenarioInput": "시나리오 입력에 응답",
     "arrangeScenario": "시나리오 자동 정렬",
     "cancelRequest": "요청 취소",

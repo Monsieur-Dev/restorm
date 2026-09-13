@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Vis optagelsessessioner",
+    "createRecordingSession": "Opret en optagelsessession",
+    "updateRecordingSession": "Opdater en optagelsessession",
+    "setRecordingFilters": "Angiv URL-filtre for en optagelsessession",
+    "startRecording": "Start optagelse af en session",
+    "stopRecording": "Stop optagelse af en session",
+    "getRecordingStatus": "Hent status for en optagelsessession",
+    "listRecordingCaptures": "Vis de optagne kald i en optagelsessession",
+    "getRecordingCapture": "Hent ét optaget kald i sin helhed",
+    "deduceRecordingRoutes": "Udled ruterne i en optagelsessession",
     "answerScenarioInput": "Besvar et scenarieinput",
     "arrangeScenario": "Arranger scenariet automatisk",
     "cancelRequest": "Annuller en anmodning",

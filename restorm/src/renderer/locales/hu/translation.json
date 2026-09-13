@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Rögzítési munkamenetek listázása",
+    "createRecordingSession": "Rögzítési munkamenet létrehozása",
+    "updateRecordingSession": "Rögzítési munkamenet frissítése",
+    "setRecordingFilters": "Rögzítési munkamenet URL-szűrőinek beállítása",
+    "startRecording": "Munkamenet rögzítésének indítása",
+    "stopRecording": "Munkamenet rögzítésének leállítása",
+    "getRecordingStatus": "Rögzítési munkamenet állapotának lekérése",
+    "listRecordingCaptures": "Rögzítési munkamenet rögzített hívásainak listázása",
+    "getRecordingCapture": "Egy rögzített hívás teljes lekérése",
+    "deduceRecordingRoutes": "Rögzítési munkamenet útvonalainak levezetése",
     "answerScenarioInput": "Forgatókönyv-bemenet megválaszolása",
     "arrangeScenario": "Forgatókönyv automatikus elrendezése",
     "cancelRequest": "Kérés megszakítása",

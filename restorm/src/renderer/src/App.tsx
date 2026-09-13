@@ -159,6 +159,7 @@ import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToas
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useMcpRecordingBridge } from './hooks/useMcpRecordingBridge'
 import { useExternalFileChange } from './hooks/useExternalFileChange'
 import { useGitMergeInProgressToast } from 'electron-core-ui/renderer'
 import { useGitFolder } from './hooks/useGitFolder'
@@ -1512,7 +1513,11 @@ const App: React.FC = () => {
       return null
     }
     const legacyMatch = /^(folder|env-folder|request|scenario|design)-(?:id:)?(.+)$/.exec(tabId)
-    return legacyMatch?.[2] ?? null
+    if (legacyMatch?.[2]) return legacyMatch[2]
+    // A recording session's tabs (`recording-id:<id>` / `recording-node-id:<id>:<node>`)
+    // all belong to the session item.
+    const recordingMatch = /^recording-(?:node-)?id:([^:]+)/.exec(tabId)
+    return recordingMatch?.[1] ?? null
   }, [rootItems])
 
   // Resolve the active tab's unit id and delegate to `handleMenuSaveUnit`,
@@ -1565,6 +1570,14 @@ const App: React.FC = () => {
     if (!itemId) return null
     const item = findItemById(rootItems, itemId)
     return item !== null && isApiDesign(item) ? itemId : null
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+  const activeRecordingId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isRecordingSession(item) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
@@ -2051,8 +2064,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? null,
-    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? activeRecordingId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : activeRecordingId ? 'recording' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on
@@ -2072,6 +2085,7 @@ const App: React.FC = () => {
     openAnyRequestTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
@@ -2401,6 +2415,14 @@ const App: React.FC = () => {
     void window.restorm?.recording.stop(sessionId)
     handleCloseTabByTabId(recordingTabId(sessionId, 'browser'))
   }, [handleCloseTabByTabId])
+
+  // MCP `start_recording` / `stop_recording` run the same two flows.
+  useMcpRecordingBridge({
+    enabled: mcpEnabled,
+    rootItemsRef,
+    startRecording: handleStartRecordingSession,
+    stopRecording: handleStopRecordingSession
+  })
 
   // "Deduce the routes": the captured calls become a tree of folders + real
   // requests under the session's Routes node — merged with a previous

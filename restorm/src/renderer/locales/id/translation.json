@@ -2929,6 +2929,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Daftar sesi perekaman",
+    "createRecordingSession": "Buat sesi perekaman",
+    "updateRecordingSession": "Perbarui sesi perekaman",
+    "setRecordingFilters": "Atur filter URL sesi perekaman",
+    "startRecording": "Mulai merekam sesi",
+    "stopRecording": "Berhenti merekam sesi",
+    "getRecordingStatus": "Dapatkan status sesi perekaman",
+    "listRecordingCaptures": "Daftar panggilan yang ditangkap dari sesi perekaman",
+    "getRecordingCapture": "Dapatkan satu panggilan yang ditangkap secara lengkap",
+    "deduceRecordingRoutes": "Simpulkan rute sesi perekaman",
     "answerScenarioInput": "Jawab masukan skenario",
     "arrangeScenario": "Tata otomatis skenario",
     "cancelRequest": "Batalkan permintaan",

@@ -33,13 +33,14 @@
 
 import { useEffect } from 'react'
 import { navigationService, logger } from 'electron-core-ui/renderer'
-import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario, ApiDesign } from '../../../shared/types/collections'
+import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario, ApiDesign, RecordingSession } from '../../../shared/types/collections'
+import type { RecordingTabNode } from '../../../shared/recording/recordingSections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
-import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findDesignById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findDesignById, findRecordingSessionById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 import type { OpenTabOptions } from './useWorkbenchTabs'
 
-type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design'
+type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording'
 
 interface RestormNavBridge {
   onMcpOpenTab: (cb: (payload: { requestId?: string; itemId: string; kind: ActiveKind }) => void) => () => void
@@ -60,6 +61,8 @@ export interface UseMcpNavigationInput {
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  /** A recording session's tab: `open_tab` lands on its config page. */
+  openRecordingTab: (session: RecordingSession, node: RecordingTabNode, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   closeTabByItemId: (itemId: string) => void
 }
 
@@ -98,6 +101,7 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
     openAnyRequestTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     closeTabByItemId
   } = input
 
@@ -171,6 +175,14 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
           expandAncestors(itemId, items)
           navigationService.navigateTo(itemId, 'mcp', { type: 'design' })
           ack(true)
+        } else if (kind === 'recording') {
+          const session = findRecordingSessionById(items, itemId)
+          if (!session) { ack(false); return }
+          openRecordingTab(session, 'config', breadcrumbs, { temporary: false })
+          setSelectedItemId(itemId)
+          expandAncestors(itemId, items)
+          navigationService.navigateTo(itemId, 'mcp', { type: 'recording' })
+          ack(true)
         } else {
           // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
           const f = findFolderById(items, itemId)
@@ -202,5 +214,5 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       offReveal()
       offClose()
     }
-  }, [enabled, rootItemsRef, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, openDesignTab, closeTabByItemId])
+  }, [enabled, rootItemsRef, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, openDesignTab, openRecordingTab, closeTabByItemId])
 }

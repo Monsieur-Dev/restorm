@@ -14,7 +14,7 @@
 
 import { useEffect, useRef } from 'react'
 
-type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null
+type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null
 
 interface RestormRuntimeBridge {
   pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: ActiveKind }) => void

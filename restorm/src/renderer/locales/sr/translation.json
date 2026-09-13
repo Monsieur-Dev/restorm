@@ -2931,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Prikaži sesije snimanja",
+    "createRecordingSession": "Napravi sesiju snimanja",
+    "updateRecordingSession": "Ažuriraj sesiju snimanja",
+    "setRecordingFilters": "Podesi URL filtere sesije snimanja",
+    "startRecording": "Pokreni snimanje sesije",
+    "stopRecording": "Zaustavi snimanje sesije",
+    "getRecordingStatus": "Preuzmi status sesije snimanja",
+    "listRecordingCaptures": "Prikaži snimljene pozive sesije snimanja",
+    "getRecordingCapture": "Preuzmi jedan snimljeni poziv u celosti",
+    "deduceRecordingRoutes": "Izvedi rute sesije snimanja",
     "answerScenarioInput": "Odgovori na unos scenarija",
     "arrangeScenario": "Automatski rasporedi scenario",
     "cancelRequest": "Otkaži zahtev",

@@ -26,7 +26,9 @@ import { randomUUID } from 'node:crypto'
 import { BrowserWindow, ipcMain, type IpcMainEvent } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
-import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, isApiDesign, isRecordingSession } from '../../../shared/models'
+
+type NavKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording'
 import { SINGLETON_TAB_IDS, isSingletonTabId } from '../../../shared/types/editor'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -100,7 +102,7 @@ type OpenTabRound = 'opened' | 'not-projected' | 'no-window' | 'timeout'
  */
 function openTabRound(
   itemId: string,
-  kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design',
+  kind: NavKind,
   roundTimeoutMs: number
 ): Promise<OpenTabRound> {
   const windows = BrowserWindow.getAllWindows().filter((win) => !win.isDestroyed())
@@ -146,7 +148,7 @@ function openTabRound(
  */
 async function openTabAndAwaitAck(
   itemId: string,
-  kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design',
+  kind: NavKind,
   timeoutMs = OPEN_TAB_ACK_TIMEOUT_MS
 ): Promise<boolean> {
   const deadline = Date.now() + timeoutMs
@@ -164,7 +166,7 @@ async function openTabAndAwaitAck(
   }
 }
 
-function describeKind(itemId: string): 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null {
+function describeKind(itemId: string): NavKind | null {
   const target = collectionStore.findById(itemId)
   if (!target) return null
   // A scenario carries `configuration`, so it passes `isAnyFolder` — test it
@@ -172,6 +174,7 @@ function describeKind(itemId: string): 'request' | 'folder' | 'env-folder' | 'sc
   // it down the folder path (which can't find or open it).
   if (isScenario(target)) return 'scenario'
   if (isApiDesign(target)) return 'design'
+  if (isRecordingSession(target)) return 'recording'
   if (isRequest(target)) return 'request'
   if (isEnvironmentFolder(target)) return 'env-folder'
   if (isAnyFolder(target)) return 'folder'

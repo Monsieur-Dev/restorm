@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Kayıt oturumlarını listele",
+    "createRecordingSession": "Bir kayıt oturumu oluştur",
+    "updateRecordingSession": "Bir kayıt oturumunu güncelle",
+    "setRecordingFilters": "Bir kayıt oturumunun URL filtrelerini ayarla",
+    "startRecording": "Bir oturumun kaydını başlat",
+    "stopRecording": "Bir oturumun kaydını durdur",
+    "getRecordingStatus": "Bir kayıt oturumunun durumunu al",
+    "listRecordingCaptures": "Bir kayıt oturumunun yakalanan çağrılarını listele",
+    "getRecordingCapture": "Yakalanan bir çağrının tamamını al",
+    "deduceRecordingRoutes": "Bir kayıt oturumunun rotalarını çıkar",
     "answerScenarioInput": "Senaryo girişini yanıtla",
     "arrangeScenario": "Senaryoyu otomatik düzenle",
     "cancelRequest": "İsteği iptal et",

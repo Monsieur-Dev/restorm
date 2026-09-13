@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Vis opptaksøkter",
+    "createRecordingSession": "Opprett en opptaksøkt",
+    "updateRecordingSession": "Oppdater en opptaksøkt",
+    "setRecordingFilters": "Angi URL-filtre for en opptaksøkt",
+    "startRecording": "Start opptak av en økt",
+    "stopRecording": "Stopp opptak av en økt",
+    "getRecordingStatus": "Hent status for en opptaksøkt",
+    "listRecordingCaptures": "Vis de registrerte kallene i en opptaksøkt",
+    "getRecordingCapture": "Hent ett registrert kall i sin helhet",
+    "deduceRecordingRoutes": "Utled rutene i en opptaksøkt",
     "answerScenarioInput": "Svar på en scenarioinndata",
     "arrangeScenario": "Ordne scenarioet automatisk",
     "cancelRequest": "Avbryt en forespørsel",

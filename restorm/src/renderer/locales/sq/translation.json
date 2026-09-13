@@ -2930,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listo sesionet e regjistrimit",
+    "createRecordingSession": "Krijo një sesion regjistrimi",
+    "updateRecordingSession": "Përditëso një sesion regjistrimi",
+    "setRecordingFilters": "Cakto filtrat e URL-ve të një sesioni regjistrimi",
+    "startRecording": "Nis regjistrimin e një sesioni",
+    "stopRecording": "Ndalo regjistrimin e një sesioni",
+    "getRecordingStatus": "Merr gjendjen e një sesioni regjistrimi",
+    "listRecordingCaptures": "Listo thirrjet e kapura të një sesioni regjistrimi",
+    "getRecordingCapture": "Merr një thirrje të kapur të plotë",
+    "deduceRecordingRoutes": "Nxirr rrugët e një sesioni regjistrimi",
     "answerScenarioInput": "Përgjigju një hyrjeje skenari",
     "arrangeScenario": "Rregullo automatikisht skenarin",
     "cancelRequest": "Anulo një kërkesë",

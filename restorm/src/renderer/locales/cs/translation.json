@@ -2932,6 +2932,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Zobrazit relace nahrávání",
+    "createRecordingSession": "Vytvořit relaci nahrávání",
+    "updateRecordingSession": "Aktualizovat relaci nahrávání",
+    "setRecordingFilters": "Nastavit filtry URL relace nahrávání",
+    "startRecording": "Spustit nahrávání relace",
+    "stopRecording": "Zastavit nahrávání relace",
+    "getRecordingStatus": "Získat stav relace nahrávání",
+    "listRecordingCaptures": "Zobrazit zachycená volání relace nahrávání",
+    "getRecordingCapture": "Získat jedno zachycené volání v plném rozsahu",
+    "deduceRecordingRoutes": "Odvodit trasy relace nahrávání",
     "answerScenarioInput": "Odpovědět na vstup scénáře",
     "arrangeScenario": "Automaticky uspořádat scénář",
     "cancelRequest": "Zrušit požadavek",

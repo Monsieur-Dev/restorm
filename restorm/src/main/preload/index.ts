@@ -2375,7 +2375,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -2466,7 +2466,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
@@ -2476,8 +2476,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
      * internal senders (e.g. `run_request`'s tab-open side effect), which
      * stay fire-and-forget. */
-    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
@@ -2490,9 +2490,32 @@ contextBridge.exposeInMainWorld('restorm', {
     replyMcpOpenTab: (payload: { requestId: string; opened: boolean }): void => {
       ipcRenderer.send('mcp:open-tab-result', payload)
     },
+    /** Subscribe to MCP `start_recording` requests. Payload `{requestId, sessionId}`:
+     * the renderer runs the record button's flow (stage the intent, open the
+     * browser tab) and acks whether it found the session (`replyMcpStartRecording`).
+     * Main then watches the capture engine's status — the ack only says the
+     * flow was started, not that the engine attached. */
+    onMcpStartRecording: (callback: (payload: { requestId: string; sessionId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId: string; sessionId: string }) }
+      ipcRenderer.on('mcp:start-recording', handler)
+      return () => { ipcRenderer.off('mcp:start-recording', handler) }
+    },
+    /** Ack an `mcp:start-recording` request. `accepted` = this window holds
+     * the session and launched the start flow. */
+    replyMcpStartRecording: (payload: { requestId: string; accepted: boolean }): void => {
+      ipcRenderer.send('mcp:start-recording-result', payload)
+    },
+    /** Subscribe to MCP `stop_recording` requests. Payload `{sessionId}`. Main
+     * has already stopped the engine; the renderer closes the browser tab and
+     * clears any staged start intent. */
+    onMcpStopRecording: (callback: (payload: { sessionId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { sessionId: string }) }
+      ipcRenderer.on('mcp:stop-recording', handler)
+      return () => { ipcRenderer.off('mcp:stop-recording', handler) }
+    },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -2507,8 +2530,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

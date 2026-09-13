@@ -102,3 +102,26 @@ Feature: Recording session sidebar nodes and tabs
     Then the recording "routes" tab is open
     And the recording routes tab lists 1 deduced request
     And the Routes row of the session lists the request "GET /api/ping" in the folder "api"
+
+  Scenario: An agent drives a whole recording over MCP — create, record, read the captures, deduce
+    Given a Pro project with an env folder is open with the MCP server enabled
+    When I create a recording session over MCP pointing at the local page
+    Then the sidebar shows the session created over MCP
+    And MCP lists 1 recording session named "MCP recording"
+    When I start the recording over MCP
+    Then the session is on air
+    And the MCP recording status reports at least 2 captures
+    When I stop the recording over MCP
+    Then the session is idle
+    When I deduce the routes over MCP
+    Then the MCP deduction reports 1 new route
+    And MCP lists the folder "api" under the session and the request "GET /api/ping" inside it
+    When I open the session tab over MCP
+    And I expand the session row
+    Then the Routes row of the session lists the request "GET /api/ping" in the folder "api"
+
+  Scenario: Over MCP, deducing the routes is refused on Community
+    Given a project with an env folder is open with the MCP server enabled
+    When I create a recording session over MCP pointing at the local page
+    Then the sidebar shows the session created over MCP
+    And deducing the routes over MCP is refused as a Pro feature

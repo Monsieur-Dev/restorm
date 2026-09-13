@@ -22,8 +22,7 @@ import { searchService } from 'electron-core-ui/main'
 import {
   isAnyFolder,
   isEnvironmentFolder,
-  isRequest
-} from '../../../shared/models'
+  isRequest, isRecordingSession} from '../../../shared/models'
 import { flattenTree, flattenScenarios, listChildren } from '../tree'
 import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
 
@@ -67,7 +66,7 @@ export function registerReadTools(mcp: McpService): void {
         return jsonReply(flattenTree(collectionStore.getCollections()).folders)
       }
       const target = collectionStore.findById(parentId)
-      if (!target || !isAnyFolder(target)) {
+      if (!target || !(isAnyFolder(target) || isRecordingSession(target))) {
         return errorReply(`No folder with id ${parentId} (target is ${target ? 'not a folder' : 'unknown'})`)
       }
       return jsonReply(listChildren(target).folders)
@@ -112,7 +111,7 @@ export function registerReadTools(mcp: McpService): void {
         return jsonReply(flattenTree(collectionStore.getCollections()).requests)
       }
       const target = collectionStore.findById(folderId)
-      if (!target || !isAnyFolder(target)) {
+      if (!target || !(isAnyFolder(target) || isRecordingSession(target))) {
         return errorReply(`No folder with id ${folderId} (target is ${target ? 'not a folder' : 'unknown'})`)
       }
       return jsonReply(listChildren(target).requests)
@@ -150,7 +149,7 @@ export function registerReadTools(mcp: McpService): void {
       titleKey: 'mcpToolTitles.search',
       title: 'Search project',
       description:
-        'Run a typed search across folders / requests / environments / scenarios / designs using restorm\'s ' +
+        'Run a typed search across folders / requests / environments / scenarios / designs / recording sessions using restorm\'s ' +
         'in-memory search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
         'the response length (default 50, max 200). Each match carries `{ id, title, category, ' +
         'description?, score }`; request-kind matches additionally carry `method` and `url` so ' +
@@ -158,7 +157,7 @@ export function registerReadTools(mcp: McpService): void {
         'without a follow-up `get_request`.',
       inputSchema: {
         query: z.string().min(1).describe('Free-text query, e.g. "users" or "POST /pets".'),
-        kinds: z.array(z.enum(['request', 'folder', 'environment', 'scenario', 'design', 'tag', 'settings'])).optional().describe(
+        kinds: z.array(z.enum(['request', 'folder', 'environment', 'scenario', 'design', 'recording', 'tag', 'settings'])).optional().describe(
           'Restrict matches to one or more categories. Omit for all kinds.'
         ),
         maxResults: z.coerce.number().int().min(1).max(ABS_MAX_SEARCH_RESULTS).optional().describe(
