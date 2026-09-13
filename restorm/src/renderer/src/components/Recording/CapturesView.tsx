@@ -210,6 +210,9 @@ export const CapturesView: React.FC<CapturesViewProps> = ({ session, onDeduceRou
                 // visible window (rows are a fixed 26px).
                 virtualized
                 rowHeight={26}
+                // A live recording reads like a log: keep the newest calls in
+                // view while the list is scrolled to the bottom.
+                followTail
                 selectionMode="single"
                 selectedIds={selectedId !== null ? [selectedId] : []}
                 onItemClick={handleItemClick}

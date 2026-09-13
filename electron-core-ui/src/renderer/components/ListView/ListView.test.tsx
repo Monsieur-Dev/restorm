@@ -231,6 +231,56 @@ describe('ListView multi-drag', () => {
  * defining `clientHeight` on the scroll content and firing a scroll event —
  * exactly the two signals the component reads.
  */
+describe('ListView followTail', () => {
+	const ROW = 20
+	const rows = (n: number): ListViewItemData[] => Array.from({ length: n }, (_, i) => ({ id: `row-${String(i)}`, title: `Row ${String(i)}` }))
+	function scrollContent(container: HTMLElement): HTMLElement {
+		const el = container.querySelector<HTMLElement>('.list-view')
+		if (!el) throw new Error('no list content')
+		return el
+	}
+	/** jsdom has no layout: the scroll geometry is stubbed by hand. */
+	function geometry(el: HTMLElement, clientHeight: number, scrollHeight: number): void {
+		Object.defineProperty(el, 'clientHeight', { value: clientHeight, configurable: true })
+		Object.defineProperty(el, 'scrollHeight', { value: scrollHeight, configurable: true })
+	}
+
+	it('scrolls to the new bottom when rows are appended while at the bottom', () => {
+		const { container, rerender } = render(<ListView data-testid="tail" items={rows(5)} followTail virtualized rowHeight={ROW} />)
+		const el = scrollContent(container)
+		geometry(el, 100, 5 * ROW)
+		fireEvent.scroll(el)
+		geometry(el, 100, 50 * ROW)
+		rerender(<ListView data-testid="tail" items={rows(50)} followTail virtualized rowHeight={ROW} />)
+		expect(el.scrollTop).toBe(50 * ROW - 100)
+	})
+
+	it('stays put once the user scrolled up, and resumes at the bottom', () => {
+		const { container, rerender } = render(<ListView data-testid="tail" items={rows(50)} followTail rowHeight={ROW} />)
+		const el = scrollContent(container)
+		geometry(el, 100, 50 * ROW)
+		el.scrollTop = 200
+		fireEvent.scroll(el)
+		geometry(el, 100, 60 * ROW)
+		rerender(<ListView data-testid="tail" items={rows(60)} followTail rowHeight={ROW} />)
+		expect(el.scrollTop).toBe(200)
+		// Back to the bottom: following resumes on the next append.
+		el.scrollTop = 60 * ROW - 100
+		fireEvent.scroll(el)
+		geometry(el, 100, 70 * ROW)
+		rerender(<ListView data-testid="tail" items={rows(70)} followTail rowHeight={ROW} />)
+		expect(el.scrollTop).toBe(70 * ROW - 100)
+	})
+
+	it('does nothing without the option', () => {
+		const { container, rerender } = render(<ListView data-testid="tail" items={rows(5)} rowHeight={ROW} />)
+		const el = scrollContent(container)
+		geometry(el, 100, 50 * ROW)
+		rerender(<ListView data-testid="tail" items={rows(50)} rowHeight={ROW} />)
+		expect(el.scrollTop).toBe(0)
+	})
+})
+
 describe('ListView virtualisation', () => {
   const ROW = 26
   const many: ListViewItemData[] = Array.from({ length: 200 }, (_, i) => ({ id: `row-${String(i)}`, title: `Row ${String(i)}` }))

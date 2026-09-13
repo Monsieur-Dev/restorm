@@ -121,3 +121,26 @@ When('I scroll list view {string} to the bottom', async ({ page }, listId: strin
   await content.evaluate((el) => { el.scrollTop = el.scrollHeight })
   await page.waitForTimeout(300)
 })
+
+// ── Follow tail ───────────────────────────────────────────────────────
+
+When('I click the list view harness append button', async ({ page }) => {
+  await page.locator('[data-testid="listview-tail-append"]').click()
+  await page.waitForTimeout(300)
+})
+
+When('I scroll list view {string} to the top', async ({ page }, listId: string) => {
+  const content = page.locator(`[data-testid="${listId}-scrollable-content"]`)
+  await content.evaluate((el) => { el.scrollTop = 0 })
+  await page.waitForTimeout(300)
+})
+
+Then('list view {string} is scrolled to the bottom', async ({ page }, listId: string) => {
+  const content = page.locator(`[data-testid="${listId}-scrollable-content"]`)
+  await expect.poll(async () => content.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop), { timeout: 5000 }).toBeLessThanOrEqual(1)
+})
+
+Then('list view {string} is scrolled to the top', async ({ page }, listId: string) => {
+  const content = page.locator(`[data-testid="${listId}-scrollable-content"]`)
+  await expect.poll(async () => content.evaluate((el) => el.scrollTop), { timeout: 5000 }).toBe(0)
+})

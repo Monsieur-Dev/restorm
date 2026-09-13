@@ -125,6 +125,10 @@ export interface ListViewProps {
   rowHeight?: number
   /** Rows mounted beyond each viewport edge. Default 10. */
   overscan?: number
+  /** Follow the tail of a growing list: scrolled to the bottom + rows
+   *  appended → scrolls to the new bottom; scrolled up → stays put until
+   *  the user comes back to the bottom. Default false. */
+  followTail?: boolean
 }
 
 export interface ListViewItemProps {
@@ -233,6 +237,14 @@ const FileTree: React.FC = () => {
   always kept mounted. Sticky headers are not supported (a header scrolled out
   of the window unmounts). Off by default: existing consumers keep every row
   in the DOM.
+
+- **Follow tail (opt-in)**: `followTail` makes a growing list behave like a
+  live log. While the list is scrolled to the bottom (within one row — a
+  fresh, never-scrolled list counts as at the bottom), every batch of appended
+  rows scrolls it to the new bottom; as soon as the user scrolls up it stays
+  where it is, and it resumes following once they scroll back down. Nothing
+  else changes: rows are appended by the consumer as usual, and the option
+  works with or without `virtualized`. Off by default.
 
 ## Notes for AI Usage
 

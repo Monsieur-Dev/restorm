@@ -191,7 +191,9 @@
       "basic": "Basique (sélection, expansion, sticky, rename, dnd, menu contextuel)",
       "controlledExpansion": "Expansion contrôlée (expandedIds)",
       "multipleSelection": "Sélection multiple",
-      "virtualized": "Virtualisée (5000 lignes, 26px fixes)"
+      "virtualized": "Virtualisée (5000 lignes, 26px fixes)",
+      "followTail": "Suivi de fin de liste (20 lignes par clic, reste collée en bas tant qu'on y est)",
+      "appendRows": "Ajouter 20 lignes"
     }
   },
   "listViewDropdown": {

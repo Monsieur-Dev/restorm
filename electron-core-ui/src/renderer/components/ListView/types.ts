@@ -309,6 +309,14 @@ export interface ListViewProps {
    * scroll shows content before the window catches up. Default 10.
    */
   overscan?: number
+
+  /**
+   * Follow the tail of a growing list (a live log): when the list is
+   * scrolled to the bottom and rows are appended, it scrolls to the new
+   * bottom; once the user scrolls up, it stays put until they come back to
+   * the bottom. Works with or without `virtualized`. Default `false`.
+   */
+  followTail?: boolean
 }
 
 export interface ListViewItemProps {

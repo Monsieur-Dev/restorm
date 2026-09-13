@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
 import { startDragPreview } from '../../utils/dragPreview'
@@ -213,7 +213,8 @@ const ListViewInner: React.FC<ListViewProps> = ({
   onEmptyAreaDrop,
   virtualized = false,
   rowHeight = DEFAULT_ROW_HEIGHT,
-  overscan = DEFAULT_OVERSCAN
+  overscan = DEFAULT_OVERSCAN,
+  followTail = false
 }) => {
   const rootTestId = dataTestId ?? 'list-view'
   const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
@@ -370,9 +371,30 @@ const ListViewInner: React.FC<ListViewProps> = ({
     const next = { scrollTop: scrollTop ?? el.scrollTop, height: el.clientHeight }
     setViewport((prev) => (prev.scrollTop === next.scrollTop && prev.height === next.height ? prev : next))
   }, [])
+  // ── Follow tail ───────────────────────────────────────────────────────
+  // "At the bottom" is sampled on every scroll (within a row of the end, so
+  // a sub-pixel gap or a smooth-scroll rounding still counts); a list that
+  // has not scrolled yet is at the bottom. When rows are appended while at
+  // the bottom, the list scrolls to the new end right after the rows (or the
+  // virtual spacers) are laid out.
+  const atBottomRef = useRef(true)
+  const sampleAtBottom = useCallback(() => {
+    const el = listRef.current
+    if (!el) return
+    atBottomRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - rowHeight
+  }, [rowHeight])
   const handleScroll = useCallback((scrollTop: number) => {
     if (virtualized) measureViewport(scrollTop)
-  }, [virtualized, measureViewport])
+    if (followTail) sampleAtBottom()
+  }, [virtualized, measureViewport, followTail, sampleAtBottom])
+  const rowCount = flatItems.length
+  useLayoutEffect(() => {
+    if (!followTail || !atBottomRef.current) return
+    const el = listRef.current
+    if (!el) return
+    const top = Math.max(0, el.scrollHeight - el.clientHeight)
+    if (el.scrollTop !== top) el.scrollTop = top
+  }, [followTail, rowCount])
   useEffect(() => {
     if (!virtualized) return
     const el = listRef.current
@@ -1062,7 +1084,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
         aria-label={ariaLabel}
         tabIndex={0}
         onKeyDown={handleKeyDown}
-        {...(virtualized ? { onScroll: handleScroll } : {})}
+        {...(virtualized || followTail ? { onScroll: handleScroll } : {})}
         {...(onEmptyAreaDrop && !disableDrag ? {
           onDragOver: handleEmptyAreaDragOver,
           onDrop: handleEmptyAreaDrop

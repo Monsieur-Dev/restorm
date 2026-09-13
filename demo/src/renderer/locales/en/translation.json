@@ -191,7 +191,9 @@
       "basic": "Basic (selection, expand, sticky, rename, dnd, context menu)",
       "controlledExpansion": "Controlled expansion (expandedIds)",
       "multipleSelection": "Multiple selection",
-      "virtualized": "Virtualised (5000 rows, fixed 26px)"
+      "virtualized": "Virtualised (5000 rows, fixed 26px)",
+      "followTail": "Follow tail (grows by 20 rows, sticks to the bottom while at the bottom)",
+      "appendRows": "Append 20 rows"
     }
   },
   "listViewDropdown": {

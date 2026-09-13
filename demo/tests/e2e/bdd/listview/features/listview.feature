@@ -81,3 +81,16 @@ Feature: ListView
     When I click list view "listview-virtual" item "v-4999"
     Then list view harness last selection itemid should be "v-4999"
 
+  Scenario: A follow-tail list sticks to the bottom while it is at the bottom, and stays put once scrolled up
+    Given I open the list view e2e tab
+    Then list view "listview-tail" should be visible
+    When I click the list view harness append button
+    Then list view "listview-tail" is scrolled to the bottom
+    Then list view "listview-tail" mounts item "t-39"
+    When I scroll list view "listview-tail" to the top
+    And I click the list view harness append button
+    Then list view "listview-tail" is scrolled to the top
+    When I scroll list view "listview-tail" to the bottom
+    And I click the list view harness append button
+    Then list view "listview-tail" is scrolled to the bottom
+    Then list view "listview-tail" mounts item "t-79"
