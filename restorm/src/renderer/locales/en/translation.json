@@ -2832,6 +2832,30 @@
       "browser": "The recording browser will appear here.",
       "captures": "No call captured yet. Start a recording from the session settings to see the calls of the page appear here.",
       "routes": "No route deduced yet. Record some calls, then deduce the routes from the captures."
+    },
+    "config": {
+      "subtitle": "Browse the page while Restorm listens to its API calls. Only the settings below are saved with the project — never the captured calls.",
+      "url": "Page to listen on",
+      "urlPlaceholder": "https://example.com, http://localhost:3000 or file:///path/page.html",
+      "urlInvalid": "Enter an http(s) or file url.",
+      "urlRequired": "Enter the page url to enable recording.",
+      "record": "Start recording",
+      "stop": "Stop recording",
+      "protocols": "Protocols to capture",
+      "whitelist": "White list",
+      "blacklist": "Black list",
+      "addPattern": "Add a pattern",
+      "removePattern": "Remove this pattern",
+      "invalidPattern": "This pattern is not a valid regular expression.",
+      "patternPlaceholder": "Regular expression, e.g. ^https://api\\.example\\.com/",
+      "noPattern": "No pattern — everything passes.",
+      "filtersHint": "A call is kept when it matches at least one white-list entry (or the list is empty) and no black-list entry. Changes apply to the next calls."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

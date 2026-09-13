@@ -2832,6 +2832,30 @@
       "browser": "De opnamebrowser verschijnt hier.",
       "captures": "Nog geen aanroep vastgelegd. Start een opname vanuit de sessie-instellingen om de aanroepen van de pagina hier te zien verschijnen.",
       "routes": "Nog geen route afgeleid. Neem enkele aanroepen op en leid daarna de routes af uit de opnamen."
+    },
+    "config": {
+      "subtitle": "Blader door de pagina terwijl Restorm naar de API-aanroepen luistert. Alleen de instellingen hieronder worden met het project opgeslagen — nooit de vastgelegde aanroepen.",
+      "url": "Te beluisteren pagina",
+      "urlPlaceholder": "https://voorbeeld.nl, http://localhost:3000 of file:///pad/pagina.html",
+      "urlInvalid": "Voer een http(s)- of file-URL in.",
+      "urlRequired": "Voer de URL van de pagina in om opnemen in te schakelen.",
+      "record": "Opname starten",
+      "stop": "Opname stoppen",
+      "protocols": "Vast te leggen protocollen",
+      "whitelist": "Witte lijst",
+      "blacklist": "Zwarte lijst",
+      "addPattern": "Patroon toevoegen",
+      "removePattern": "Dit patroon verwijderen",
+      "invalidPattern": "Dit patroon is geen geldige reguliere expressie.",
+      "patternPlaceholder": "Reguliere expressie, bijv. ^https://api\\.voorbeeld\\.nl/",
+      "noPattern": "Geen patroon — alles wordt doorgelaten.",
+      "filtersHint": "Een aanroep wordt bewaard als hij met minstens één item van de witte lijst overeenkomt (of als die leeg is) en met geen enkel item van de zwarte lijst. Wijzigingen gelden voor de volgende aanroepen."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

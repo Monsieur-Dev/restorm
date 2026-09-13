@@ -2832,6 +2832,30 @@
       "browser": "Tallennusselain näkyy tässä.",
       "captures": "Kutsuja ei ole vielä kaapattu. Aloittakaa tallennus istunnon asetuksista, jotta sivun kutsut näkyvät tässä.",
       "routes": "Reittejä ei ole vielä päätelty. Tallentakaa kutsuja ja päätelkää sitten reitit kaappauksista."
+    },
+    "config": {
+      "subtitle": "Selatkaa sivua, kun Restorm kuuntelee sen API-kutsuja. Vain alla olevat asetukset tallennetaan projektiin — kaapattuja kutsuja ei koskaan.",
+      "url": "Kuunneltava sivu",
+      "urlPlaceholder": "https://esimerkki.fi, http://localhost:3000 tai file:///polku/sivu.html",
+      "urlInvalid": "Syöttäkää http(s)- tai file-osoite.",
+      "urlRequired": "Syöttäkää sivun osoite ottaaksenne tallennuksen käyttöön.",
+      "record": "Aloita tallennus",
+      "stop": "Lopeta tallennus",
+      "protocols": "Kaapattavat protokollat",
+      "whitelist": "Sallittujen luettelo",
+      "blacklist": "Estettyjen luettelo",
+      "addPattern": "Lisää kuvio",
+      "removePattern": "Poista tämä kuvio",
+      "invalidPattern": "Tämä kuvio ei ole kelvollinen säännöllinen lauseke.",
+      "patternPlaceholder": "Säännöllinen lauseke, esim. ^https://api\\.esimerkki\\.fi/",
+      "noPattern": "Ei kuvioita — kaikki päästetään läpi.",
+      "filtersHint": "Kutsu säilytetään, jos se vastaa vähintään yhtä sallittujen luettelon kohtaa (tai luettelo on tyhjä) eikä yhtäkään estettyjen luettelon kohtaa. Muutokset koskevat seuraavia kutsuja."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

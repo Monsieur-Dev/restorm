@@ -727,6 +727,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // captures / routes) rebuild from the live session item.
     const recordingTab = parseRecordingTabId(tabId)
     if (recordingTab !== null) {
+      // The browser tab exists only while a recording runs — a recording is
+      // never restored across a relaunch, so the tab is not rebuilt either.
+      if (recordingTab.node === 'browser') return null
       const item = findItemById(rootItems, recordingTab.sessionId)
       if (item && isRecordingSession(item)) {
         const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)

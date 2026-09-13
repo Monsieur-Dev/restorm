@@ -2832,6 +2832,30 @@
       "browser": "Der Aufnahme-Browser erscheint hier.",
       "captures": "Noch kein Aufruf erfasst. Starten Sie eine Aufnahme in den Sitzungseinstellungen, damit die Aufrufe der Seite hier erscheinen.",
       "routes": "Noch keine Route abgeleitet. Erfassen Sie Aufrufe und leiten Sie anschließend die Routen aus den Aufzeichnungen ab."
+    },
+    "config": {
+      "subtitle": "Navigieren Sie auf der Seite, während Restorm ihre API-Aufrufe mithört. Nur die Einstellungen unten werden mit dem Projekt gespeichert — niemals die erfassten Aufrufe.",
+      "url": "Zu überwachende Seite",
+      "urlPlaceholder": "https://beispiel.de, http://localhost:3000 oder file:///pfad/seite.html",
+      "urlInvalid": "Geben Sie eine http(s)- oder file-URL ein.",
+      "urlRequired": "Geben Sie die URL der Seite ein, um die Aufnahme zu aktivieren.",
+      "record": "Aufnahme starten",
+      "stop": "Aufnahme beenden",
+      "protocols": "Zu erfassende Protokolle",
+      "whitelist": "Positivliste",
+      "blacklist": "Negativliste",
+      "addPattern": "Muster hinzufügen",
+      "removePattern": "Dieses Muster entfernen",
+      "invalidPattern": "Dieses Muster ist kein gültiger regulärer Ausdruck.",
+      "patternPlaceholder": "Regulärer Ausdruck, z. B. ^https://api\\.beispiel\\.de/",
+      "noPattern": "Kein Muster — alles wird durchgelassen.",
+      "filtersHint": "Ein Aufruf wird behalten, wenn er mindestens einem Eintrag der Positivliste entspricht (oder diese leer ist) und keinem Eintrag der Negativliste. Änderungen gelten für die nächsten Aufrufe."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

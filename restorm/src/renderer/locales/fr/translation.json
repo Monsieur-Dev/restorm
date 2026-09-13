@@ -2832,6 +2832,30 @@
       "browser": "Le navigateur d’enregistrement apparaîtra ici.",
       "captures": "Aucun appel capturé pour le moment. Lancez un enregistrement depuis les paramètres de la session pour voir apparaître ici les appels de la page.",
       "routes": "Aucune route déduite pour le moment. Enregistrez des appels, puis déduisez les routes à partir des captures."
+    },
+    "config": {
+      "subtitle": "Naviguez dans la page pendant que Restorm écoute ses appels API. Seuls les paramètres ci-dessous sont enregistrés avec le projet — jamais les appels capturés.",
+      "url": "Page à écouter",
+      "urlPlaceholder": "https://exemple.com, http://localhost:3000 ou file:///chemin/page.html",
+      "urlInvalid": "Saisissez une url http(s) ou file.",
+      "urlRequired": "Saisissez l’url de la page pour activer l’enregistrement.",
+      "record": "Lancer l’enregistrement",
+      "stop": "Arrêter l’enregistrement",
+      "protocols": "Protocoles à capturer",
+      "whitelist": "Liste blanche",
+      "blacklist": "Liste noire",
+      "addPattern": "Ajouter un motif",
+      "removePattern": "Supprimer ce motif",
+      "invalidPattern": "Ce motif n’est pas une expression régulière valide.",
+      "patternPlaceholder": "Expression régulière, ex. ^https://api\\.exemple\\.com/",
+      "noPattern": "Aucun motif — tout passe.",
+      "filtersHint": "Un appel est conservé s’il correspond à au moins une entrée de la liste blanche (ou si elle est vide) et à aucune entrée de la liste noire. Les modifications s’appliquent aux appels suivants."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

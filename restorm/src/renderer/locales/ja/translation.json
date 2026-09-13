@@ -2831,6 +2831,30 @@
       "browser": "記録用ブラウザーがここに表示されます。",
       "captures": "まだ呼び出しは記録されていません。セッションの設定から記録を開始すると、ページの呼び出しがここに表示されます。",
       "routes": "まだルートは推定されていません。呼び出しを記録してから、キャプチャからルートを推定してください。"
+    },
+    "config": {
+      "subtitle": "Restorm がページの API 呼び出しを監視している間、ページを操作してください。プロジェクトに保存されるのは以下の設定のみで、記録された呼び出しは保存されません。",
+      "url": "監視するページ",
+      "urlPlaceholder": "https://example.com、http://localhost:3000、または file:///path/page.html",
+      "urlInvalid": "http(s) または file の URL を入力してください。",
+      "urlRequired": "記録を有効にするにはページの URL を入力してください。",
+      "record": "記録を開始",
+      "stop": "記録を停止",
+      "protocols": "記録するプロトコル",
+      "whitelist": "ホワイトリスト",
+      "blacklist": "ブラックリスト",
+      "addPattern": "パターンを追加",
+      "removePattern": "このパターンを削除",
+      "invalidPattern": "このパターンは有効な正規表現ではありません。",
+      "patternPlaceholder": "正規表現（例: ^https://api\\.example\\.com/）",
+      "noPattern": "パターンなし — すべて通過します。",
+      "filtersHint": "呼び出しは、ホワイトリストの少なくとも1つの項目に一致し（またはリストが空で）、ブラックリストのどの項目にも一致しない場合に保持されます。変更は以降の呼び出しに適用されます。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

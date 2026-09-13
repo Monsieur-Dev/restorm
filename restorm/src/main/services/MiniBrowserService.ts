@@ -52,14 +52,17 @@ import { BrowserWindow, WebContentsView } from 'electron'
 import { logger } from 'electron-core-ui/main'
 
 /**
- * The mini-browser only ever embeds web content. Reject any non-http(s)
- * scheme (file://, javascript:, data:, …) so a navigation can't read
- * local files or run a `javascript:` payload in the embedded context.
+ * The mini-browser embeds web content: http(s) pages, and a LOCAL html page
+ * (`file://`) — a recording session may listen to a page under development
+ * before it is served. Every other scheme (javascript:, data:, blob:, …) is
+ * rejected so a navigation can't run a `javascript:` payload in the
+ * embedded context. A `file://` page still runs sandboxed with no node
+ * integration; it reads no more than a browser opening the same file would.
  */
 function isEmbeddableUrl(url: string): boolean {
   try {
     const { protocol } = new URL(url)
-    return protocol === 'http:' || protocol === 'https:'
+    return protocol === 'http:' || protocol === 'https:' || protocol === 'file:'
   } catch {
     return false
   }
@@ -148,7 +151,7 @@ class MiniBrowserService {
 					logger.warn('[MiniBrowserService] initial loadURL failed', { tabId, url: initialUrl, error: String(err) })
 				})
 			} else {
-				logger.warn('[MiniBrowserService] blocked non-http(s) initial URL', { tabId, url: initialUrl })
+				logger.warn('[MiniBrowserService] blocked non-embeddable initial URL', { tabId, url: initialUrl })
 			}
 		}
 	}
@@ -298,7 +301,7 @@ class MiniBrowserService {
 		const state = this.views.get(tabId)
 		if (!state) return
 		if (!isEmbeddableUrl(url)) {
-			logger.warn('[MiniBrowserService] blocked non-http(s) navigation', { tabId, url })
+			logger.warn('[MiniBrowserService] blocked non-embeddable navigation', { tabId, url })
 			return
 		}
 		void state.view.webContents.loadURL(url).catch((err: unknown) => {
@@ -416,7 +419,7 @@ class MiniBrowserService {
 		view.webContents.on('will-navigate', (event, url) => {
 			if (!isEmbeddableUrl(url)) {
 				event.preventDefault()
-				logger.warn('[MiniBrowserService] blocked non-http(s) will-navigate', { tabId, url })
+				logger.warn('[MiniBrowserService] blocked non-embeddable will-navigate', { tabId, url })
 			}
 		})
 		view.webContents.on('did-navigate', (_event, url) => {

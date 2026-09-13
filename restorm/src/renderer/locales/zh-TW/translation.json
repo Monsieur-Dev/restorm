@@ -2831,6 +2831,30 @@
       "browser": "錄製瀏覽器將顯示於此。",
       "captures": "尚未擷取任何呼叫。請在工作階段設定中開始錄製，頁面的呼叫便會顯示於此。",
       "routes": "尚未推導出任何路由。請先錄製一些呼叫，再從擷取中推導路由。"
+    },
+    "config": {
+      "subtitle": "在 Restorm 監聽頁面 API 呼叫的同時瀏覽該頁面。隨專案儲存的只有以下設定，擷取的呼叫永不儲存。",
+      "url": "要監聽的頁面",
+      "urlPlaceholder": "https://example.com、http://localhost:3000 或 file:///path/page.html",
+      "urlInvalid": "請輸入 http(s) 或 file 網址。",
+      "urlRequired": "請輸入頁面網址以啟用錄製。",
+      "record": "開始錄製",
+      "stop": "停止錄製",
+      "protocols": "要擷取的通訊協定",
+      "whitelist": "白名單",
+      "blacklist": "黑名單",
+      "addPattern": "新增模式",
+      "removePattern": "移除此模式",
+      "invalidPattern": "此模式不是有效的正規表示式。",
+      "patternPlaceholder": "正規表示式，例如 ^https://api\\.example\\.com/",
+      "noPattern": "沒有模式——全部通過。",
+      "filtersHint": "當呼叫至少符合白名單中的一項（或白名單為空）且不符合黑名單中的任何一項時予以保留。變更將套用於後續呼叫。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

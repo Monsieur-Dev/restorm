@@ -2833,6 +2833,30 @@
       "browser": "Pregledač za snimanje pojaviće se ovde.",
       "captures": "Još nije zabeležen nijedan poziv. Pokrenite snimanje iz podešavanja sesije da bi se pozivi stranice pojavili ovde.",
       "routes": "Još nije izvedena nijedna ruta. Snimite pozive, a zatim izvedite rute iz snimaka."
+    },
+    "config": {
+      "subtitle": "Pregledajte stranicu dok Restorm sluša njene API pozive. Sa projektom se čuvaju samo podešavanja u nastavku — nikada zabeleženi pozivi.",
+      "url": "Stranica koja se sluša",
+      "urlPlaceholder": "https://primer.rs, http://localhost:3000 ili file:///putanja/stranica.html",
+      "urlInvalid": "Unesite http(s) ili file URL.",
+      "urlRequired": "Unesite URL stranice da biste omogućili snimanje.",
+      "record": "Pokreni snimanje",
+      "stop": "Zaustavi snimanje",
+      "protocols": "Protokoli za beleženje",
+      "whitelist": "Bela lista",
+      "blacklist": "Crna lista",
+      "addPattern": "Dodaj obrazac",
+      "removePattern": "Ukloni ovaj obrazac",
+      "invalidPattern": "Ovaj obrazac nije važeći regularni izraz.",
+      "patternPlaceholder": "Regularni izraz, npr. ^https://api\\.primer\\.rs/",
+      "noPattern": "Nema obrazaca — sve prolazi.",
+      "filtersHint": "Poziv se zadržava ako odgovara bar jednoj stavci bele liste (ili ako je ona prazna) i nijednoj stavci crne liste. Izmene se primenjuju na sledeće pozive."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

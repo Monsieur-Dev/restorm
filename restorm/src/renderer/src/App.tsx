@@ -53,6 +53,8 @@ import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
 import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
 import { RecordingSession as RecordingSessionClass } from '../../shared/models/RecordingSession'
+import { recordingTabId } from '../../shared/recording/recordingSections'
+import { requestRecordingStart, clearPendingRecordingStart } from './services/recordingIntent'
 
 /**
  * Resolve the concrete class of a document node by its `type`
@@ -2361,6 +2363,42 @@ const App: React.FC = () => {
       return { ...prev, groups }
     })
   }, [])
+  // Close ONE tab by its tab id (a session's browser tab, which shares its
+  // item id with the session's other tabs).
+  const handleCloseTabByTabId = useCallback((tabId: string): void => {
+    setWorkbenchTree((prev) => {
+      const filterGroup = (g: GroupNode): GroupNode => {
+        if (isContainerNode(g)) {
+          return { ...g, groups: g.groups.map(filterGroup).filter((c) => !isTabGroupNode(c) || c.tabs.length > 0) }
+        }
+        if (!g.tabs.some((t) => t.id === tabId)) return g
+        const tabs = g.tabs.filter((t) => t.id !== tabId)
+        const activeTabId = g.activeTabId === tabId ? tabs[0]?.id ?? '' : g.activeTabId ?? ''
+        return { ...g, tabs, activeTabId }
+      }
+      const groups = prev.groups.map(filterGroup).filter((g) => !isTabGroupNode(g) || g.tabs.length > 0)
+      return { ...prev, groups }
+    })
+  }, [])
+
+  // The record button of a session's config tab. Start: stage the intent,
+  // expand the session (the browser row appears with the live status), open
+  // the browser tab STABLE — its mini-browser view, once created, starts the
+  // engine. Stop: stop the engine, close the browser tab (the row follows).
+  const handleStartRecordingSession = useCallback((sessionId: string): void => {
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
+    if (!item || !isRecordingSession(item)) return
+    requestRecordingStart(sessionId)
+    setExpandedIds((prev) => Array.from(new Set([...prev, sessionId])))
+    openRecordingTab(item, 'browser', breadcrumbs, { temporary: false })
+  }, [rootItems, openRecordingTab, setExpandedIds])
+
+  const handleStopRecordingSession = useCallback((sessionId: string): void => {
+    clearPendingRecordingStart(sessionId)
+    void window.restorm?.recording.stop(sessionId)
+    handleCloseTabByTabId(recordingTabId(sessionId, 'browser'))
+  }, [handleCloseTabByTabId])
+
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
   // Let the transient-clients store close the tabs its requests opened when a
@@ -4024,6 +4062,8 @@ const App: React.FC = () => {
               getScenarioById={getScenarioByIdCb}
               getDesignById={getDesignByIdCb}
               getRecordingSessionById={getRecordingSessionByIdCb}
+              onStartRecordingSession={handleStartRecordingSession}
+              onStopRecordingSession={handleStopRecordingSession}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -4115,6 +4155,8 @@ const App: React.FC = () => {
             getScenarioById={(id) => findScenarioById(rootItems, id)}
             getDesignById={(id) => findDesignById(rootItems, id)}
             getRecordingSessionById={(id) => findRecordingSessionById(rootItems, id)}
+            onStartRecordingSession={handleStartRecordingSession}
+            onStopRecordingSession={handleStopRecordingSession}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

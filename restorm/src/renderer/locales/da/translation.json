@@ -2832,6 +2832,30 @@
       "browser": "Optagelsesbrowseren vises her.",
       "captures": "Ingen kald er opsamlet endnu. Start en optagelse fra sessionens indstillinger for at se sidens kald her.",
       "routes": "Ingen ruter er udledt endnu. Optag nogle kald, og udled derefter ruterne fra optagelserne."
+    },
+    "config": {
+      "subtitle": "Naviger på siden, mens Restorm lytter til dens API-kald. Kun indstillingerne nedenfor gemmes med projektet — aldrig de opsamlede kald.",
+      "url": "Side der lyttes på",
+      "urlPlaceholder": "https://eksempel.dk, http://localhost:3000 eller file:///sti/side.html",
+      "urlInvalid": "Angiv en http(s)- eller file-URL.",
+      "urlRequired": "Angiv sidens URL for at kunne optage.",
+      "record": "Start optagelse",
+      "stop": "Stop optagelse",
+      "protocols": "Protokoller der opsamles",
+      "whitelist": "Hvidliste",
+      "blacklist": "Sortliste",
+      "addPattern": "Tilføj et mønster",
+      "removePattern": "Fjern dette mønster",
+      "invalidPattern": "Dette mønster er ikke et gyldigt regulært udtryk.",
+      "patternPlaceholder": "Regulært udtryk, f.eks. ^https://api\\.eksempel\\.dk/",
+      "noPattern": "Ingen mønstre — alt slipper igennem.",
+      "filtersHint": "Et kald beholdes, hvis det matcher mindst én post på hvidlisten (eller listen er tom) og ingen post på sortlisten. Ændringer gælder for de næste kald."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

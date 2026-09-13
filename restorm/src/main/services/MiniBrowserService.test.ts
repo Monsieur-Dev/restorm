@@ -165,16 +165,25 @@ describe('MiniBrowserService — security', () => {
 		miniBrowserService.destroy(tabId)
 	})
 
-	it('does not load a non-http(s) initial URL', () => {
+	it('does not load a non-embeddable initial URL', () => {
 		const { win, addChildView } = makeWindow()
 		const tabId = nextTab()
-		miniBrowserService.create(tabId, win as never, 'file:///etc/passwd')
+		miniBrowserService.create(tabId, win as never, 'javascript:alert(1)')
 		const view = viewFor(addChildView)
 		expect(view.webContents.loadURL).not.toHaveBeenCalled()
 		miniBrowserService.destroy(tabId)
 	})
 
-	it('blocks navigate() to a non-http(s) scheme but allows http(s)', () => {
+	it('loads a local html page (file://) — a recording session may listen to one', () => {
+		const { win, addChildView } = makeWindow()
+		const tabId = nextTab()
+		miniBrowserService.create(tabId, win as never, 'file:///home/dev/app/index.html')
+		const view = viewFor(addChildView)
+		expect(view.webContents.loadURL).toHaveBeenCalledWith('file:///home/dev/app/index.html')
+		miniBrowserService.destroy(tabId)
+	})
+
+	it('blocks navigate() to a non-embeddable scheme but allows http(s)', () => {
 		const { win, addChildView } = makeWindow()
 		const tabId = nextTab()
 		miniBrowserService.create(tabId, win as never)

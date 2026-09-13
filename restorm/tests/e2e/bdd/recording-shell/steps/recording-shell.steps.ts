@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd'
 import { copyFileSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import type { Page, Locator } from '@playwright/test'
 import { test, expect, RECORDING_SHELL_TEMP_DIR } from '../../fixtures/recording-shell.fixture'
 
@@ -168,4 +168,59 @@ Then('the saved file carries a recording session named {string}', async ({}, nam
 Then('the saved file declares file format version {string}', async ({}, version: string) => {
   const saved = readFileSync(projectPath, 'utf-8')
   expect(saved.startsWith(`fileFormatVersion: ${version}\n`)).toBe(true)
+})
+
+// ── Config page + record button ───────────────────────────────────────
+
+const LOCAL_PAGE = `file://${resolve(__dirname, '../../../samples/fixtures/recording-page.html')}`
+
+function recordButton(p: Page): Locator {
+  return p.locator('[data-testid="recording-config-record"]')
+}
+
+Then('the record button is disabled', async () => {
+  const p = requirePage()
+  await expect(recordButton(p)).toBeVisible({ timeout: 10000 })
+  // The ECUI Button carries its disabled state as a class (see design-server).
+  await expect(recordButton(p)).toHaveClass(/disabled/, { timeout: 5000 })
+})
+
+Then('the record button is enabled', async () => {
+  const p = requirePage()
+  await expect(recordButton(p)).not.toHaveClass(/disabled/, { timeout: 5000 })
+})
+
+When('I set the session url to the local test page', async () => {
+  const p = requirePage()
+  // The ECUI InputBox suffixes its own test id on the native input.
+  const input = p.locator('[data-testid="recording-config-url-input"]')
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await input.fill(LOCAL_PAGE)
+  // The InputBox debounces its onChange; let the value land on the session.
+  await p.waitForTimeout(700)
+})
+
+When('I click the record button', async () => {
+  const p = requirePage()
+  await recordButton(p).click()
+  await p.waitForTimeout(800)
+})
+
+Then('the session has a {string} row', async ({}, kind: string) => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect(sidebarRow(p, nodeRowId(id, kind))).toBeVisible({ timeout: 10000 })
+})
+
+Then('the session is on air', async () => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'recording', { timeout: 10000 })
+})
+
+Then('the session is idle', async () => {
+  const p = requirePage()
+  const id = await sessionId(p)
+  await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'idle', { timeout: 10000 })
 })

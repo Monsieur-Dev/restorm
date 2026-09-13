@@ -2834,6 +2834,30 @@
       "browser": "Przeglądarka nagrywania pojawi się tutaj.",
       "captures": "Nie przechwycono jeszcze żadnego wywołania. Proszę rozpocząć nagrywanie w ustawieniach sesji, aby zobaczyć tutaj wywołania strony.",
       "routes": "Nie wywnioskowano jeszcze żadnej trasy. Proszę nagrać wywołania, a następnie wywnioskować trasy z przechwyceń."
+    },
+    "config": {
+      "subtitle": "Proszę przeglądać stronę, podczas gdy Restorm nasłuchuje jej wywołań API. Z projektem zapisywane są tylko poniższe ustawienia — nigdy przechwycone wywołania.",
+      "url": "Nasłuchiwana strona",
+      "urlPlaceholder": "https://przyklad.pl, http://localhost:3000 lub file:///sciezka/strona.html",
+      "urlInvalid": "Proszę podać adres URL http(s) lub file.",
+      "urlRequired": "Proszę podać adres URL strony, aby włączyć nagrywanie.",
+      "record": "Rozpocznij nagrywanie",
+      "stop": "Zatrzymaj nagrywanie",
+      "protocols": "Przechwytywane protokoły",
+      "whitelist": "Biała lista",
+      "blacklist": "Czarna lista",
+      "addPattern": "Dodaj wzorzec",
+      "removePattern": "Usuń ten wzorzec",
+      "invalidPattern": "Ten wzorzec nie jest poprawnym wyrażeniem regularnym.",
+      "patternPlaceholder": "Wyrażenie regularne, np. ^https://api\\.przyklad\\.pl/",
+      "noPattern": "Brak wzorca — wszystko przechodzi.",
+      "filtersHint": "Wywołanie jest zachowywane, jeśli pasuje do co najmniej jednej pozycji białej listy (lub gdy jest ona pusta) i do żadnej pozycji czarnej listy. Zmiany dotyczą kolejnych wywołań."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

@@ -2831,6 +2831,30 @@
       "browser": "录制浏览器将显示在此处。",
       "captures": "尚未捕获任何调用。请在会话设置中开始录制，页面的调用便会显示在此处。",
       "routes": "尚未推导出任何路由。请先录制一些调用，然后从捕获中推导路由。"
+    },
+    "config": {
+      "subtitle": "在 Restorm 监听页面 API 调用的同时浏览该页面。随项目保存的只有以下设置，捕获的调用永不保存。",
+      "url": "要监听的页面",
+      "urlPlaceholder": "https://example.com、http://localhost:3000 或 file:///path/page.html",
+      "urlInvalid": "请输入 http(s) 或 file 地址。",
+      "urlRequired": "请输入页面地址以启用录制。",
+      "record": "开始录制",
+      "stop": "停止录制",
+      "protocols": "要捕获的协议",
+      "whitelist": "白名单",
+      "blacklist": "黑名单",
+      "addPattern": "添加模式",
+      "removePattern": "移除此模式",
+      "invalidPattern": "此模式不是有效的正则表达式。",
+      "patternPlaceholder": "正则表达式，例如 ^https://api\\.example\\.com/",
+      "noPattern": "没有模式——全部通过。",
+      "filtersHint": "当调用至少匹配白名单中的一项（或白名单为空）且不匹配黑名单中的任何一项时予以保留。更改将应用于后续调用。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

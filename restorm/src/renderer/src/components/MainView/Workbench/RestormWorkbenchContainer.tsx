@@ -79,6 +79,8 @@ export interface RestormWorkbenchContainerProps {
   getScenarioById: (id: string) => Scenario | undefined
   getDesignById: (id: string) => ApiDesign | undefined
   getRecordingSessionById: (id: string) => RecordingSession | undefined
+  onStartRecordingSession?: ((sessionId: string) => void) | undefined
+  onStopRecordingSession?: ((sessionId: string) => void) | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
@@ -134,6 +136,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   getScenarioById,
   getDesignById,
   getRecordingSessionById,
+  onStartRecordingSession,
+  onStopRecordingSession,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -195,6 +199,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           getScenarioById={getScenarioById}
           getDesignById={getDesignById}
           getRecordingSessionById={getRecordingSessionById}
+          onStartRecordingSession={onStartRecordingSession}
+          onStopRecordingSession={onStopRecordingSession}
           getEnvironmentFolderById={getEnvironmentFolderById}
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}

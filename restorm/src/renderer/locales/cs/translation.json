@@ -2834,6 +2834,30 @@
       "browser": "Prohlížeč pro nahrávání se zobrazí zde.",
       "captures": "Zatím nebylo zachyceno žádné volání. Spusťte nahrávání v nastavení relace a volání stránky se zobrazí zde.",
       "routes": "Zatím nebyla odvozena žádná trasa. Nahrajte volání a poté odvoďte trasy ze zachycených volání."
+    },
+    "config": {
+      "subtitle": "Procházejte stránku, zatímco Restorm naslouchá jejím volání API. S projektem se ukládají pouze níže uvedená nastavení — nikdy zachycená volání.",
+      "url": "Sledovaná stránka",
+      "urlPlaceholder": "https://priklad.cz, http://localhost:3000 nebo file:///cesta/stranka.html",
+      "urlInvalid": "Zadejte URL http(s) nebo file.",
+      "urlRequired": "Zadejte URL stránky, aby bylo možné nahrávat.",
+      "record": "Spustit nahrávání",
+      "stop": "Zastavit nahrávání",
+      "protocols": "Zachytávané protokoly",
+      "whitelist": "Bílá listina",
+      "blacklist": "Černá listina",
+      "addPattern": "Přidat vzor",
+      "removePattern": "Odebrat tento vzor",
+      "invalidPattern": "Tento vzor není platný regulární výraz.",
+      "patternPlaceholder": "Regulární výraz, např. ^https://api\\.priklad\\.cz/",
+      "noPattern": "Žádný vzor — vše projde.",
+      "filtersHint": "Volání se zachová, pokud odpovídá alespoň jedné položce bílé listiny (nebo je-li prázdná) a žádné položce černé listiny. Změny se uplatní na další volání."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

@@ -2832,6 +2832,30 @@
       "browser": "Shfletuesi i regjistrimit do të shfaqet këtu.",
       "captures": "Asnjë thirrje nuk është kapur ende. Nisni një regjistrim nga cilësimet e sesionit për të parë këtu thirrjet e faqes.",
       "routes": "Asnjë rrugë nuk është nxjerrë ende. Regjistroni thirrje dhe më pas nxirrni rrugët nga kapjet."
+    },
+    "config": {
+      "subtitle": "Shfletoni faqen ndërsa Restorm dëgjon thirrjet e saj API. Vetëm cilësimet e mëposhtme ruhen me projektin — kurrë thirrjet e kapura.",
+      "url": "Faqja që dëgjohet",
+      "urlPlaceholder": "https://shembull.al, http://localhost:3000 ose file:///shtegu/faqja.html",
+      "urlInvalid": "Vendosni një URL http(s) ose file.",
+      "urlRequired": "Vendosni URL-në e faqes për të aktivizuar regjistrimin.",
+      "record": "Nis regjistrimin",
+      "stop": "Ndal regjistrimin",
+      "protocols": "Protokollet për t’u kapur",
+      "whitelist": "Lista e bardhë",
+      "blacklist": "Lista e zezë",
+      "addPattern": "Shto një model",
+      "removePattern": "Hiq këtë model",
+      "invalidPattern": "Ky model nuk është një shprehje e rregullt e vlefshme.",
+      "patternPlaceholder": "Shprehje e rregullt, p.sh. ^https://api\\.shembull\\.al/",
+      "noPattern": "Asnjë model — gjithçka kalon.",
+      "filtersHint": "Një thirrje ruhet nëse përputhet me të paktën një zë të listës së bardhë (ose nëse ajo është bosh) dhe me asnjë zë të listës së zezë. Ndryshimet zbatohen për thirrjet e ardhshme."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

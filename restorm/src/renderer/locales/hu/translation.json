@@ -2832,6 +2832,30 @@
       "browser": "A felvételi böngésző itt jelenik meg.",
       "captures": "Még nincs rögzített hívás. Indítson felvételt a munkamenet beállításaiból, hogy az oldal hívásai itt megjelenjenek.",
       "routes": "Még nincs levezetett útvonal. Rögzítsen hívásokat, majd vezesse le az útvonalakat a rögzítésekből."
+    },
+    "config": {
+      "subtitle": "Böngésszen az oldalon, amíg a Restorm figyeli az API-hívásait. A projekttel csak az alábbi beállítások kerülnek mentésre — a rögzített hívások soha.",
+      "url": "Figyelt oldal",
+      "urlPlaceholder": "https://pelda.hu, http://localhost:3000 vagy file:///utvonal/oldal.html",
+      "urlInvalid": "Adjon meg egy http(s) vagy file URL-t.",
+      "urlRequired": "Adja meg az oldal URL-jét a felvétel engedélyezéséhez.",
+      "record": "Felvétel indítása",
+      "stop": "Felvétel leállítása",
+      "protocols": "Rögzítendő protokollok",
+      "whitelist": "Fehérlista",
+      "blacklist": "Feketelista",
+      "addPattern": "Minta hozzáadása",
+      "removePattern": "Minta eltávolítása",
+      "invalidPattern": "Ez a minta nem érvényes reguláris kifejezés.",
+      "patternPlaceholder": "Reguláris kifejezés, pl. ^https://api\\.pelda\\.hu/",
+      "noPattern": "Nincs minta — minden átmegy.",
+      "filtersHint": "Egy hívás akkor marad meg, ha a fehérlista legalább egy elemére illeszkedik (vagy a lista üres), és a feketelista egyetlen elemére sem. A módosítások a következő hívásokra vonatkoznak."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

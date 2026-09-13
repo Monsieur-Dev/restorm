@@ -2832,6 +2832,30 @@
       "browser": "O navegador de gravação aparecerá aqui.",
       "captures": "Ainda não foi capturada nenhuma chamada. Inicie uma gravação a partir das definições da sessão para ver aqui as chamadas da página.",
       "routes": "Ainda não foi deduzida nenhuma rota. Grave algumas chamadas e depois deduza as rotas a partir das capturas."
+    },
+    "config": {
+      "subtitle": "Navegue na página enquanto o Restorm escuta as suas chamadas API. Apenas as definições abaixo são guardadas com o projeto — nunca as chamadas capturadas.",
+      "url": "Página a escutar",
+      "urlPlaceholder": "https://exemplo.com, http://localhost:3000 ou file:///caminho/pagina.html",
+      "urlInvalid": "Introduza um URL http(s) ou file.",
+      "urlRequired": "Introduza o URL da página para ativar a gravação.",
+      "record": "Iniciar a gravação",
+      "stop": "Parar a gravação",
+      "protocols": "Protocolos a capturar",
+      "whitelist": "Lista branca",
+      "blacklist": "Lista negra",
+      "addPattern": "Adicionar um padrão",
+      "removePattern": "Remover este padrão",
+      "invalidPattern": "Este padrão não é uma expressão regular válida.",
+      "patternPlaceholder": "Expressão regular, p. ex. ^https://api\\.exemplo\\.com/",
+      "noPattern": "Nenhum padrão — tudo passa.",
+      "filtersHint": "Uma chamada é mantida se corresponder a pelo menos uma entrada da lista branca (ou se esta estiver vazia) e a nenhuma entrada da lista negra. As alterações aplicam-se às chamadas seguintes."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

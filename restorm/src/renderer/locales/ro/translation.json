@@ -2833,6 +2833,30 @@
       "browser": "Browserul de înregistrare va apărea aici.",
       "captures": "Niciun apel capturat încă. Porniți o înregistrare din setările sesiunii pentru a vedea aici apelurile paginii.",
       "routes": "Nicio rută dedusă încă. Înregistrați apeluri, apoi deduceți rutele din capturi."
+    },
+    "config": {
+      "subtitle": "Navigați pe pagină în timp ce Restorm ascultă apelurile ei API. Doar setările de mai jos se salvează cu proiectul — niciodată apelurile capturate.",
+      "url": "Pagina de ascultat",
+      "urlPlaceholder": "https://exemplu.ro, http://localhost:3000 sau file:///cale/pagina.html",
+      "urlInvalid": "Introduceți un URL http(s) sau file.",
+      "urlRequired": "Introduceți URL-ul paginii pentru a activa înregistrarea.",
+      "record": "Pornește înregistrarea",
+      "stop": "Oprește înregistrarea",
+      "protocols": "Protocoale de capturat",
+      "whitelist": "Lista albă",
+      "blacklist": "Lista neagră",
+      "addPattern": "Adăugați un tipar",
+      "removePattern": "Eliminați acest tipar",
+      "invalidPattern": "Acest tipar nu este o expresie regulată validă.",
+      "patternPlaceholder": "Expresie regulată, de ex. ^https://api\\.exemplu\\.ro/",
+      "noPattern": "Niciun tipar — totul trece.",
+      "filtersHint": "Un apel este păstrat dacă se potrivește cu cel puțin o intrare din lista albă (sau dacă aceasta este goală) și cu nicio intrare din lista neagră. Modificările se aplică apelurilor următoare."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

@@ -2832,6 +2832,30 @@
       "browser": "Inspelningswebbläsaren visas här.",
       "captures": "Inga anrop har fångats ännu. Starta en inspelning från sessionens inställningar för att se sidans anrop här.",
       "routes": "Inga rutter har härletts ännu. Spela in några anrop och härled sedan rutterna från inspelningarna."
+    },
+    "config": {
+      "subtitle": "Surfa på sidan medan Restorm lyssnar på dess API-anrop. Bara inställningarna nedan sparas med projektet — aldrig de infångade anropen.",
+      "url": "Sida att lyssna på",
+      "urlPlaceholder": "https://exempel.se, http://localhost:3000 eller file:///sokvag/sida.html",
+      "urlInvalid": "Ange en http(s)- eller file-URL.",
+      "urlRequired": "Ange sidans URL för att kunna spela in.",
+      "record": "Starta inspelning",
+      "stop": "Stoppa inspelning",
+      "protocols": "Protokoll att fånga",
+      "whitelist": "Vitlista",
+      "blacklist": "Svartlista",
+      "addPattern": "Lägg till ett mönster",
+      "removePattern": "Ta bort det här mönstret",
+      "invalidPattern": "Det här mönstret är inte ett giltigt reguljärt uttryck.",
+      "patternPlaceholder": "Reguljärt uttryck, t.ex. ^https://api\\.exempel\\.se/",
+      "noPattern": "Inga mönster — allt släpps igenom.",
+      "filtersHint": "Ett anrop behålls om det matchar minst en post i vitlistan (eller om listan är tom) och ingen post i svartlistan. Ändringar gäller de kommande anropen."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

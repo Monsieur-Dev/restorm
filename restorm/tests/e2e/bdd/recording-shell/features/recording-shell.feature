@@ -35,3 +35,18 @@ Feature: Recording session sidebar nodes and tabs
     And I save the project
     Then the saved file carries a recording session named "New recording session"
     And the saved file declares file format version "1.2"
+
+  Scenario: The record button needs a page url, then starts and stops a recording
+    Given a project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    Then the record button is disabled
+    When I set the session url to the local test page
+    Then the record button is enabled
+    When I click the record button
+    Then the session has a "browser" row
+    And the recording "browser" tab is open
+    And the session is on air
+    When I click the session row
+    And I click the record button
+    Then the session is idle
+    And the session has no "browser" row

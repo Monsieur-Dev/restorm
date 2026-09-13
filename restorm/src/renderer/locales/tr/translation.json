@@ -2832,6 +2832,30 @@
       "browser": "Kayıt tarayıcısı burada görünecektir.",
       "captures": "Henüz yakalanan çağrı yok. Sayfanın çağrılarını burada görmek için oturum ayarlarından bir kayıt başlatınız.",
       "routes": "Henüz çıkarılan rota yok. Çağrıları kaydediniz, ardından rotaları yakalamalardan çıkarınız."
+    },
+    "config": {
+      "subtitle": "Restorm API çağrılarını dinlerken sayfada gezininiz. Projeyle birlikte yalnızca aşağıdaki ayarlar kaydedilir — yakalanan çağrılar hiçbir zaman kaydedilmez.",
+      "url": "Dinlenecek sayfa",
+      "urlPlaceholder": "https://ornek.com, http://localhost:3000 veya file:///yol/sayfa.html",
+      "urlInvalid": "Bir http(s) veya file URL'si giriniz.",
+      "urlRequired": "Kaydı etkinleştirmek için sayfanın URL'sini giriniz.",
+      "record": "Kaydı başlat",
+      "stop": "Kaydı durdur",
+      "protocols": "Yakalanacak protokoller",
+      "whitelist": "Beyaz liste",
+      "blacklist": "Kara liste",
+      "addPattern": "Desen ekle",
+      "removePattern": "Bu deseni kaldır",
+      "invalidPattern": "Bu desen geçerli bir düzenli ifade değildir.",
+      "patternPlaceholder": "Düzenli ifade, örn. ^https://api\\.ornek\\.com/",
+      "noPattern": "Desen yok — her şey geçer.",
+      "filtersHint": "Bir çağrı, beyaz listedeki en az bir girdiyle eşleşiyorsa (veya liste boşsa) ve kara listedeki hiçbir girdiyle eşleşmiyorsa saklanır. Değişiklikler sonraki çağrılara uygulanır."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

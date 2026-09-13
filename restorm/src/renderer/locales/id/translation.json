@@ -2831,6 +2831,30 @@
       "browser": "Peramban perekaman akan muncul di sini.",
       "captures": "Belum ada panggilan yang ditangkap. Mulai perekaman dari pengaturan sesi agar panggilan halaman muncul di sini.",
       "routes": "Belum ada rute yang disimpulkan. Rekam beberapa panggilan, lalu simpulkan rute dari tangkapan."
+    },
+    "config": {
+      "subtitle": "Jelajahi halaman sementara Restorm mendengarkan panggilan API-nya. Hanya pengaturan di bawah ini yang disimpan bersama proyek — panggilan yang ditangkap tidak pernah disimpan.",
+      "url": "Halaman yang didengarkan",
+      "urlPlaceholder": "https://contoh.com, http://localhost:3000 atau file:///jalur/halaman.html",
+      "urlInvalid": "Masukkan URL http(s) atau file.",
+      "urlRequired": "Masukkan URL halaman untuk mengaktifkan perekaman.",
+      "record": "Mulai merekam",
+      "stop": "Berhenti merekam",
+      "protocols": "Protokol yang ditangkap",
+      "whitelist": "Daftar putih",
+      "blacklist": "Daftar hitam",
+      "addPattern": "Tambahkan pola",
+      "removePattern": "Hapus pola ini",
+      "invalidPattern": "Pola ini bukan ekspresi reguler yang valid.",
+      "patternPlaceholder": "Ekspresi reguler, mis. ^https://api\\.contoh\\.com/",
+      "noPattern": "Tidak ada pola — semuanya lolos.",
+      "filtersHint": "Panggilan disimpan jika cocok dengan setidaknya satu entri daftar putih (atau daftar kosong) dan tidak cocok dengan entri daftar hitam mana pun. Perubahan berlaku untuk panggilan berikutnya."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
     }
   },
   "mcp": {

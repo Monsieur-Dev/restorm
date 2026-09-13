@@ -712,10 +712,10 @@ const miniBrowserBoundsSchema = z.object({
   height: z.number()
 })
 
-/** Only http(s) URLs may be embedded; empty string = "no initial URL". */
+/** Only http(s) pages and local `file://` pages may be embedded; empty string = "no initial URL". */
 const httpUrlOrEmpty = z.string().refine(
-  (v) => v === '' || /^https?:\/\//i.test(v),
-  { message: 'mini-browser URL must be http(s)' }
+  (v) => v === '' || /^(https?|file):\/\//i.test(v),
+  { message: 'mini-browser URL must be http(s) or file' }
 )
 
 export const miniBrowserCreateArgs = z.tuple([tabIdArg, httpUrlOrEmpty.optional()])
