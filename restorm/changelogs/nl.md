@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Neem een webpagina op en krijg haar API als verzoeken.**
+
+- **Opnamesessies.** Een nieuw soort item in de zijbalk opent een webpagina in de ingebouwde minibrowser en legt elke API-aanroep vast die ze doet — REST, GraphQL, gRPC-web en WebSocket — live, met witte en zwarte lijsten in reguliere expressies, pauzeren en stoppen vanaf de adresbalk, en een rode badge “in de lucht” zolang de opname loopt. Elke vastgelegde aanroep leest precies als het antwoord op een verzoek (body, informatie, cookies, grafiek); het contextmenu van een aanroep voegt haar url aan een lijst toe, met de mogelijkheid om wat al was vastgelegd op te schonen. De opnamen blijven in het geheugen, begrensd door een nieuwe app-instelling, en raken uw projectbestand nooit aan.
+- **Routes afleiden (Pro).** Eén knop zet de opnamen om in een mappenboom met echte, opnieuw uitvoerbare verzoeken: variërende padsegmenten worden `{{param}}`-padparameters, de mappen volgen de statische voorvoegsels, gRPC-web-aanroepen worden per service ingedeeld en elk verzoek wordt vooraf ingevuld op basis van de laatste geslaagde aanroep, met de vastgelegde aanroepen in zijn antwoordgeschiedenis. Opnieuw afleiden voegt samen — uw wijzigingen blijven behouden.
+- **Bestuur het vanuit uw AI-assistent.** Tien MCP-tools maken sessies aan en configureren ze, starten en stoppen een opname, lezen de opnamen en leiden de routes af.
+- **Rijker tabblad Antwoord.** Afbeeldingen worden nu inline getoond, video en audio worden afgespeeld, Markdown wordt weergegeven en de code-editor kiest de taal op basis van het Content-Type — met een vertaalde knop Downloaden altijd bij de hand. Een binair antwoord dat vanuit de geschiedenis opnieuw wordt uitgevoerd, toont niet langer zijn base64.
+- **Lange lijsten blijven snel.** De lijst met opnamen (en de zijbalk boven 400 rijen) rendert alleen wat op het scherm staat.
+- Projectbestanden die een opnamesessie bevatten, worden opgeslagen in formaat 1.2; oudere versies van Restorm vragen u bij te werken voordat ze die openen.
+
 ## v1.1.4
 
 **Verbind uw AI-assistent op macOS — nu betrouwbaar.**

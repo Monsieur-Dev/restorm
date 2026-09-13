@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Regjistroni një faqe ueb, merrni API-në e saj si kërkesa.**
+
+- **Sesionet e regjistrimit.** Një lloj i ri elementi në shiritin anësor hap një faqe ueb në mini-shfletuesin e integruar dhe kap çdo thirrje API që ajo kryen — REST, GraphQL, gRPC-web dhe WebSocket — drejtpërdrejt, me lista të bardha dhe të zeza me shprehje të rregullta, ndalim të përkohshëm dhe ndalim nga rreshti i adresës, dhe një shenjë të kuqe „në transmetim” gjatë gjithë kohës që punon. Çdo thirrje e kapur lexohet saktësisht si përgjigjja e një kërkese (trupi, informacionet, cookies, grafiku); menyja kontekstuale e një thirrjeje shton url-në e saj në një listë, me mundësinë e pastrimit të asaj që është kapur tashmë. Kapjet mbeten në memorie, të kufizuara nga një cilësim i ri i aplikacionit, dhe nuk prekin kurrë skedarin e projektit tuaj.
+- **Nxirr rrugët (Pro).** Një buton shndërron kapjet në një pemë dosjesh me kërkesa të vërteta, të riluajtshme: segmentet e shtegut që ndryshojnë bëhen parametra shtegu `{{param}}`, dosjet ndjekin prefikset statike, thirrjet gRPC-web sistemohen sipas shërbimit dhe çdo kërkesë plotësohet paraprakisht nga thirrja e fundit e suksesshme, me thirrjet e kapura në historikun e saj të përgjigjeve. Një nxjerrje e re bashkon — ndryshimet tuaja ruhen.
+- **Drejtojeni nga asistenti juaj IA.** Dhjetë mjete MCP krijojnë dhe konfigurojnë sesione, nisin dhe ndalin një regjistrim, lexojnë kapjet dhe nxjerrin rrugët.
+- **Skeda Përgjigje më e pasur.** Imazhet shfaqen tani brenda faqes, videot dhe audio luhen, Markdown-i vizatohet dhe redaktori i kodit zgjedh gjuhën sipas Content-Type — me një buton Shkarko të përkthyer, gjithmonë pranë. Një përgjigje binare e riluajtur nga historiku nuk e shfaq më base64-in e saj.
+- **Listat e gjata mbeten të shpejta.** Lista e kapjeve (dhe shiriti anësor mbi 400 rreshta) vizaton vetëm atë që është në ekran.
+- Skedarët e projektit që përmbajnë një sesion regjistrimi ruhen në formatin 1.2; versionet e mëparshme të Restorm ju kërkojnë të përditësoni përpara se t’i hapni.
+
 ## v1.1.4
 
 **Lidhni asistentin tuaj të AI-së në macOS — tani i besueshëm.**

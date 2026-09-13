@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Ta opp en nettside, få API-et dens som forespørsler.**
+
+- **Opptakssesjoner.** En ny type element i sidefeltet åpner en nettside i den innebygde mini-nettleseren og fanger hvert API-kall den gjør — REST, GraphQL, gRPC-web og WebSocket — direkte, med hvite- og svartelister i regulære uttrykk, pause og stopp fra adresselinjen, og et rødt «på lufta»-merke mens det pågår. Hvert fangede kall leses nøyaktig som svaret på en forespørsel (innhold, informasjon, cookies, graf); kontekstmenyen til et kall legger url-en dens til en liste, med mulighet for å rydde bort det som allerede er fanget. Opptakene blir i minnet, begrenset av en ny programinnstilling, og rører aldri prosjektfilen din.
+- **Utled rutene (Pro).** Én knapp gjør opptakene om til et mappetre med ekte forespørsler du kan kjøre om igjen: varierende stisegmenter blir `{{param}}`-stiparametere, mappene følger de statiske prefiksene, gRPC-web-kall sorteres etter tjeneste, og hver forespørsel forhåndsutfylles fra det siste vellykkede kallet, med de fangede kallene i svarhistorikken. Å utlede på nytt fletter — endringene dine beholdes.
+- **Styr det fra AI-assistenten din.** Ti MCP-verktøy oppretter og konfigurerer sesjoner, starter og stopper et opptak, leser opptakene og utleder rutene.
+- **Rikere Svar-fane.** Bilder vises nå direkte, video og lyd spilles av, Markdown gjengis, og kodeeditoren velger språk ut fra Content-Type — med en oversatt Last ned-knapp alltid for hånden. Et binært svar som kjøres om igjen fra historikken, viser ikke lenger base64-innholdet sitt.
+- **Lange lister forblir raske.** Opptakslisten (og sidefeltet over 400 rader) tegner bare det som er på skjermen.
+- Prosjektfiler som inneholder en opptakssesjon, lagres i format 1.2; eldre versjoner av Restorm ber deg oppdatere før de åpnes.
+
 ## v1.1.4
 
 **Koble til AI-assistenten din på macOS — nå pålitelig.**

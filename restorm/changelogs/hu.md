@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Rögzítsen egy weboldalt, és kapja meg az API-ját kérésekként.**
+
+- **Felvételi munkamenetek.** Az oldalsáv új elemtípusa megnyit egy weboldalt a beépített miniböngészőben, és élőben rögzíti minden API-hívását — REST, GraphQL, gRPC-web és WebSocket — reguláris kifejezésekből álló fehér- és feketelistával, szüneteltetéssel és leállítással a címsorból, futás közben pedig piros „adásban” jelvénnyel. Minden rögzített hívás pontosan úgy olvasható, mint egy kérés válasza (törzs, információk, cookie-k, gráf); egy hívás helyi menüje az url-jét egy listához adja, és kívánság szerint megtisztítja a már rögzítetteket. A rögzítések a memóriában maradnak, egy új alkalmazásbeállítás korlátozza őket, és soha nem érintik a projektfájlt.
+- **Útvonalak levezetése (Pro).** Egy gomb a rögzítéseket valódi, újra futtatható kérések mappafájává alakítja: a változó útvonalszegmensek `{{param}}` útvonalparaméterekké válnak, a mappák a statikus előtagokat követik, a gRPC-web hívások szolgáltatás szerint kerülnek besorolásra, és minden kérés az utolsó sikeres hívásból van előre kitöltve, a rögzített hívásokkal a válaszelőzményeiben. Az újbóli levezetés összefésül — a módosításai megmaradnak.
+- **Vezérelje AI-asszisztenséből.** Tíz MCP-eszköz hoz létre és állít be munkameneteket, indít és állít le felvételt, olvassa a rögzítéseket és vezeti le az útvonalakat.
+- **Gazdagabb Válasz lap.** A képek most közvetlenül megjelennek, a videók és a hang lejátszhatók, a Markdown megjelenítésre kerül, és a kódszerkesztő a Content-Type alapján választ nyelvet — a lefordított Letöltés gomb mindig kéznél van. Az előzményekből újra futtatott bináris válasz már nem mutatja a base64 tartalmát.
+- **A hosszú listák gyorsak maradnak.** A rögzítések listája (és az oldalsáv 400 sor felett) csak azt jeleníti meg, ami a képernyőn látható.
+- A felvételi munkamenetet tartalmazó projektfájlok 1.2 formátumban kerülnek mentésre; a Restorm korábbi verziói frissítést kérnek Öntől, mielőtt megnyitnák őket.
+
 ## v1.1.4
 
 **Csatlakoztassa AI-asszisztensét macOS-en — mostantól megbízhatóan.**

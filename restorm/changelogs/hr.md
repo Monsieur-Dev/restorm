@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Snimite web-stranicu i dobijte njezin API u obliku zahtjeva.**
+
+- **Sesije snimanja.** Nova vrsta stavke bočne trake otvara web-stranicu u ugrađenom mini pregledniku i bilježi svaki API poziv koji ona upućuje — REST, GraphQL, gRPC-web i WebSocket — uživo, s bijelom i crnom listom u regularnim izrazima, pauziranjem i zaustavljanjem iz adresnog retka te crvenom oznakom „u eteru“ dok traje. Svaki zabilježeni poziv čita se točno kao odgovor zahtjeva (tijelo, informacije, kolačići, graf); kontekstni izbornik poziva dodaje njegov url na listu, uz mogućnost čišćenja već zabilježenog. Snimke ostaju u memoriji, ograničene novom postavkom aplikacije, i nikada ne diraju vašu datoteku projekta.
+- **Izvedi rute (Pro).** Jedan gumb pretvara snimke u stablo mapa s pravim zahtjevima koji se mogu ponovno izvesti: promjenjivi segmenti putanje postaju parametri putanje `{{param}}`, mape slijede statičke prefikse, gRPC-web pozivi razvrstavaju se po servisu, a svaki zahtjev unaprijed je ispunjen iz posljednjeg uspješnog poziva, sa zabilježenim pozivima u svojoj povijesti odgovora. Ponovno izvođenje spaja — vaše izmjene ostaju sačuvane.
+- **Upravljajte njome iz svog AI asistenta.** Deset MCP alata stvara i podešava sesije, pokreće i zaustavlja snimanje, čita snimke i izvodi rute.
+- **Bogatija kartica Odgovor.** Slike se sada prikazuju izravno, videozapisi i zvuk reproduciraju se, Markdown se iscrtava, a uređivač koda odabire jezik prema Content-Type — uz prevedeni gumb Preuzmi koji je uvijek pri ruci. Binarni odgovor ponovno izveden iz povijesti više ne prikazuje svoj base64.
+- **Dugački popisi ostaju brzi.** Popis snimaka (i bočna traka iznad 400 redaka) iscrtava samo ono što je na zaslonu.
+- Datoteke projekta koje sadrže sesiju snimanja spremaju se u formatu 1.2; ranije verzije Restorma traže od vas ažuriranje prije njihova otvaranja.
+
 ## v1.1.4
 
 **Povežite svog AI asistenta na macOS-u — sada pouzdano.**

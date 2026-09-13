@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Nahrajte webovou stránku a získejte její API jako požadavky.**
+
+- **Relace nahrávání.** Nový typ položky postranního panelu otevře webovou stránku v zabudovaném mini prohlížeči a zachytává každé volání API, které stránka provede — REST, GraphQL, gRPC-web i WebSocket — v reálném čase, s bílou a černou listinou v podobě regulárních výrazů, tlačítky Pozastavit nahrávání a Zastavit nahrávání na adresním řádku a červeným odznakem „ve vysílání“ po dobu běhu. Každé zachycené volání se čte přesně jako odpověď požadavku (tělo, informace, cookies, graf); kontextová nabídka volání přidá jeho url na listinu a volitelně proškrtá to, co už bylo zachyceno. Zachycená volání zůstávají v paměti, jsou omezena novým nastavením aplikace a nikdy se nedotknou vašeho souboru projektu.
+- **Odvodit trasy (Pro).** Jediné tlačítko přemění zachycená volání na strom složek se skutečnými, znovu spustitelnými požadavky: proměnlivé segmenty cesty se stanou parametry cesty `{{param}}`, složky sledují statické předpony, volání gRPC-web se řadí podle služby a každý požadavek je předvyplněn z posledního úspěšného volání, se zachycenými voláními v jeho historii odpovědí. Opakované odvození sloučí výsledek s tím stávajícím — vaše úpravy zůstanou zachovány.
+- **Řiďte to ze svého AI asistenta.** Deset nástrojů MCP vytváří a nastavuje relace, spouští a zastavuje nahrávání, čte zachycená volání a odvozuje trasy.
+- **Bohatší karta Odpověď.** Obrázky se nyní zobrazují přímo, videa a zvuk se přehrávají, Markdown se vykresluje a editor kódu vybírá jazyk podle Content-Type — s přeloženým tlačítkem Stáhnout vždy po ruce. Binární odpověď znovu spuštěná z historie už nezobrazuje svůj base64.
+- **Dlouhé seznamy zůstávají svižné.** Seznam zachycených volání (a postranní panel nad 400 řádků) vykresluje jen to, co je na obrazovce.
+- Soubory projektu obsahující relaci nahrávání se ukládají ve formátu 1.2; starší verze aplikace Restorm vás před jejich otevřením požádají o aktualizaci.
+
 ## v1.1.4
 
 **Připojte svého AI asistenta na macOS — nyní spolehlivě.**

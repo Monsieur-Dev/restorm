@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Tallentakaa verkkosivu ja saakaa sen API pyyntöinä.**
+
+- **Tallennusistunnot.** Uudenlainen sivupalkin kohde avaa verkkosivun sisäänrakennetussa miniselaimessa ja kaappaa jokaisen sivun tekemän API-kutsun — REST, GraphQL, gRPC-web ja WebSocket — reaaliajassa, säännöllisiin lausekkeisiin perustuvilla sallittujen ja estettyjen luetteloilla, keskeytyksellä ja lopetuksella osoiteriviltä sekä punaisella ”lähetyksessä”-merkillä tallennuksen ajan. Jokainen kaapattu kutsu luetaan täsmälleen kuin pyynnön vastaus (sisältö, tiedot, evästeet, kaavio); kutsun pikavalikko lisää sen osoitteen luetteloon ja karsii halutessanne jo kaapatut kutsut. Kaappaukset pysyvät muistissa, uuden sovellusasetuksen rajaamina, eivätkä koskaan koske projektitiedostoonne.
+- **Päättele reitit (Pro).** Yksi painike muuntaa kaappaukset kansiopuuksi oikeita, uudelleen suoritettavia pyyntöjä: vaihtelevista polun osista tulee `{{param}}`-polkuparametreja, kansiot seuraavat kiinteitä etuliitteitä, gRPC-web-kutsut järjestetään palvelun mukaan ja jokainen pyyntö esitäytetään viimeisimmän onnistuneen kutsun perusteella, kaapatut kutsut vastaushistoriassaan. Uusi päättely yhdistää — muutoksenne säilyvät.
+- **Ohjatkaa sitä tekoälyavustajastanne.** Kymmenen MCP-työkalua luo ja määrittää istuntoja, aloittaa ja lopettaa tallennuksen, lukee kaappaukset ja päättelee reitit.
+- **Monipuolisempi Vastaus-välilehti.** Kuvat näytetään nyt suoraan, videot ja ääni toistetaan, Markdown renderöidään ja koodieditori valitsee kielen Content-Type-otsakkeen perusteella — käännetty Lataa-painike aina käden ulottuvilla. Historiasta uudelleen suoritettu binäärivastaus ei enää näytä base64-muotoaan.
+- **Pitkät luettelot pysyvät nopeina.** Kaappausluettelo (ja sivupalkki yli 400 rivin jälkeen) renderöi vain sen, mikä on näytöllä.
+- Tallennusistunnon sisältävät projektitiedostot tallennetaan muodossa 1.2; Restormin aiemmat versiot pyytävät teitä päivittämään ennen niiden avaamista.
+
 ## v1.1.4
 
 **Yhdistäkää tekoälyavustajanne macOS:ssä — nyt luotettavasti.**

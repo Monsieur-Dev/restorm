@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Grabe una página web y obtenga su API en forma de solicitudes.**
+
+- **Sesiones de grabación.** Un nuevo tipo de elemento de la barra lateral abre una página web en el mininavegador integrado y captura cada llamada API que realiza — REST, GraphQL, gRPC-web y WebSocket — en directo, con listas blanca y negra en expresiones regulares, pausa y detención desde la línea de dirección, y una insignia roja «en el aire» mientras se ejecuta. Cada llamada capturada se lee exactamente como la respuesta de una solicitud (cuerpo, información, cookies, grafo); el menú contextual de una llamada añade su url a una lista, con la opción de depurar lo ya capturado. Las capturas permanecen en memoria, limitadas por un nuevo ajuste de la aplicación, y nunca tocan su archivo de proyecto.
+- **Deducir las rutas (Pro).** Un botón transforma las capturas en un árbol de carpetas de solicitudes reales y reproducibles: los segmentos de ruta variables se convierten en parámetros de ruta `{{param}}`, las carpetas siguen los prefijos estáticos, las llamadas gRPC-web se ordenan por servicio y cada solicitud se rellena de antemano a partir de la última llamada correcta, con las llamadas capturadas en su historial de respuestas. Volver a deducir fusiona — sus modificaciones se conservan.
+- **Contrólelo desde su asistente de IA.** Diez herramientas MCP crean y configuran sesiones, inician y detienen una grabación, leen las capturas y deducen las rutas.
+- **Pestaña Respuesta más completa.** Las imágenes ahora se muestran integradas, los vídeos y el audio se reproducen, el Markdown se renderiza y el editor de código elige el lenguaje según el Content-Type — con un botón Descargar traducido siempre a mano. Una respuesta binaria reproducida desde el historial ya no muestra su base64.
+- **Las listas largas siguen siendo rápidas.** La lista de capturas (y la barra lateral a partir de 400 filas) solo renderiza lo que está en pantalla.
+- Los archivos de proyecto que contienen una sesión de grabación se guardan en el formato 1.2; las versiones anteriores de Restorm le piden actualizar antes de abrirlos.
+
 ## v1.1.4
 
 **Conecte su asistente de IA en macOS — ahora de forma fiable.**

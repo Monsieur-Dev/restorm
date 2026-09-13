@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Spela in en webbsida, få dess API som förfrågningar.**
+
+- **Inspelningssessioner.** En ny sorts objekt i sidopanelen öppnar en webbsida i den inbyggda mini-webbläsaren och fångar varje API-anrop den gör — REST, GraphQL, gRPC-web och WebSocket — live, med vit- och svartlistor i reguljära uttryck, paus och stopp från adressraden och en röd ”on air”-markering medan den kör. Varje fångat anrop läses exakt som en förfrågans svar (body, info, cookies, graf); ett anrops snabbmeny lägger till dess url i en lista, med möjlighet att rensa det som redan fångats. Inspelningarna stannar i minnet, begränsade av en ny appinställning, och rör aldrig din projektfil.
+- **Härled rutterna (Pro).** En knapp gör om inspelningarna till ett mappträd med riktiga förfrågningar som kan köras igen: varierande sökvägssegment blir sökvägsparametrar `{{param}}`, mapparna följer de statiska prefixen, gRPC-web-anrop sorteras per tjänst och varje förfrågan förifylls från det senaste lyckade anropet, med de fångade anropen i dess svarshistorik. Att härleda igen slår samman — dina ändringar behålls.
+- **Styr det från din AI-assistent.** Tio MCP-verktyg skapar och konfigurerar sessioner, startar och stoppar en inspelning, läser inspelningarna och härleder rutterna.
+- **Rikare Svar-flik.** Bilder visas nu direkt, video och ljud spelas upp, Markdown renderas och kodredigeraren väljer språk utifrån Content-Type — med en översatt Ladda ned-knapp alltid till hands. Ett binärt svar som körs igen från historiken visar inte längre sin base64.
+- **Långa listor förblir snabba.** Inspelningslistan (och sidopanelen bortom 400 rader) renderar bara det som syns på skärmen.
+- Projektfiler som innehåller en inspelningssession sparas i format 1.2; äldre versioner av Restorm ber dig uppdatera innan de öppnas.
+
 ## v1.1.4
 
 **Anslut din AI-assistent på macOS — nu pålitligt.**

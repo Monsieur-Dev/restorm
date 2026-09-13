@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Nehmen Sie eine Webseite auf und erhalten Sie ihre API als Anfragen.**
+
+- **Aufnahmesitzungen.** Eine neue Art von Element in der Seitenleiste öffnet eine Webseite im integrierten Mini-Browser und erfasst jeden API-Aufruf, den sie ausführt — REST, GraphQL, gRPC-web und WebSocket — live, mit Positiv- und Negativlisten aus regulären Ausdrücken, Pausieren und Beenden direkt aus der Adresszeile und einem roten „On Air“-Abzeichen, solange sie läuft. Jeder erfasste Aufruf liest sich genau wie die Antwort einer Anfrage (Body, Informationen, Cookies, Graph); das Kontextmenü eines Aufrufs fügt seine URL einer Liste hinzu und bereinigt auf Wunsch das bereits Erfasste. Die Aufzeichnungen bleiben im Arbeitsspeicher, begrenzt durch eine neue Anwendungseinstellung, und berühren Ihre Projektdatei nie.
+- **Routen ableiten (Pro).** Eine Schaltfläche verwandelt die Aufzeichnungen in einen Ordnerbaum echter, wiederholbarer Anfragen: Variierende Pfadsegmente werden zu `{{param}}`-Pfadparametern, die Ordner folgen den statischen Präfixen, gRPC-web-Aufrufe werden nach Dienst einsortiert, und jede Anfrage wird aus dem letzten erfolgreichen Aufruf vorausgefüllt, mit den erfassten Aufrufen in ihrem Antwortverlauf. Ein erneutes Ableiten führt zusammen — Ihre Änderungen bleiben erhalten.
+- **Steuern Sie es aus Ihrem KI-Assistenten.** Zehn MCP-Werkzeuge legen Sitzungen an und konfigurieren sie, starten und beenden eine Aufnahme, lesen die Aufzeichnungen und leiten die Routen ab.
+- **Reichhaltigerer Tab Antwort.** Bilder werden jetzt direkt angezeigt, Videos und Audio abgespielt, Markdown gerendert, und der Code-Editor wählt die Sprache anhand des Content-Type — mit einer übersetzten Schaltfläche Herunterladen, die stets zur Hand ist. Eine aus dem Verlauf wiederholte Binärantwort zeigt nicht mehr ihr Base64.
+- **Lange Listen bleiben flott.** Die Liste der Aufzeichnungen (und die Seitenleiste ab 400 Zeilen) rendert nur, was auf dem Bildschirm zu sehen ist.
+- Projektdateien, die eine Aufnahmesitzung enthalten, werden im Format 1.2 gespeichert; frühere Versionen von Restorm bitten Sie vor dem Öffnen um ein Update.
+
 ## v1.1.4
 
 **Verbinden Sie Ihren KI-Assistenten unter macOS — jetzt zuverlässig.**

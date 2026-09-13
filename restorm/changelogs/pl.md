@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Proszę nagrać stronę internetową i otrzymać jej API w postaci żądań.**
+
+- **Sesje nagrywania.** Nowy rodzaj elementu w panelu bocznym otwiera stronę internetową we wbudowanej mini-przeglądarce i przechwytuje na żywo każde wykonywane przez nią wywołanie API — REST, GraphQL, gRPC-web i WebSocket — z białą i czarną listą w postaci wyrażeń regularnych, wstrzymywaniem i zatrzymywaniem z paska adresu oraz czerwoną plakietką „na antenie” w trakcie nagrywania. Każde przechwycone wywołanie czyta się dokładnie jak odpowiedź żądania (treść, informacje, cookies, graf); menu kontekstowe wywołania dodaje jego adres url do listy, z możliwością oczyszczenia tego, co już przechwycono. Przechwycenia pozostają w pamięci, ograniczone nowym ustawieniem aplikacji, i nigdy nie dotykają pliku projektu.
+- **Wywnioskuj trasy (Pro).** Jeden przycisk zamienia przechwycenia w drzewo folderów z prawdziwymi żądaniami do ponownego uruchomienia: zmienne segmenty ścieżki stają się parametrami ścieżki `{{param}}`, foldery odpowiadają statycznym prefiksom, wywołania gRPC-web są porządkowane według usługi, a każde żądanie jest wstępnie wypełnione na podstawie ostatniego udanego wywołania, z przechwyconymi wywołaniami w historii odpowiedzi. Ponowne wnioskowanie scala wyniki — wprowadzone zmiany zostają zachowane.
+- **Sterowanie z asystenta AI.** Dziesięć narzędzi MCP tworzy i konfiguruje sesje, rozpoczyna i zatrzymuje nagrywanie, odczytuje przechwycenia i wnioskuje trasy.
+- **Bogatsza karta Odpowiedź.** Obrazy wyświetlają się teraz bezpośrednio, wideo i dźwięk są odtwarzane, Markdown jest renderowany, a edytor kodu dobiera język na podstawie Content-Type — z przetłumaczonym przyciskiem Pobierz zawsze pod ręką. Odpowiedź binarna uruchomiona ponownie z historii nie pokazuje już swojego base64.
+- **Długie listy pozostają szybkie.** Lista przechwyceń (oraz panel boczny powyżej 400 wierszy) renderuje tylko to, co widać na ekranie.
+- Pliki projektu zawierające sesję nagrywania są zapisywane w formacie 1.2; wcześniejsze wersje Restorma proszą o aktualizację przed ich otwarciem.
+
 ## v1.1.4
 
 **Proszę podłączyć swojego asystenta AI na macOS — teraz niezawodnie.**

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0
+
+**Bir web sayfasını kaydedin, API'sini istekler olarak alın.**
+
+- **Kayıt oturumları.** Kenar çubuğundaki yeni bir öğe türü, bir web sayfasını yerleşik mini tarayıcıda açar ve yaptığı her API çağrısını — REST, GraphQL, gRPC-web ve WebSocket — canlı olarak yakalar; düzenli ifadelerle beyaz ve kara listeler, adres satırından duraklatma ve durdurma, çalışırken de kırmızı bir “yayında” rozeti sunar. Yakalanan her çağrı, bir isteğin yanıtı gibi birebir okunur (gövde, bilgiler, çerezler, grafik); bir çağrının bağlam menüsü url'sini bir listeye ekler ve isteğe bağlı olarak önceden yakalananları temizler. Yakalamalar bellekte kalır, yeni bir uygulama ayarıyla sınırlandırılır ve proje dosyanıza hiçbir zaman dokunmaz.
+- **Rotaları çıkar (Pro).** Tek bir düğme, yakalamaları gerçek ve yeniden oynatılabilir isteklerden oluşan bir klasör ağacına dönüştürür: değişen yol parçaları `{{param}}` yol parametrelerine dönüşür, klasörler sabit ön ekleri izler, gRPC-web çağrıları servise göre yerleştirilir ve her istek, yakalanan çağrılar yanıt geçmişinde olmak üzere son başarılı çağrıdan önceden doldurulur. Yeniden çıkarmak birleştirir — düzenlemeleriniz korunur.
+- **Yapay zekâ asistanınızdan yönetin.** On MCP aracı oturum oluşturur ve yapılandırır, bir kaydı başlatır ve durdurur, yakalamaları okur ve rotaları çıkarır.
+- **Daha zengin Yanıt sekmesi.** Görseller artık satır içinde gösteriliyor, video ve ses oynatılıyor, Markdown işleniyor ve kod düzenleyici dili Content-Type'a göre seçiyor — çevrilmiş bir İndir düğmesi her zaman elinizin altında. Geçmişten yeniden oynatılan ikili bir yanıt artık base64'ünü göstermiyor.
+- **Uzun listeler hızlı kalıyor.** Yakalamalar listesi (ve 400 satırı aşan kenar çubuğu) yalnızca ekranda görünenleri çiziyor.
+- Bir kayıt oturumu içeren proje dosyaları 1.2 biçiminde kaydedilir; Restorm'un önceki sürümleri bunları açmadan önce güncelleme yapmanızı ister.
+
 ## v1.1.4
 
 **Yapay zekâ asistanınızı macOS'ta bağlayın — artık güvenilir.**
