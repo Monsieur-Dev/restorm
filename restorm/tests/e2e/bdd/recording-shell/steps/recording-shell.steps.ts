@@ -762,3 +762,24 @@ When('I drag the session {string} row onto the open tab {string} edge', async ({
   const rel = edge === 'right' ? { x: 0.95, y: 0.5 } : edge === 'left' ? { x: 0.05, y: 0.5 } : edge === 'top' ? { x: 0.5, y: 0.05 } : { x: 0.5, y: 0.95 }
   await dragRowIdToTarget(p, nodeRowId(id, kind), '.editor-group-content-placeholder', rel.x, rel.y)
 })
+
+// ── Ctrl+Tab switcher ─────────────────────────────────────────────────
+
+When('I hold Ctrl and press Tab to open the tab switcher', async () => {
+  const p = requirePage()
+  await p.keyboard.down('Control')
+  await p.keyboard.press('Tab')
+  await expect(p.locator('[data-testid="tab-switcher"]')).toBeVisible({ timeout: 5000 })
+})
+
+Then('the tab switcher item at index {int} should contain {string}', async ({}, index: number, text: string) => {
+  const item = requirePage().locator(`[data-testid="tab-switcher-item-${String(index)}"]`)
+  await expect(item).toBeVisible({ timeout: 3000 })
+  await expect(item).toContainText(text, { timeout: 3000 })
+})
+
+When('I release Ctrl', async () => {
+  const p = requirePage()
+  await p.keyboard.up('Control')
+  await p.waitForTimeout(300)
+})

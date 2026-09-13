@@ -4,6 +4,7 @@ import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
+import { recordingNodeRowId, parseRecordingTabId } from '../../../../../shared/recording/recordingSections'
 import {
   isFolderTab,
   isEnvironmentFolderTab,
@@ -447,6 +448,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // Drives both the switcher sort and the close-returns-to-previous
   // selection in the workbench.
   const getTabNavKey = useCallback((tab: RestormEditorTab): string | null => {
+    // A recording session's node tabs share the session as item id but are
+    // distinct tabs: key them by their sidebar node row (what activation and
+    // sidebar clicks record), or they would all sort together in Ctrl+Tab.
+    if (isRecordingTab(tab) && tab.node !== 'config') return recordingNodeRowId(tab.session.id, tab.node)
     return getTabItemId(tab) ?? tab.id
   }, [getTabItemId])
 
@@ -920,7 +925,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             const tab = node.tabs.find((t) => t.id === tabId)
             if (tab) {
               found.groupId = node.id
-              found.itemId = getTabItemId(tab as RestormEditorTab)
+              // The MRU key, not the bare item id: a recording node tab
+              // records under its node row (see getTabNavKey).
+              found.itemId = getTabNavKey(tab as RestormEditorTab)
               return { ...node, activeTabId: tabId }
             }
             return node
@@ -943,6 +950,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           : tabId.startsWith('folder') ? 'folder'
           : tabId.startsWith('design') ? 'design'
           : tabId.startsWith('scenario') ? 'scenario-editor'
+          : parseRecordingTabId(tabId) !== null ? 'recording'
           : 'http-request'
         navigationService.navigateTo(found.itemId, 'tab-switcher', { type: tabType })
       }

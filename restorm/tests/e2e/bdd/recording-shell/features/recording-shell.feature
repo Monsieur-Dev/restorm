@@ -32,6 +32,18 @@ Feature: Recording session sidebar nodes and tabs
     Then the workbench has 2 editor groups
     And the recording "captures" tab is open
 
+  Scenario: Ctrl+Tab lists a session's tabs by recency, each on its own
+    Given a project with an env folder is open
+    When I add a recording session from the env folder's context menu
+    And I click the session "captures" row
+    And I click the session "routes" row
+    And I click the session row
+    And I hold Ctrl and press Tab to open the tab switcher
+    Then the tab switcher item at index 0 should contain "New recording session"
+    And the tab switcher item at index 1 should contain "Routes"
+    And the tab switcher item at index 2 should contain "Captures"
+    When I release Ctrl
+
   Scenario: A scenario's Add menu offers no recording session
     Given a project with an env folder is open
     When I add a scenario from the env folder's context menu

@@ -9,7 +9,7 @@ import type { RecordingSession, Folder, EnvironmentFolder, Request, Environment,
 import { isFolder, isRequest, isScenario, isApiDesign, isRecordingSession, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import { parseDesignSectionRowId, designSectionRowId, designEntityRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
-import { parseRecordingNodeRowId, type RecordingTabNode } from '../../../shared/recording/recordingSections'
+import { parseRecordingNodeRowId, parseRecordingTabId, recordingNodeRowId, type RecordingTabNode } from '../../../shared/recording/recordingSections'
 import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection, getActiveDesignEntity, subscribeActiveDesignEntity } from '../services/designSectionIntent'
 import { parseDesignClientRowId, findClientRequest } from '../services/designClientsStore'
 import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
@@ -687,6 +687,13 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
     if (idMatch?.[1] && idMatch[2]) {
       return { itemType: mapType(idMatch[1]), itemId: idMatch[2] }
+    }
+    // A recording session's tabs: the config tab navigates as the session,
+    // each node tab (browser / captures / routes) as its own sidebar node
+    // row — one MRU entry per tab, the same keys the sidebar clicks record.
+    const recording = parseRecordingTabId(tabId)
+    if (recording !== null) {
+      return { itemType: 'recording', itemId: recording.node === 'config' ? recording.sessionId : recordingNodeRowId(recording.sessionId, recording.node) }
     }
     return { itemId: null, itemType: null }
   }, [resolveIndexPath])
