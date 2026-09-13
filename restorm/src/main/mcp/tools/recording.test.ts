@@ -252,20 +252,21 @@ describe('recording MCP tools', () => {
     parse(await mcp.invoke('create_recording_session', { name: 'rec', url: 'http://localhost:9999/' }))
     addWindow(1)
     addWindow(2)
-    // Decline from both windows on every round until the (shortened) budget runs out.
-    const declineAll = (): void => {
-      for (const b of broadcasts.splice(0)) {
-        if (b.channel !== 'mcp:start-recording') continue
-        const { requestId } = b.payload as { requestId: string }
-        emitIpcMain('mcp:start-recording-result', 1, { requestId, accepted: false })
-        emitIpcMain('mcp:start-recording-result', 2, { requestId, accepted: false })
+    // Both windows decline every round, answering as soon as the request is
+    // broadcast (a microtask later — not on a timer: a polling decline can
+    // miss the last, shortest round on a slow machine, which then reads as
+    // a renderer timeout instead of the exhausted budget).
+    for (const window of windowsState) {
+      const original = window.webContents.send
+      window.webContents.send = (channel: string, payload: unknown): void => {
+        original(channel, payload)
+        if (channel !== 'mcp:start-recording') return
+        const { requestId } = payload as { requestId: string }
+        queueMicrotask(() => { emitIpcMain('mcp:start-recording-result', window.webContents.id, { requestId, accepted: false }) })
       }
     }
     const { startRecordingViaRenderer } = await import('./recording')
-    const pending = startRecordingViaRenderer('s-1', 350)
-    const timer = setInterval(declineAll, 20)
-    const result = await pending
-    clearInterval(timer)
+    const result = await startRecordingViaRenderer('s-1', 350)
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toContain('no window accepted')
   })
