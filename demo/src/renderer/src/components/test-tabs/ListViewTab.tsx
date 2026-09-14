@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListView } from 'electron-core-ui/renderer'
+import { Button, ListView } from 'electron-core-ui/renderer'
 import type { ListViewDropEventPayload, ListViewItemData, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 
 interface LastSelectionEvent {
@@ -178,8 +178,15 @@ const ListViewTab: React.FC = () => {
   ]), [])
 
   const initialMultiItems = useMemo<ListViewItemData[]>(() => (makeLeafItems('m', 12)), [])
+  // Virtualisation harness: far more rows than the 200px box can show.
+  const initialVirtualItems = useMemo<ListViewItemData[]>(() => (makeLeafItems('v', 5000)), [])
 
   const [basicItems, setBasicItems] = useState<ListViewItemData[]>(initialBasicItems)
+  // Follow-tail harness: a short list that grows by 20 rows per click.
+  const [tailItems, setTailItems] = useState<ListViewItemData[]>(() => makeLeafItems('t', 20))
+  const appendTailRows = useCallback(() => {
+    setTailItems((prev) => [...prev, ...makeLeafItems('t', 20).map((_item, i) => ({ id: `t-${String(prev.length + i)}`, title: `Tail ${String(prev.length + i)}` }))])
+  }, [])
   const [controlledExpandedIds] = useState<string[]>([])
 
   const [lastSelection, setLastSelection] = useState<LastSelectionEvent | null>(null)
@@ -259,6 +266,39 @@ const ListViewTab: React.FC = () => {
             ariaLabel="ListView multiple selection"
             selectionMode="multiple"
             onSelectionChange={onSelectionChange('listview-multi')}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gap: 8 }}>
+        <div style={{ opacity: 0.7 }}>{t('listView.harness.virtualized')}</div>
+        <div style={{ height: 200, border: '1px solid var(--panel-border)', overflow: 'hidden' }}>
+          <ListView
+            data-testid="listview-virtual"
+            items={initialVirtualItems}
+            rootRole="list"
+            ariaLabel="ListView virtualised"
+            virtualized
+            rowHeight={26}
+            onSelectionChange={onSelectionChange('listview-virtual')}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gap: 8 }}>
+        <div style={{ opacity: 0.7 }}>{t('listView.harness.followTail')}</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button data-testid="listview-tail-append" onClick={appendTailRows}>{t('listView.harness.appendRows')}</Button>
+        </div>
+        <div style={{ height: 130, border: '1px solid var(--panel-border)', overflow: 'hidden' }}>
+          <ListView
+            data-testid="listview-tail"
+            items={tailItems}
+            rootRole="list"
+            ariaLabel="ListView follow tail"
+            virtualized
+            rowHeight={26}
+            followTail
           />
         </div>
       </div>

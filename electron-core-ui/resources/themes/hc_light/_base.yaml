@@ -513,6 +513,14 @@ colors:
     value: "#1565c0"
     description: "API design badge (HC light, blue)"
 
+  - id: recording-on-air-background
+    value: "#b8003a"
+    description: "Recording session badge + on-air beam (HC light, deep rose red)"
+
+  - id: recording-on-air-beam-tail
+    value: "#e0446f"
+    description: "Recording on-air beam trail tail (HC light)"
+
   - id: badge-capsule-glyph-background
     value: "#311b92"
     description: "Server-mode capsule glyph (HC light)"

@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API 设计"
+        "design": "API 设计",
+        "recording": "录制会话"
       },
       "cut": "剪切",
       "copy": "复制",
@@ -443,6 +444,7 @@
         "requestBodyFile": "文件"
       },
       "loading": "正在发送请求...",
+      "body": { "download": "下载", "binary": "二进制内容（{{type}}）— 请使用“下载”保存", "unknownType": "未知类型" },
       "noResponseBody": "无响应正文 — 详情请见 Infos",
       "noResponse": "点击“发送”以执行请求",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "设置",
       "tag": "标签",
       "scenario": "场景",
-      "design": "API 设计"
+      "design": "API 设计",
+      "recording": "录制会话"
     },
     "tooltip": {
       "noDetails": "无可用详情",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "每个历史记录保留的条目数",
     "maxEntriesDescription": "请求的调用历史记录和场景的运行历史记录各自保留的条目数。已固定的条目始终保留，与此值无关。主屏幕的近期活动列表不受影响。"
   },
+  "recording": {
+    "title": "录制会话",
+    "maxCapturesTitle": "每个会话保留的已捕获调用数",
+    "maxCapturesDescription": "录制会话在内存中保留的已捕获调用数量。达到上限后，最早的调用会被优先丢弃。捕获内容永远不会保存到项目文件中。",
+    "newSessionName": "新建录制会话",
+    "node": {
+      "browser": "浏览器",
+      "captures": "捕获",
+      "routes": "路由"
+    },
+    "tab": {
+      "browserTitle": "浏览器：{{name}}",
+      "capturesTitle": "捕获：{{name}}",
+      "routesTitle": "路由：{{name}}"
+    },
+    "placeholder": {
+      "config": "会话设置（页面 URL、协议、白名单和黑名单）将显示在此处。",
+      "browser": "录制浏览器将显示在此处。",
+      "captures": "尚未捕获任何调用。请在会话设置中开始录制，页面的调用便会显示在此处。",
+      "routes": "尚未推导出任何路由。请先录制一些调用，然后从捕获中推导路由。"
+    },
+    "config": {
+      "subtitle": "在 Restorm 监听页面 API 调用的同时浏览该页面。随项目保存的只有以下设置，捕获的调用永不保存。",
+      "url": "要监听的页面",
+      "urlPlaceholder": "https://example.com、http://localhost:3000 或 file:///path/page.html",
+      "urlInvalid": "请输入 http(s) 或 file 地址。",
+      "urlRequired": "请输入页面地址以启用录制。",
+      "record": "开始录制",
+      "stop": "停止录制",
+      "protocols": "要捕获的协议",
+      "whitelist": "白名单",
+      "blacklist": "黑名单",
+      "addPattern": "添加模式",
+      "removePattern": "移除此模式",
+      "invalidPattern": "此模式不是有效的正则表达式。",
+      "patternPlaceholder": "正则表达式，例如 ^https://api\\.example\\.com/",
+      "noPattern": "没有模式——全部通过。",
+      "filtersHint": "当调用至少匹配白名单中的一项（或白名单为空）且不匹配黑名单中的任何一项时予以保留。更改将应用于后续调用。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "暂停录制",
+      "resume": "继续录制",
+      "stop": "停止录制"
+    },
+    "captures": {
+      "empty": "尚未捕获任何调用。请在会话设置中开始录制，页面的调用便会实时显示在此处。",
+      "filterPlaceholder": "筛选调用（正则表达式）",
+      "live": "进行中",
+      "clearRun": "删除此次录制的调用",
+      "selectOne": "选择一个调用以查看其响应。",
+      "loadingDetail": "正在加载调用…",
+      "addToWhitelist": "添加到白名单…",
+      "addToBlacklist": "添加到黑名单…",
+      "patternLabel": "模式（正则表达式）",
+      "add": "添加",
+      "addAndApply": "添加并应用到已捕获的调用",
+      "applyConfirm": "将名单应用到已捕获的调用会移除其中所有现已被拒绝的调用。此操作无法撤销。",
+      "applyConfirmOk": "应用并移除",
+      "deduce": "推导路由",
+      "deduceWhileRecording": "请先停止录制再推导路由。",
+      "deduceUnavailable": "路由推导尚不可用。",
+      "deduceLocked": "推导路由需要 Pro 及以上套餐。"
+    },
+    "routes": {
+      "empty": "尚未推导出任何路由。请先录制调用，然后使用捕获下方的“推导路由”——请求会显示在此处以及侧栏的“路由”行下方。",
+      "proCallout": "从捕获的调用推导路由需要 Pro 及以上套餐。录制功能对所有人开放。",
+      "subscribe": "查看套餐",
+      "count_one": "{{count}} 个推导出的请求",
+      "count_other": "{{count}} 个推导出的请求",
+      "hint": "推导出的请求是普通请求：可自由编辑；再次推导会保留您的修改，只添加新的路由。"
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 调用日志保留",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "列出录制会话",
+    "createRecordingSession": "创建录制会话",
+    "updateRecordingSession": "更新录制会话",
+    "setRecordingFilters": "设置录制会话的 URL 过滤器",
+    "startRecording": "开始录制会话",
+    "stopRecording": "停止录制会话",
+    "getRecordingStatus": "获取录制会话的状态",
+    "listRecordingCaptures": "列出录制会话捕获的调用",
+    "getRecordingCapture": "获取一次捕获调用的完整内容",
+    "deduceRecordingRoutes": "推断录制会话的路由",
     "answerScenarioInput": "回答场景输入",
     "arrangeScenario": "自动排列场景",
     "cancelRequest": "取消请求",
@@ -3209,6 +3300,9 @@
       "addedDesign": "已添加设计 \"{{name}}\"",
       "modifiedDesign": "已修改设计 \"{{name}}\"",
       "deletedDesign": "已删除设计 \"{{name}}\"",
+      "addedRecording": "已添加录制会话\"{{name}}\"",
+      "modifiedRecording": "已修改录制会话\"{{name}}\"",
+      "deletedRecording": "已删除录制会话\"{{name}}\"",
       "addedFolder": "已添加文件夹 \"{{name}}\"",
       "modifiedFolder": "已修改文件夹 \"{{name}}\"",
       "deletedFolder": "已删除文件夹 \"{{name}}\"",
@@ -3218,6 +3312,7 @@
       "movedRequest": "移动了请求“{{name}}”",
       "movedScenario": "移动了场景“{{name}}”",
       "movedDesign": "移动了设计“{{name}}”",
+      "movedRecording": "已移动录制会话\"{{name}}\"",
       "movedFolder": "移动了文件夹“{{name}}”",
       "movedEnvironmentFolder": "移动了环境文件夹“{{name}}”",
       "reorderedFolder": "已重新排序文件夹“{{name}}”中的项目",
@@ -3229,6 +3324,7 @@
       "singleRequest": "更新请求 \"{{name}}\"",
       "singleScenario": "更新场景 \"{{name}}\"",
       "singleDesign": "更新设计 \"{{name}}\"",
+      "singleRecording": "录制会话\"{{name}}\"的更新",
       "singleFolder": "更新文件夹 \"{{name}}\"",
       "singleEnvironmentFolder": "更新环境文件夹 \"{{name}}\"",
       "singleFileFormatVersion": "迁移到文件格式 {{name}}",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "{{count}} 个场景",
       "countDesign_one": "{{count}} 个设计",
       "countDesign_other": "{{count}} 个设计",
+      "countRecording_one": "{{count}} 个录制会话",
+      "countRecording_other": "{{count}} 个录制会话",
       "countFolder_one": "{{count}} 个文件夹",
       "countFolder_other": "{{count}} 个文件夹",
       "countEnvironmentFolder_one": "{{count}} 个环境文件夹",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "在 Restorm 崩溃时发送匿名化报告，以便修复故障。报告在离开您的设备前会清除 URL、令牌、请求正文和个人数据。免费版包含此功能；付费版可将其关闭。 完整说明：https://restorm.app/privacy",
     "telemetryTitle": "发送使用统计",
     "telemetryDescription": "发送关于使用了哪些功能的匿名统计，用于指导后续开发。默认关闭，未经您明确同意绝不启用。不含任何请求数据、URL 或个人数据。 完整说明：https://restorm.app/privacy",
+    "geolocationTitle": "与嵌入式浏览器共享您的位置",
+    "geolocationDescription": "获取您的大致位置（来自系统定位服务，无法获取时则根据您的 IP 地址推算），并仅传递给嵌入式迷你网页浏览器，使需要定位的网站能在录制会话中正常工作。不会向 Restorm 发送任何内容。",
+    "geolocationConsent": {"title": "与嵌入式浏览器共享您的位置?", "body": "Restorm 将向您系统的定位服务请求您的位置（若无法获取，则通过第三方查询服务根据您的 IP 地址推算），并仅传递给在嵌入式迷你网页浏览器中打开的页面。除此之外，您的位置绝不会离开您的计算机，并会在您关闭此选项后立即被清除。", "accept": "允许", "decline": "暂不"},
     "crashReportsLockedLabel": "自 Pro 套餐起可更改。在免费套餐中，崩溃报告是保持质量所必需的。",
     "consentToast": {
       "title": "帮助我们改进 Restorm",

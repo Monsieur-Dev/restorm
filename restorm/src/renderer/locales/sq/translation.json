@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Dizajn API"
+        "design": "Dizajn API",
+        "recording": "Sesion regjistrimi"
       },
       "cut": "Pre",
       "copy": "Kopjo",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Skedar"
       },
       "loading": "Po dërgohet kërkesa...",
+      "body": { "download": "Shkarko", "binary": "Përmbajtje binare ({{type}}) — përdorni Shkarko për ta ruajtur", "unknownType": "lloj i panjohur" },
       "noResponseBody": "Pa trup përgjigjeje — shih Infos për detaje",
       "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Parametrat",
       "tag": "Etiketat",
       "scenario": "Skenarë",
-      "design": "Dizajne API"
+      "design": "Dizajne API",
+      "recording": "Sesionet e regjistrimit"
     },
     "tooltip": {
       "noDetails": "Asnjë detaj në dispozicion",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Hyrjet e ruajtura për çdo historik",
     "maxEntriesDescription": "Sa hyrje ruajnë historiku i thirrjeve të një kërkese dhe historiku i ekzekutimeve të një skenari. Hyrjet e fiksuara ruhen gjithmonë, pavarësisht nga kjo vlerë. Listat e aktivitetit të fundit në ekranin kryesor nuk preken."
   },
+  "recording": {
+    "title": "Sesionet e regjistrimit",
+    "maxCapturesTitle": "Thirrjet e kapura që ruhen për sesion",
+    "maxCapturesDescription": "Sa thirrje të kapura ruan në memorie një sesion regjistrimi. Pasi arrihet kufiri, thirrjet më të vjetra hiqen të parat. Kapjet nuk ruhen kurrë në skedarin e projektit.",
+    "newSessionName": "Sesion regjistrimi i ri",
+    "node": {
+      "browser": "Shfletuesi",
+      "captures": "Kapjet",
+      "routes": "Rrugët"
+    },
+    "tab": {
+      "browserTitle": "Shfletuesi: {{name}}",
+      "capturesTitle": "Kapjet: {{name}}",
+      "routesTitle": "Rrugët: {{name}}"
+    },
+    "placeholder": {
+      "config": "Cilësimet e sesionit (URL-ja e faqes, protokollet, lista e bardhë dhe e zezë) do të shfaqen këtu.",
+      "browser": "Shfletuesi i regjistrimit do të shfaqet këtu.",
+      "captures": "Asnjë thirrje nuk është kapur ende. Nisni një regjistrim nga cilësimet e sesionit për të parë këtu thirrjet e faqes.",
+      "routes": "Asnjë rrugë nuk është nxjerrë ende. Regjistroni thirrje dhe më pas nxirrni rrugët nga kapjet."
+    },
+    "config": {
+      "subtitle": "Shfletoni faqen ndërsa Restorm dëgjon thirrjet e saj API. Vetëm cilësimet e mëposhtme ruhen me projektin — kurrë thirrjet e kapura.",
+      "url": "Faqja që dëgjohet",
+      "urlPlaceholder": "https://shembull.al, http://localhost:3000 ose file:///shtegu/faqja.html",
+      "urlInvalid": "Vendosni një URL http(s) ose file.",
+      "urlRequired": "Vendosni URL-në e faqes për të aktivizuar regjistrimin.",
+      "record": "Nis regjistrimin",
+      "stop": "Ndal regjistrimin",
+      "protocols": "Protokollet për t’u kapur",
+      "whitelist": "Lista e bardhë",
+      "blacklist": "Lista e zezë",
+      "addPattern": "Shto një model",
+      "removePattern": "Hiq këtë model",
+      "invalidPattern": "Ky model nuk është një shprehje e rregullt e vlefshme.",
+      "patternPlaceholder": "Shprehje e rregullt, p.sh. ^https://api\\.shembull\\.al/",
+      "noPattern": "Asnjë model — gjithçka kalon.",
+      "filtersHint": "Një thirrje ruhet nëse përputhet me të paktën një zë të listës së bardhë (ose nëse ajo është bosh) dhe me asnjë zë të listës së zezë. Ndryshimet zbatohen për thirrjet e ardhshme."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Ndalo përkohësisht regjistrimin",
+      "resume": "Rifillo regjistrimin",
+      "stop": "Ndal regjistrimin"
+    },
+    "captures": {
+      "empty": "Asnjë thirrje nuk është kapur ende. Nisni një regjistrim nga cilësimet e sesionit për të parë këtu thirrjet e faqes në kohë reale.",
+      "filterPlaceholder": "Filtroni thirrjet (shprehje e rregullt)",
+      "live": "në vazhdim",
+      "clearRun": "Fshi thirrjet e këtij regjistrimi",
+      "selectOne": "Zgjidhni një thirrje për të parë përgjigjen e saj.",
+      "loadingDetail": "Po ngarkohet thirrja…",
+      "addToWhitelist": "Shto në listën e bardhë…",
+      "addToBlacklist": "Shto në listën e zezë…",
+      "patternLabel": "Model (shprehje e rregullt)",
+      "add": "Shto",
+      "addAndApply": "Shto dhe zbato te thirrjet e kapura",
+      "applyConfirm": "Zbatimi i listave te thirrjet tashmë të kapura heq të gjitha ato që ato tani refuzojnë. Ky veprim nuk mund të zhbëhet.",
+      "applyConfirmOk": "Zbato dhe hiq",
+      "deduce": "Nxirr rrugët",
+      "deduceWhileRecording": "Ndalni regjistrimin përpara se të nxirrni rrugët.",
+      "deduceUnavailable": "Nxjerrja e rrugëve nuk është ende e disponueshme.",
+      "deduceLocked": "Nxjerrja e rrugëve është e disponueshme që nga plani Pro."
+    },
+    "routes": {
+      "empty": "Asnjë rrugë nuk është nxjerrë ende. Regjistroni thirrje dhe më pas përdorni «Nxirr rrugët» poshtë kapjeve — kërkesat shfaqen këtu dhe poshtë rreshtit Rrugët në shiritin anësor.",
+      "proCallout": "Nxjerrja e rrugëve nga thirrjet e kapura është e disponueshme që nga plani Pro. Regjistrimi mbetet i hapur për të gjithë.",
+      "subscribe": "Shikoni planet",
+      "count_one": "{{count}} kërkesë e nxjerrë",
+      "count_other": "{{count}} kërkesa të nxjerra",
+      "hint": "Kërkesat e nxjerra janë kërkesa të zakonshme: modifikojini lirisht; një nxjerrje e re ruan ndryshimet tuaja dhe shton vetëm rrugët e reja."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Ruajtja e regjistrit të thirrjeve MCP",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listo sesionet e regjistrimit",
+    "createRecordingSession": "Krijo një sesion regjistrimi",
+    "updateRecordingSession": "Përditëso një sesion regjistrimi",
+    "setRecordingFilters": "Cakto filtrat e URL-ve të një sesioni regjistrimi",
+    "startRecording": "Nis regjistrimin e një sesioni",
+    "stopRecording": "Ndalo regjistrimin e një sesioni",
+    "getRecordingStatus": "Merr gjendjen e një sesioni regjistrimi",
+    "listRecordingCaptures": "Listo thirrjet e kapura të një sesioni regjistrimi",
+    "getRecordingCapture": "Merr një thirrje të kapur të plotë",
+    "deduceRecordingRoutes": "Nxirr rrugët e një sesioni regjistrimi",
     "answerScenarioInput": "Përgjigju një hyrjeje skenari",
     "arrangeScenario": "Rregullo automatikisht skenarin",
     "cancelRequest": "Anulo një kërkesë",
@@ -3210,6 +3301,9 @@
       "addedDesign": "U shtua dizajni \"{{name}}\"",
       "modifiedDesign": "U modifikua dizajni \"{{name}}\"",
       "deletedDesign": "U fshi dizajni \"{{name}}\"",
+      "addedRecording": "U shtua sesioni i regjistrimit \"{{name}}\"",
+      "modifiedRecording": "U ndryshua sesioni i regjistrimit \"{{name}}\"",
+      "deletedRecording": "U fshi sesioni i regjistrimit \"{{name}}\"",
       "addedFolder": "U shtua dosja \"{{name}}\"",
       "modifiedFolder": "U modifikua dosja \"{{name}}\"",
       "deletedFolder": "U fshi dosja \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "U zhvendos kërkesa \"{{name}}\"",
       "movedScenario": "U zhvendos skenari \"{{name}}\"",
       "movedDesign": "U zhvendos dizajni \"{{name}}\"",
+      "movedRecording": "U zhvendos sesioni i regjistrimit \"{{name}}\"",
       "movedFolder": "U zhvendos dosja \"{{name}}\"",
       "movedEnvironmentFolder": "U zhvendos dosja e mjedisit \"{{name}}\"",
       "reorderedFolder": "Elementet u rirenditën në dosjen «{{name}}»",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Përditësim i kërkesës \"{{name}}\"",
       "singleScenario": "Përditësim i skenarit \"{{name}}\"",
       "singleDesign": "Përditësim i dizajnit \"{{name}}\"",
+      "singleRecording": "Përditësim i sesionit të regjistrimit \"{{name}}\"",
       "singleFolder": "Përditësim i dosjes \"{{name}}\"",
       "singleEnvironmentFolder": "Përditësim i dosjes së mjedisit \"{{name}}\"",
       "singleFileFormatVersion": "Kalim në formatin e skedarit {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} skenarë",
       "countDesign_one": "{{count}} dizajn",
       "countDesign_other": "{{count}} dizajne",
+      "countRecording_one": "{{count}} sesion regjistrimi",
+      "countRecording_other": "{{count}} sesione regjistrimi",
       "countFolder_one": "{{count}} dosje",
       "countFolder_other": "{{count}} dosje",
       "countEnvironmentFolder_one": "{{count}} dosje mjedisi",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Dërgon një raport të anonimizuar kur Restorm rrëzohet, që defekti të mund të riparohet. Raportet pastrohen nga URL-të, çelësat, trupat e kërkesave dhe të dhënat personale para se të largohen nga makina juaj. E përfshirë në planin falas; një plan me pagesë lejon çaktivizimin. Detajet e plota: https://restorm.app/privacy",
     "telemetryTitle": "Dërgo statistikat e përdorimit",
     "telemetryDescription": "Dërgon statistika anonime për funksionet e përdorura, për të orientuar zhvillimet e ardhshme. E çaktivizuar si parazgjedhje dhe kurrë e aktivizuar pa pëlqimin tuaj të shprehur. Nuk përmban të dhëna kërkesash, as URL, as të dhëna personale. Detajet e plota: https://restorm.app/privacy",
+    "geolocationTitle": "Ndani vendndodhjen tuaj me shfletuesin e integruar",
+    "geolocationDescription": "Merr vendndodhjen tuaj të përafërt (nga shërbimi i vendndodhjes i sistemit ose, si zgjidhje rezervë, nga adresa juaj IP) dhe ia kalon vetëm mini shfletuesit të integruar, që faqet që përdorin gjeolokalizimin të funksionojnë në një sesion regjistrimi. Asgjë nuk dërgohet te Restorm.",
+    "geolocationConsent": {"title": "Të ndahet vendndodhja juaj me shfletuesin e integruar?", "body": "Restorm do t'i kërkojë shërbimit të vendndodhjes të sistemit tuaj pozicionin tuaj (dhe, nëse ky nuk ka asnjë, do ta vlerësojë nga adresa juaj IP përmes një shërbimi të palës së tretë) dhe do t'ua kalojë vetëm faqeve të hapura në mini shfletuesin e integruar. Në asnjë rast tjetër vendndodhja juaj nuk del nga kompjuteri juaj dhe harrohet sapo e çaktivizoni këtë opsion.", "accept": "Lejo", "decline": "Jo tani"},
     "crashReportsLockedLabel": "I ndryshueshëm nga plani Pro. Në planin falas, raportet e rrëzimeve janë të nevojshme për ruajtjen e cilësisë.",
     "consentToast": {
       "title": "Na ndihmoni ta përmirësojmë Restorm",

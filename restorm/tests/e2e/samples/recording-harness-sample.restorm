@@ -1,0 +1,607 @@
+fileFormatVersion: 1
+collections:
+- id: rec-harness-env
+  name: Recording harness
+  folderType: environment
+  configuration: {}
+  environments:
+  - id: rec-harness-env-default
+    name: Default
+    variables: []
+  items:
+  - id: rec-harness-scenario
+    name: Recording servers
+    type: scenario
+    tags:
+    - recording
+    - servers
+    params: []
+    documentation: 'Runs every mock the harness page calls, all on localhost:8123 (one origin: no CORS). Run it, then record http://localhost:8123/ in a recording session.'
+    edges: []
+    items:
+    - id: rec-srv-page
+      name: Harness page
+      type: http
+      method: GET
+      url: localhost:8123/
+      body:
+        type: text
+        content: |
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <title>Petstore demo</title>
+          <style>
+            :root { color-scheme: light; }
+            body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; background: #f4f5f7; color: #1f2937; }
+            header { background: #111827; color: #fff; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
+            header .mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #f59e0b, #ef4444); }
+            header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+            header span { opacity: .7; font-size: 13px; }
+            main { padding: 24px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 980px; }
+            section { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+            h2 { font-size: 14px; margin: 0 0 10px; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; }
+            ul { list-style: none; margin: 0; padding: 0; }
+            li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f0f1f3; font-size: 14px; }
+            li:last-child { border-bottom: 0; }
+            .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #e5f6ea; color: #166534; }
+            #log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; white-space: pre-wrap; color: #374151; max-height: 260px; overflow: auto; }
+          </style>
+          </head>
+          <body>
+          <header><div class="mark"></div><div><h1>Petstore demo</h1><span>A small front end talking to REST, GraphQL, gRPC-web and WebSocket back ends</span></div></header>
+          <main>
+            <section><h2>Pets</h2><ul id="pets"><li><span>Rex</span><span class="pill">available</span></li><li><span>Whiskers</span><span class="pill">available</span></li><li><span>Nemo</span><span class="pill">available</span></li></ul></section>
+            <section><h2>Activity</h2><div id="log"></div></section>
+          </main>
+          <script>
+          (function () {
+            var base = window.location.origin
+            var log = document.getElementById('log')
+            var lines = 0
+            function say(text) {
+              lines += 1
+              if (lines > 200) return
+              log.textContent += text + '\n'
+            }
+            function call(method, path, headers, body) {
+              return fetch(base + path, { method: method, headers: headers, body: body })
+                .then(function (r) { say(method + ' ' + path + ' -> ' + r.status); return r.text() })
+                .catch(function (e) { say(method + ' ' + path + ' failed: ' + e) })
+            }
+            var ws = null
+            function openSocket() {
+              try {
+                ws = new WebSocket('ws://' + window.location.host + '/ws')
+                ws.onopen = function () { say('ws open') }
+                ws.onclose = function () { say('ws closed'); ws = null }
+                ws.onerror = function () { say('ws error') }
+              } catch (e) { say('ws failed: ' + e) }
+            }
+            // Sites that geolocate: report the position the browser gives us (or the
+            // refusal) as an API call, so a recording shows what the page received.
+            function locate() {
+              if (!navigator.geolocation) { say('geolocation unsupported'); return }
+              navigator.geolocation.getCurrentPosition(
+                function (p) { call('GET', '/api/geo?lat=' + p.coords.latitude.toFixed(2) + '&lng=' + p.coords.longitude.toFixed(2)) },
+                function (e) { say('geolocation refused: ' + e.message) },
+                { timeout: 8000 }
+              )
+            }
+            locate()
+            var tick = 0
+            function loop() {
+              tick += 1
+              if (tick > 40) return
+              var petId = (tick % 3) + 1
+              call('GET', '/api/pets')
+              call('GET', '/api/pets/' + petId)
+              call('POST', '/api/pets', { 'content-type': 'application/json' }, JSON.stringify({ name: 'Rex ' + tick }))
+              call('GET', '/api/health')
+              call('POST', '/graphql', { 'content-type': 'application/json' }, JSON.stringify({ query: 'query Pets { pets }' }))
+              call('POST', '/pets.PetService/ListPets', { 'content-type': 'application/grpc-web+proto', 'x-grpc-web': '1' }, new Uint8Array([0, 0, 0, 0, 0]))
+              if (ws === null) openSocket()
+              else if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'hello', tick: tick }))
+              setTimeout(loop, 1000)
+            }
+            loop()
+          })()
+          </script>
+          </body>
+          </html>
+      deprecated: false
+      documentation: Serves the test page that calls every other mock on this port.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: text/html; charset=utf-8
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-pets
+      name: GET /api/pets
+      type: http
+      method: GET
+      url: localhost:8123/api/pets
+      body:
+        type: text
+        content: '{"pets":[{"id":1,"name":"Rex"},{"id":2,"name":"Whiskers"}]}'
+      deprecated: false
+      documentation: List route.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-pet-1
+      name: GET /api/pets/1
+      type: http
+      method: GET
+      url: localhost:8123/api/pets/1
+      body:
+        type: text
+        content: '{"id":1,"name":"Rex"}'
+      deprecated: false
+      documentation: Detail route (id 1) — with /api/pets/2 it makes {{petId}} a path parameter.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-pet-2
+      name: GET /api/pets/2
+      type: http
+      method: GET
+      url: localhost:8123/api/pets/2
+      body:
+        type: text
+        content: '{"id":2,"name":"Whiskers"}'
+      deprecated: false
+      documentation: Detail route (id 2).
+      headers:
+      - key: Content-Type
+        enabled: true
+        value: &id001
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: &id002 []
+      pathParams: &id003 []
+      server: true
+      tags: &id004
+      - http
+      - server
+    - id: rec-srv-pet-3
+      name: GET /api/pets/3
+      type: http
+      method: GET
+      url: localhost:8123/api/pets/3
+      body:
+        type: text
+        content: '{"id":3,"name":"Nemo"}'
+      deprecated: false
+      documentation: Detail route (id 3).
+      headers:
+      - key: Content-Type
+        enabled: true
+        value: *id001
+      mockStatus: 200
+      params: *id002
+      pathParams: *id003
+      server: true
+      tags: *id004
+    - id: rec-srv-pets-post
+      name: POST /api/pets
+      type: http
+      method: POST
+      url: localhost:8123/api/pets
+      body:
+        type: text
+        content: '{"id":3,"name":"created"}'
+      deprecated: false
+      documentation: Create route — the e2e blacklists it from a capture.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-health
+      name: GET /api/health
+      type: http
+      method: GET
+      url: localhost:8123/api/health
+      body:
+        type: text
+        content: '{"ok":true}'
+      deprecated: false
+      documentation: Noise route — the e2e blacklists it from the session config.
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-geo
+      name: GET /api/geo
+      type: http
+      method: GET
+      url: localhost:8123/api/geo
+      body:
+        type: text
+        content: '{"ok":true}'
+      deprecated: false
+      documentation: Called with the position the page obtained from navigator.geolocation (the e2e checks the shared position reaches the page).
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/json
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-grpcweb
+      name: pets.PetService/ListPets (grpc-web)
+      type: http
+      method: POST
+      url: localhost:8123/pets.PetService/ListPets
+      body:
+        type: text
+        content: AAAAAAA=
+      deprecated: false
+      documentation: 'A gRPC-web shaped call: the real gRPC mock speaks HTTP/2 only, which a browser cannot reach; the capture classifies by content type.'
+      headers:
+      - key: Content-Type
+        enabled: true
+        value:
+          type: string
+          value: application/grpc-web+proto
+      mockStatus: 200
+      params: []
+      pathParams: []
+      server: true
+      tags:
+      - http
+      - server
+    - id: rec-srv-graphql
+      name: GraphQL mock
+      type: graphql
+      url: localhost:8123/graphql
+      documentation: GraphQL mock on the same port as the page (same origin, no CORS).
+      headers: []
+      mockResolvers: |-
+        {
+          "Query.pets": ["Rex", "Whiskers"]
+        }
+      operationType: query
+      query: ''
+      schema: |-
+        type Query {
+          pets: [String!]!
+        }
+      server: true
+      tags:
+      - graphql
+      - server
+    - id: rec-srv-ws
+      name: WebSocket mock
+      type: websocket
+      url: localhost:8123/ws
+      documentation: Raw WebSocket server on the same port; records the frames the page sends.
+      headers: []
+      message: '{"hello":"from server"}'
+      protocol: websocket
+      server: true
+      tags:
+      - websocket
+      - server
+    nodes:
+    - id: rec-node-page
+      config:
+        connectionName: page
+        label: page
+        requestId: rec-srv-page
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 40
+    - id: rec-node-pets
+      config:
+        connectionName: GET pets
+        label: GET pets
+        requestId: rec-srv-pets
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 130
+    - id: rec-node-pet1
+      config:
+        connectionName: GET pet 1
+        label: GET pet 1
+        requestId: rec-srv-pet-1
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 220
+    - id: rec-node-pet2
+      config:
+        connectionName: GET pet 2
+        label: GET pet 2
+        requestId: rec-srv-pet-2
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 310
+    - id: rec-node-pet3
+      config:
+        connectionName: GET pet 3
+        label: GET pet 3
+        requestId: rec-srv-pet-3
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 355
+    - id: rec-node-post
+      config:
+        connectionName: POST pets
+        label: POST pets
+        requestId: rec-srv-pets-post
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 400
+    - id: rec-node-health
+      config:
+        connectionName: GET health
+        label: GET health
+        requestId: rec-srv-health
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 490
+    - id: rec-node-geo
+      config:
+        connectionName: GET geo
+        label: GET geo
+        requestId: rec-srv-geo
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 535
+    - id: rec-node-grpc
+      config:
+        connectionName: grpc-web ListPets
+        label: grpc-web ListPets
+        requestId: rec-srv-grpcweb
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: httpListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 580
+    - id: rec-node-gql
+      config:
+        connectionName: GraphQL
+        label: GraphQL
+        requestId: rec-srv-graphql
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: graphqlListen
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: served
+        name: served
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 670
+    - id: rec-node-ws
+      config:
+        connectionName: WebSocket
+        label: WebSocket
+        requestId: rec-srv-ws
+      inputs:
+      - id: in
+        name: ''
+        dataType: any
+        flow: signal
+      kind: websocketConnect
+      note: listens until the run is stopped
+      outputs:
+      - id: connected
+        name: connected
+        dataType: any
+        flow: signal
+      - id: message
+        name: message
+        dataType: any
+        flow: both
+      position:
+        x: 40
+        y: 760
+  tagColors: {}
+  tags: []
+_projectUuid: 6f0b2c4e-9a71-4d5b-8e13-2c7a9f0d5015

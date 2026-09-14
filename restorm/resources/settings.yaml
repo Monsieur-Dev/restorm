@@ -80,6 +80,22 @@ groups:
             min: 1
             max: 1000
             integer: true
+  - id: "recording"
+    titleKey: "recording.title"
+    items:
+      # Captures are runtime data held in the main process only — never in the
+      # project file — so this cap bounds memory, not disk. Per session; the
+      # oldest calls go first.
+      - setting:
+          id: "maxCaptures"
+          titleKey: "recording.maxCapturesTitle"
+          descriptionKey: "recording.maxCapturesDescription"
+          type: "number"
+          default: 1000
+          params:
+            min: 10
+            max: 100000
+            integer: true
   - id: "mcp"
     titleKey: "mcp.title"
     items:
@@ -202,4 +218,16 @@ groups:
           titleKey: "privacy.telemetryTitle"
           descriptionKey: "privacy.telemetryDescription"
           type: "toggle"
+          default: false
+      # The position is obtained for free (GeoClue on Linux, the OS service on
+      # macOS / Windows, an IP-based guess as the last resort) and handed ONLY
+      # to the embedded mini-browser, so sites that geolocate work in a
+      # recording session. OFF by default; the custom renderer asks for the
+      # user's consent before turning it on, and turning it off forgets the
+      # position and removes it from every open browser view.
+      - setting:
+          id: "geolocation"
+          titleKey: "privacy.geolocationTitle"
+          descriptionKey: "privacy.geolocationDescription"
+          type: "geolocation-toggle"
           default: false

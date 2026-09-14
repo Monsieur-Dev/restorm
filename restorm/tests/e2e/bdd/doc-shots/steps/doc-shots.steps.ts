@@ -6,7 +6,8 @@ import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect } from '../../fixtures/doc-shots.fixture'
 import { loginViaLoopback } from '../../../helpers/workos-login'
-import { captureForAllLocales, localeDirName } from '../../../helpers/capture-locales'
+import sharp from 'sharp'
+import { captureForAllLocales, localeDirName, optimizePng, shippedLocales, switchAppLanguage } from '../../../helpers/capture-locales'
 import { callEmbeddedMcpTool, readEmbeddedMcpLock } from '../../../helpers/embedded-mcp'
 
 const OPENAPI_URL = 'https://api.artifactsmmo.com/openapi.json'
@@ -1533,4 +1534,191 @@ Then('I capture the theme carousel for every locale to {string}', async ({ resto
     // the theme selector shown in its settings context, without the sidebar.
     clipTo: () => p.locator('[data-testid="settings-tab-content"]')
   })
+})
+
+// ── Recording sessions ────────────────────────────────────────────────────
+
+const RECORDING_HARNESS_SAMPLE = 'tests/e2e/samples/recording-harness-sample.restorm'
+const RECORDING_HARNESS_ENV_ID = 'rec-harness-env'
+const RECORDING_HARNESS_SCENARIO_ID = 'rec-harness-scenario'
+const RECORDING_HARNESS_PAGE_REQUEST_ID = 'rec-srv-page'
+const RECORDING_HARNESS_PAGE_URL = 'http://localhost:8123/'
+
+let recordingSessionId: string | null = null
+let recordingRunId: string | null = null
+
+function requireRecordingSession(): string {
+  if (recordingSessionId === null) throw new Error('create the demo recording session first')
+  return recordingSessionId
+}
+
+function recordingSidebarRow(p: Page, node: 'browser' | 'captures' | 'routes'): Locator {
+  return p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="recording-node:${requireRecordingSession()}:${node}"]`)
+}
+
+async function harnessPageListening(p: Page): Promise<boolean> {
+  return p.evaluate(async (requestId: string) => {
+    const w = window as unknown as { restorm?: { http?: { isListening?: (id: string) => Promise<boolean> } } }
+    const fn = w.restorm?.http?.isListening
+    return typeof fn === 'function' ? fn(requestId) : false
+  }, RECORDING_HARNESS_PAGE_REQUEST_ID)
+}
+
+/** The harness sample copied to a neutral path (it shows in the status bar),
+ * opened through MCP, and its "Recording servers" scenario started — every
+ * mock the demo page calls comes up on localhost:8123. */
+Given('I open the recording harness project and start its mock servers', async ({ restormRoot }) => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const projectDir = '/tmp/restorm-recording-demo'
+  rmSync(projectDir, { recursive: true, force: true })
+  mkdirSync(projectDir, { recursive: true })
+  const projectPath = join(projectDir, 'petstore-front-end.restorm')
+  copyFileSync(join(restormRoot, RECORDING_HARNESS_SAMPLE), projectPath)
+  await callEmbeddedMcpTool(mcp, 'open_project', { filePath: projectPath })
+  // Await the renderer post-load mirror before driving the project.
+  await p.waitForTimeout(1500)
+  await expect(p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${RECORDING_HARNESS_ENV_ID}"]`)).toBeVisible({ timeout: 15000 })
+  const run = await callEmbeddedMcpTool<{ runId?: string }>(mcp, 'run_scenario', { scenarioId: RECORDING_HARNESS_SCENARIO_ID, blocking: false })
+  recordingRunId = typeof run.runId === 'string' ? run.runId : null
+  await expect.poll(() => harnessPageListening(p), { timeout: 30000, intervals: [500] }).toBe(true)
+  const response = await fetch(RECORDING_HARNESS_PAGE_URL)
+  if (response.status !== 200) throw new Error(`the harness page answered ${String(response.status)}`)
+  await dismissExternalChangeToast(p)
+})
+
+Given('I create the demo recording session', async () => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const created = await callEmbeddedMcpTool<{ id?: string }>(mcp, 'create_recording_session', {
+    parentId: RECORDING_HARNESS_ENV_ID,
+    name: 'Petstore front end',
+    url: RECORDING_HARNESS_PAGE_URL,
+    blacklist: ['/api/health']
+  })
+  if (typeof created.id !== 'string') throw new Error(`create_recording_session returned no id: ${JSON.stringify(created)}`)
+  recordingSessionId = created.id
+  await callEmbeddedMcpTool(mcp, 'open_tab', { itemId: created.id })
+  await expect(p.locator('[data-testid="recording-tab-config"]')).toBeVisible({ timeout: 15000 })
+  await p.waitForTimeout(500)
+})
+
+When('I capture the recording configuration for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireRecordingSession()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      await p.locator(`[data-testid="sidebar-listview"] .list-view-row[data-item-id="${id}"]`).click()
+      await expect(p.locator('[data-testid="recording-tab-config"]')).toBeVisible({ timeout: 10000 })
+      await p.waitForTimeout(300)
+    }
+  })
+})
+
+/** Start through MCP (the same flow as the record button: browser tab +
+ * engine attached), then let the demo page make a first batch of calls. */
+When('I start the demo recording and wait for its captures', async () => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const id = requireRecordingSession()
+  const started = await callEmbeddedMcpTool<{ started?: boolean }>(mcp, 'start_recording', { sessionId: id })
+  if (started.started !== true) throw new Error(`start_recording did not start: ${JSON.stringify(started)}`)
+  await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'recording', { timeout: 15000 })
+  await expect.poll(async () => {
+    const status = await callEmbeddedMcpTool<{ captureCount?: number }>(mcp, 'get_recording_status', { sessionId: id })
+    return status.captureCount ?? 0
+  }, { timeout: 30000, intervals: [500] }).toBeGreaterThanOrEqual(12)
+})
+
+/**
+ * The browser tab: the mini-browser is a native `WebContentsView` painted by
+ * the OS compositor above the page, so a window screenshot shows an empty
+ * slot where it sits. Per locale: shoot the window, capture the view's own
+ * pixels through the mini-browser bridge, and composite them into the slot's
+ * exact bounds.
+ */
+When('I capture the recording browser for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  const id = requireRecordingSession()
+  const targetFor = targetResolver(websiteOut, template)
+  const locales = localesFilter.length > 0 ? localesFilter : shippedLocales(restormRoot)
+  const viewTabId = `recording-node-id:${id}:browser`
+  for (const locale of locales) {
+    await switchAppLanguage(p, locale)
+    await dismissExternalChangeToast(p)
+    await recordingSidebarRow(p, 'browser').click()
+    const slot = p.locator('[data-testid="mini-browser-slot"]').first()
+    await expect(slot).toBeVisible({ timeout: 10000 })
+    await p.waitForTimeout(500)
+    const target = targetFor(locale)
+    mkdirSync(dirname(target), { recursive: true })
+    const windowPng = await p.screenshot()
+    const box = await slot.boundingBox()
+    const pageDataUrl = await p.evaluate(async (tabId: string) => {
+      const w = window as unknown as { restorm?: { miniBrowser?: { capture?: (id: string) => Promise<string | null> } } }
+      const fn = w.restorm?.miniBrowser?.capture
+      return typeof fn === 'function' ? fn(tabId) : null
+    }, viewTabId)
+    if (box === null || pageDataUrl === null) throw new Error('the mini-browser view could not be captured')
+    const pagePng = Buffer.from(pageDataUrl.replace(/^data:image\/png;base64,/, ''), 'base64')
+    const width = Math.round(box.width)
+    const height = Math.round(box.height)
+    const pageFitted = await sharp(pagePng).resize(width, height, { fit: 'cover', position: 'left top' }).png().toBuffer()
+    await sharp(windowPng).composite([{ input: pageFitted, left: Math.round(box.x), top: Math.round(box.y) }]).png().toFile(target)
+    optimizePng(target)
+  }
+  await switchAppLanguage(p, 'en')
+})
+
+When('I capture the recording captures view for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      await recordingSidebarRow(p, 'captures').click()
+      await expect(p.locator('[data-testid="recording-captures-list"]')).toBeVisible({ timeout: 10000 })
+      // A selected call fills the detail pane with the reused response tabs.
+      const rows = p.locator('[data-testid^="recording-capture-row-"]')
+      await expect(rows.first()).toBeVisible({ timeout: 15000 })
+      await rows.filter({ hasText: '/api/pets' }).first().click()
+      await expect(p.locator('[data-testid="recording-capture-detail-tabs"]')).toBeVisible({ timeout: 10000 })
+      await p.waitForTimeout(400)
+    }
+  })
+})
+
+When('I stop the demo recording and deduce its routes', async () => {
+  const p = requirePage()
+  const mcp = requireMcp()
+  const id = requireRecordingSession()
+  await callEmbeddedMcpTool(mcp, 'stop_recording', { sessionId: id })
+  await expect(p.locator(`[data-testid="recording-on-air-${id}"]`).first()).toHaveAttribute('data-recording-state', 'idle', { timeout: 15000 })
+  await callEmbeddedMcpTool(mcp, 'deduce_recording_routes', { sessionId: id })
+  await p.waitForTimeout(800)
+  await dismissExternalChangeToast(p)
+})
+
+When('I capture the recording routes for every locale to {string}', async ({ restormRoot, websiteOut, localesFilter }, template: string) => {
+  const p = requirePage()
+  await captureForAllLocales(p, restormRoot, targetResolver(websiteOut, template), {
+    ...(localesFilter.length > 0 ? { locales: localesFilter } : {}),
+    beforeShot: async () => {
+      await dismissExternalChangeToast(p)
+      await recordingSidebarRow(p, 'routes').click()
+      await expect(p.locator('[data-testid="recording-routes-list"]')).toBeVisible({ timeout: 10000 })
+      // Fully expand the deduced tree in the sidebar so the folders + requests show.
+      const expandAll = p.locator('[data-testid="sidebar-expand-all"]')
+      if (await expandAll.isVisible({ timeout: 1000 }).catch(() => false)) await expandAll.click()
+      await p.waitForTimeout(400)
+    }
+  })
+})
+
+Then('I stop the recording harness mock servers', async () => {
+  const mcp = requireMcp()
+  if (recordingRunId !== null) await callEmbeddedMcpTool(mcp, 'stop_scenario_run', { runId: recordingRunId })
+  await requirePage().waitForTimeout(500)
 })

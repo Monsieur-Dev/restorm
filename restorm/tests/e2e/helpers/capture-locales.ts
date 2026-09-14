@@ -41,7 +41,7 @@ let pngquantAvailable: boolean | null = null
 /** Quantize a capture in place (deterministic for identical input, `--strip`
  * drops timestamps) — screenshots are versioned, so size matters. A missing
  * pngquant downgrades to raw Playwright PNGs with a single warning. */
-function optimizePng(target: string): void {
+export function optimizePng(target: string): void {
   if (pngquantAvailable === null) {
     pngquantAvailable = spawnSync('pngquant', ['--version']).status === 0
     if (!pngquantAvailable) console.log('[doc-shots] pngquant not found — captures stay unoptimized')

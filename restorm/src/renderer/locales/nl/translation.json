@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Opnamesessie"
       },
       "cut": "Knippen",
       "copy": "Kopiëren",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Bestand"
       },
       "loading": "Verzoek wordt verzonden...",
+      "body": { "download": "Downloaden", "binary": "Binaire inhoud ({{type}}) — gebruik Downloaden om deze op te slaan", "unknownType": "onbekend type" },
       "noResponseBody": "Geen response-body — zie Infos voor details",
       "noResponse": "Klik op Verzenden om het verzoek uit te voeren",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Instellingen",
       "tag": "Tags",
       "scenario": "Scenario's",
-      "design": "API-designs"
+      "design": "API-designs",
+      "recording": "Opnamesessies"
     },
     "tooltip": {
       "noDetails": "Geen details beschikbaar",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Bewaarde items per geschiedenis",
     "maxEntriesDescription": "Hoeveel items de aanroepgeschiedenis van een verzoek en de uitvoeringsgeschiedenis van een scenario elk bewaren. Vastgezette items blijven altijd bewaard, ongeacht deze waarde. De lijsten met recente activiteit op het startscherm worden niet beïnvloed."
   },
+  "recording": {
+    "title": "Opnamesessies",
+    "maxCapturesTitle": "Vastgelegde aanroepen bewaard per sessie",
+    "maxCapturesDescription": "Hoeveel vastgelegde aanroepen een opnamesessie in het geheugen bewaart. Zodra de limiet is bereikt, worden de oudste aanroepen eerst verwijderd. Opnamen worden nooit in het projectbestand opgeslagen.",
+    "newSessionName": "Nieuwe opnamesessie",
+    "node": {
+      "browser": "Browser",
+      "captures": "Opnamen",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Opnamen: {{name}}",
+      "routesTitle": "Routes: {{name}}"
+    },
+    "placeholder": {
+      "config": "De sessie-instellingen (pagina-URL, protocollen, witte en zwarte lijst) verschijnen hier.",
+      "browser": "De opnamebrowser verschijnt hier.",
+      "captures": "Nog geen aanroep vastgelegd. Start een opname vanuit de sessie-instellingen om de aanroepen van de pagina hier te zien verschijnen.",
+      "routes": "Nog geen route afgeleid. Neem enkele aanroepen op en leid daarna de routes af uit de opnamen."
+    },
+    "config": {
+      "subtitle": "Blader door de pagina terwijl Restorm naar de API-aanroepen luistert. Alleen de instellingen hieronder worden met het project opgeslagen — nooit de vastgelegde aanroepen.",
+      "url": "Te beluisteren pagina",
+      "urlPlaceholder": "https://voorbeeld.nl, http://localhost:3000 of file:///pad/pagina.html",
+      "urlInvalid": "Voer een http(s)- of file-URL in.",
+      "urlRequired": "Voer de URL van de pagina in om opnemen in te schakelen.",
+      "record": "Opname starten",
+      "stop": "Opname stoppen",
+      "protocols": "Vast te leggen protocollen",
+      "whitelist": "Witte lijst",
+      "blacklist": "Zwarte lijst",
+      "addPattern": "Patroon toevoegen",
+      "removePattern": "Dit patroon verwijderen",
+      "invalidPattern": "Dit patroon is geen geldige reguliere expressie.",
+      "patternPlaceholder": "Reguliere expressie, bijv. ^https://api\\.voorbeeld\\.nl/",
+      "noPattern": "Geen patroon — alles wordt doorgelaten.",
+      "filtersHint": "Een aanroep wordt bewaard als hij met minstens één item van de witte lijst overeenkomt (of als die leeg is) en met geen enkel item van de zwarte lijst. Wijzigingen gelden voor de volgende aanroepen."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Opname pauzeren",
+      "resume": "Opname hervatten",
+      "stop": "Opname stoppen"
+    },
+    "captures": {
+      "empty": "Nog geen aanroep vastgelegd. Start een opname vanuit de sessie-instellingen om de aanroepen van de pagina hier live te zien verschijnen.",
+      "filterPlaceholder": "Aanroepen filteren (reguliere expressie)",
+      "live": "bezig",
+      "clearRun": "De aanroepen van deze opname verwijderen",
+      "selectOne": "Selecteer een aanroep om het antwoord te zien.",
+      "loadingDetail": "Aanroep wordt geladen…",
+      "addToWhitelist": "Toevoegen aan de witte lijst…",
+      "addToBlacklist": "Toevoegen aan de zwarte lijst…",
+      "patternLabel": "Patroon (reguliere expressie)",
+      "add": "Toevoegen",
+      "addAndApply": "Toevoegen en toepassen op de vastgelegde aanroepen",
+      "applyConfirm": "De lijsten toepassen op de al vastgelegde aanroepen verwijdert elke aanroep die ze nu weigeren. Dit kan niet ongedaan worden gemaakt.",
+      "applyConfirmOk": "Toepassen en verwijderen",
+      "deduce": "Routes afleiden",
+      "deduceWhileRecording": "Stop de opname voordat u de routes afleidt.",
+      "deduceUnavailable": "Het afleiden van routes is nog niet beschikbaar.",
+      "deduceLocked": "Routes afleiden is beschikbaar vanaf het Pro-abonnement."
+    },
+    "routes": {
+      "empty": "Nog geen route afgeleid. Neem aanroepen op en gebruik daarna ‘Routes afleiden’ onder de opnamen — de verzoeken verschijnen hier en onder de rij Routes in de zijbalk.",
+      "proCallout": "Routes afleiden uit de vastgelegde aanroepen is beschikbaar vanaf het Pro-abonnement. Opnemen blijft voor iedereen beschikbaar.",
+      "subscribe": "Bekijk de abonnementen",
+      "count_one": "{{count}} afgeleid verzoek",
+      "count_other": "{{count}} afgeleide verzoeken",
+      "hint": "De afgeleide verzoeken zijn gewone verzoeken: bewerk ze vrij; opnieuw afleiden behoudt uw wijzigingen en voegt alleen nieuwe routes toe."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Bewaring van MCP-aanroeplogboek",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Opnamesessies weergeven",
+    "createRecordingSession": "Een opnamesessie aanmaken",
+    "updateRecordingSession": "Een opnamesessie bijwerken",
+    "setRecordingFilters": "De URL-filters van een opnamesessie instellen",
+    "startRecording": "De opname van een sessie starten",
+    "stopRecording": "De opname van een sessie stoppen",
+    "getRecordingStatus": "De status van een opnamesessie ophalen",
+    "listRecordingCaptures": "De vastgelegde aanroepen van een opnamesessie weergeven",
+    "getRecordingCapture": "Eén vastgelegde aanroep volledig ophalen",
+    "deduceRecordingRoutes": "De routes van een opnamesessie afleiden",
     "answerScenarioInput": "Een scenario-invoer beantwoorden",
     "arrangeScenario": "Het scenario automatisch ordenen",
     "cancelRequest": "Een verzoek annuleren",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Ontwerp \"{{name}}\" toegevoegd",
       "modifiedDesign": "Ontwerp \"{{name}}\" gewijzigd",
       "deletedDesign": "Ontwerp \"{{name}}\" verwijderd",
+      "addedRecording": "Opnamesessie \"{{name}}\" toegevoegd",
+      "modifiedRecording": "Opnamesessie \"{{name}}\" gewijzigd",
+      "deletedRecording": "Opnamesessie \"{{name}}\" verwijderd",
       "addedFolder": "Map \"{{name}}\" toegevoegd",
       "modifiedFolder": "Map \"{{name}}\" gewijzigd",
       "deletedFolder": "Map \"{{name}}\" verwijderd",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Verzoek \"{{name}}\" verplaatst",
       "movedScenario": "Scenario \"{{name}}\" verplaatst",
       "movedDesign": "Ontwerp \"{{name}}\" verplaatst",
+      "movedRecording": "Opnamesessie \"{{name}}\" verplaatst",
       "movedFolder": "Map \"{{name}}\" verplaatst",
       "movedEnvironmentFolder": "Omgevingsmap \"{{name}}\" verplaatst",
       "reorderedFolder": "Items opnieuw geordend in de map '{{name}}'",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Update van verzoek \"{{name}}\"",
       "singleScenario": "Update van scenario \"{{name}}\"",
       "singleDesign": "Update van ontwerp \"{{name}}\"",
+      "singleRecording": "Update van de opnamesessie \"{{name}}\"",
       "singleFolder": "Update van map \"{{name}}\"",
       "singleEnvironmentFolder": "Update van omgevingsmap \"{{name}}\"",
       "singleFileFormatVersion": "Overgang naar bestandsformaat {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} scenario's",
       "countDesign_one": "{{count}} ontwerp",
       "countDesign_other": "{{count}} ontwerpen",
+      "countRecording_one": "{{count}} opnamesessie",
+      "countRecording_other": "{{count}} opnamesessies",
       "countFolder_one": "{{count}} map",
       "countFolder_other": "{{count}} mappen",
       "countEnvironmentFolder_one": "{{count}} omgevingsmap",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Verzendt een geanonimiseerd rapport wanneer Restorm crasht, zodat de storing verholpen kan worden. Rapporten worden ontdaan van URL's, tokens, aanvraaginhoud en persoonsgegevens voordat ze uw machine verlaten. Inbegrepen bij het gratis abonnement; met een betaald abonnement kunt u dit uitschakelen. Alle details: https://restorm.app/privacy",
     "telemetryTitle": "Gebruiksstatistieken verzenden",
     "telemetryDescription": "Verzendt anonieme statistieken over welke functies gebruikt worden, om te sturen wat er hierna gebouwd wordt. Standaard uit en nooit ingeschakeld zonder uw uitdrukkelijke toestemming. Bevat geen aanvraaggegevens, geen URL's en geen persoonsgegevens. Alle details: https://restorm.app/privacy",
+    "geolocationTitle": "Uw locatie delen met de ingebouwde browser",
+    "geolocationDescription": "Bepaalt uw geschatte positie (via de locatieservice van het systeem, of anders op basis van uw IP-adres) en geeft die uitsluitend door aan de ingebouwde mini-webbrowser, zodat sites die geolocatie gebruiken werken in een opnamesessie. Er wordt niets naar Restorm verzonden.",
+    "geolocationConsent": {"title": "Uw locatie delen met de ingebouwde browser?", "body": "Restorm vraagt uw positie op bij de locatieservice van uw systeem (en schat die, als daar geen positie beschikbaar is, op basis van uw IP-adres via een dienst van derden) en geeft die uitsluitend door aan de pagina's die in de ingebouwde mini-webbrowser worden geopend. Uw positie verlaat uw computer verder nooit en wordt vergeten zodra u deze optie uitschakelt.", "accept": "Toestaan", "decline": "Niet nu"},
     "crashReportsLockedLabel": "Aanpasbaar vanaf het Pro-abonnement. In het gratis abonnement zijn crashrapporten nodig om de kwaliteit te bewaken.",
     "consentToast": {
       "title": "Help ons Restorm te verbeteren",

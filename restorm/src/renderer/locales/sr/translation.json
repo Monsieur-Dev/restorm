@@ -318,7 +318,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Dizajn API-ja"
+        "design": "Dizajn API-ja",
+        "recording": "Sesija snimanja"
       },
       "cut": "Iseci",
       "copy": "Kopiraj",
@@ -445,6 +446,7 @@
         "requestBodyFile": "Datoteka"
       },
       "loading": "Slanje zahteva...",
+      "body": { "download": "Preuzmi", "binary": "Binarni sadržaj ({{type}}) — upotrebite Preuzmi da biste ga sačuvali", "unknownType": "nepoznat tip" },
       "noResponseBody": "Nema tela odgovora — pogledajte Infos za detalje",
       "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
       "history": {
@@ -753,7 +755,8 @@
       "settings": "Podešavanja",
       "tag": "Oznake",
       "scenario": "Scenariji",
-      "design": "Dizajni API-ja"
+      "design": "Dizajni API-ja",
+      "recording": "Sesije snimanja"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih detalja",
@@ -2811,6 +2814,84 @@
     "maxEntriesTitle": "Sačuvani unosi po istoriji",
     "maxEntriesDescription": "Koliko unosa čuvaju istorija poziva zahteva i istorija izvršavanja scenarija. Zakačeni unosi se uvek čuvaju, bez obzira na ovu vrednost. Liste nedavne aktivnosti na početnom ekranu nisu obuhvaćene."
   },
+  "recording": {
+    "title": "Sesije snimanja",
+    "maxCapturesTitle": "Zabeleženi pozivi zadržani po sesiji",
+    "maxCapturesDescription": "Koliko zabeleženih poziva sesija snimanja zadržava u memoriji. Kada se dostigne ograničenje, najstariji pozivi se uklanjaju prvi. Snimci se nikada ne čuvaju u datoteci projekta.",
+    "newSessionName": "Nova sesija snimanja",
+    "node": {
+      "browser": "Pregledač",
+      "captures": "Snimci",
+      "routes": "Rute"
+    },
+    "tab": {
+      "browserTitle": "Pregledač: {{name}}",
+      "capturesTitle": "Snimci: {{name}}",
+      "routesTitle": "Rute: {{name}}"
+    },
+    "placeholder": {
+      "config": "Podešavanja sesije (URL stranice, protokoli, bela i crna lista) pojaviće se ovde.",
+      "browser": "Pregledač za snimanje pojaviće se ovde.",
+      "captures": "Još nije zabeležen nijedan poziv. Pokrenite snimanje iz podešavanja sesije da bi se pozivi stranice pojavili ovde.",
+      "routes": "Još nije izvedena nijedna ruta. Snimite pozive, a zatim izvedite rute iz snimaka."
+    },
+    "config": {
+      "subtitle": "Pregledajte stranicu dok Restorm sluša njene API pozive. Sa projektom se čuvaju samo podešavanja u nastavku — nikada zabeleženi pozivi.",
+      "url": "Stranica koja se sluša",
+      "urlPlaceholder": "https://primer.rs, http://localhost:3000 ili file:///putanja/stranica.html",
+      "urlInvalid": "Unesite http(s) ili file URL.",
+      "urlRequired": "Unesite URL stranice da biste omogućili snimanje.",
+      "record": "Pokreni snimanje",
+      "stop": "Zaustavi snimanje",
+      "protocols": "Protokoli za beleženje",
+      "whitelist": "Bela lista",
+      "blacklist": "Crna lista",
+      "addPattern": "Dodaj obrazac",
+      "removePattern": "Ukloni ovaj obrazac",
+      "invalidPattern": "Ovaj obrazac nije važeći regularni izraz.",
+      "patternPlaceholder": "Regularni izraz, npr. ^https://api\\.primer\\.rs/",
+      "noPattern": "Nema obrazaca — sve prolazi.",
+      "filtersHint": "Poziv se zadržava ako odgovara bar jednoj stavci bele liste (ili ako je ona prazna) i nijednoj stavci crne liste. Izmene se primenjuju na sledeće pozive."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pauziraj snimanje",
+      "resume": "Nastavi snimanje",
+      "stop": "Zaustavi snimanje"
+    },
+    "captures": {
+      "empty": "Još nije zabeležen nijedan poziv. Pokrenite snimanje iz podešavanja sesije da bi se pozivi stranice ovde pojavljivali u realnom vremenu.",
+      "filterPlaceholder": "Filtrirajte pozive (regularni izraz)",
+      "live": "u toku",
+      "clearRun": "Izbriši pozive ovog snimanja",
+      "selectOne": "Izaberite poziv da biste videli njegov odgovor.",
+      "loadingDetail": "Učitavanje poziva…",
+      "addToWhitelist": "Dodaj na belu listu…",
+      "addToBlacklist": "Dodaj na crnu listu…",
+      "patternLabel": "Obrazac (regularni izraz)",
+      "add": "Dodaj",
+      "addAndApply": "Dodaj i primeni na zabeležene pozive",
+      "applyConfirm": "Primena lista na već zabeležene pozive uklanja sve one koje sada odbijaju. Ova radnja se ne može opozvati.",
+      "applyConfirmOk": "Primeni i ukloni",
+      "deduce": "Izvedi rute",
+      "deduceWhileRecording": "Zaustavite snimanje pre izvođenja ruta.",
+      "deduceUnavailable": "Izvođenje ruta još nije dostupno.",
+      "deduceLocked": "Izvođenje ruta dostupno je od plana Pro."
+    },
+    "routes": {
+      "empty": "Još nije izvedena nijedna ruta. Snimite pozive, a zatim upotrebite „Izvedi rute“ ispod snimaka — zahtevi se pojavljuju ovde i ispod reda Rute u bočnoj traci.",
+      "proCallout": "Izvođenje ruta iz zabeleženih poziva dostupno je od plana Pro. Snimanje ostaje otvoreno svima.",
+      "subscribe": "Pogledajte planove",
+      "count_one": "{{count}} izvedeni zahtev",
+      "count_other": "{{count}} izvedena zahteva",
+      "hint": "Izvedeni zahtevi su obični zahtevi: slobodno ih uređujte; ponovno izvođenje čuva vaše izmene i dodaje samo nove rute."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Čuvanje evidencije MCP poziva",
@@ -2851,6 +2932,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Prikaži sesije snimanja",
+    "createRecordingSession": "Napravi sesiju snimanja",
+    "updateRecordingSession": "Ažuriraj sesiju snimanja",
+    "setRecordingFilters": "Podesi URL filtere sesije snimanja",
+    "startRecording": "Pokreni snimanje sesije",
+    "stopRecording": "Zaustavi snimanje sesije",
+    "getRecordingStatus": "Preuzmi status sesije snimanja",
+    "listRecordingCaptures": "Prikaži snimljene pozive sesije snimanja",
+    "getRecordingCapture": "Preuzmi jedan snimljeni poziv u celosti",
+    "deduceRecordingRoutes": "Izvedi rute sesije snimanja",
     "answerScenarioInput": "Odgovori na unos scenarija",
     "arrangeScenario": "Automatski rasporedi scenario",
     "cancelRequest": "Otkaži zahtev",
@@ -3211,6 +3302,9 @@
       "addedDesign": "Dodat dizajn „{{name}}”",
       "modifiedDesign": "Izmenjen dizajn „{{name}}”",
       "deletedDesign": "Uklonjen dizajn „{{name}}”",
+      "addedRecording": "Dodata je sesija snimanja „{{name}}”",
+      "modifiedRecording": "Izmenjena je sesija snimanja „{{name}}”",
+      "deletedRecording": "Izbrisana je sesija snimanja „{{name}}”",
       "addedFolder": "Dodata fascikla „{{name}}”",
       "modifiedFolder": "Izmenjena fascikla „{{name}}”",
       "deletedFolder": "Uklonjena fascikla „{{name}}”",
@@ -3220,6 +3314,7 @@
       "movedRequest": "Premešten zahtev \"{{name}}\"",
       "movedScenario": "Premešten scenario \"{{name}}\"",
       "movedDesign": "Premešten dizajn \"{{name}}\"",
+      "movedRecording": "Premeštena je sesija snimanja „{{name}}”",
       "movedFolder": "Premeštena fascikla \"{{name}}\"",
       "movedEnvironmentFolder": "Premeštena fascikla okruženja \"{{name}}\"",
       "reorderedFolder": "Promenjen redosled stavki u fascikli „{{name}}“",
@@ -3231,6 +3326,7 @@
       "singleRequest": "Ažuriranje zahteva „{{name}}”",
       "singleScenario": "Ažuriranje scenarija „{{name}}”",
       "singleDesign": "Ažuriranje dizajna „{{name}}”",
+      "singleRecording": "Ažuriranje sesije snimanja „{{name}}”",
       "singleFolder": "Ažuriranje fascikle „{{name}}”",
       "singleEnvironmentFolder": "Ažuriranje fascikle okruženja „{{name}}”",
       "singleFileFormatVersion": "Prelazak na format datoteke {{name}}",
@@ -3240,6 +3336,8 @@
       "countScenario_other": "{{count}} scenarija",
       "countDesign_one": "{{count}} dizajn",
       "countDesign_other": "{{count}} dizajna",
+      "countRecording_one": "{{count}} sesija snimanja",
+      "countRecording_other": "{{count}} sesije snimanja",
       "countFolder_one": "{{count}} fascikla",
       "countFolder_other": "{{count}} fascikli",
       "countEnvironmentFolder_one": "{{count}} fascikla okruženja",
@@ -3333,6 +3431,9 @@
     "crashReportsDescription": "Šalje anonimizovani izveštaj kada se Restorm sruši, kako bi kvar mogao da se ispravi. Izveštaji se čiste od URL adresa, tokena, tela zahteva i ličnih podataka pre nego što napuste vaš računar. Uključeno u besplatni plan; plaćeni plan omogućava isključivanje. Svi detalji: https://restorm.app/privacy",
     "telemetryTitle": "Slanje statistike korišćenja",
     "telemetryDescription": "Šalje anonimnu statistiku o tome koje se funkcije koriste, radi usmeravanja budućeg razvoja. Podrazumevano isključeno i nikada uključeno bez vašeg izričitog pristanka. Ne sadrži podatke zahteva, URL adrese ni lične podatke. Svi detalji: https://restorm.app/privacy",
+    "geolocationTitle": "Deljenje vaše lokacije sa ugrađenim pregledačem",
+    "geolocationDescription": "Pribavlja vašu približnu lokaciju (iz sistemske usluge lokacije ili, kao rezervu, iz vaše IP adrese) i prosleđuje je isključivo ugrađenom mini veb pregledaču, kako bi sajtovi koji koriste geolokaciju radili u sesiji snimanja. Ništa se ne šalje kompaniji Restorm.",
+    "geolocationConsent": {"title": "Deliti vašu lokaciju sa ugrađenim pregledačem?", "body": "Restorm će zatražiti vašu lokaciju od usluge lokacije vašeg sistema (a ako je ona nema, proceniće je iz vaše IP adrese putem usluge treće strane) i proslediti je isključivo stranicama otvorenim u ugrađenom mini veb pregledaču. Vaša lokacija ni u kom drugom slučaju ne napušta vaš računar i zaboravlja se čim isključite ovu opciju.", "accept": "Dozvoli", "decline": "Ne sada"},
     "crashReportsLockedLabel": "Može se menjati od Pro plana. U besplatnom planu izveštaji o rušenju su neophodni za održavanje kvaliteta.",
     "consentToast": {
       "title": "Pomozite nam da poboljšamo Restorm",

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Diseño de API"
+        "design": "Diseño de API",
+        "recording": "Sesión de grabación"
       },
       "cut": "Cortar",
       "copy": "Copiar",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Archivo"
       },
       "loading": "Enviando la petición...",
+      "body": { "download": "Descargar", "binary": "Contenido binario ({{type}}) — use Descargar para guardarlo", "unknownType": "tipo desconocido" },
       "noResponseBody": "Sin cuerpo de respuesta — consulte Infos para más detalles",
       "noResponse": "Pulse Enviar para ejecutar la petición",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Ajustes",
       "tag": "Etiquetas",
       "scenario": "Escenarios",
-      "design": "Diseños de API"
+      "design": "Diseños de API",
+      "recording": "Sesiones de grabación"
     },
     "tooltip": {
       "noDetails": "Sin detalles disponibles",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Entradas conservadas por historial",
     "maxEntriesDescription": "Cuántas entradas conservan el historial de llamadas de una solicitud y el historial de ejecuciones de un escenario. Las entradas ancladas se conservan siempre, sea cual sea este valor. Las listas de actividad reciente de la pantalla de inicio no se ven afectadas."
   },
+  "recording": {
+    "title": "Sesiones de grabación",
+    "maxCapturesTitle": "Llamadas capturadas conservadas por sesión",
+    "maxCapturesDescription": "Cuántas llamadas capturadas conserva en memoria una sesión de grabación. Una vez alcanzado el límite, las llamadas más antiguas se descartan primero. Las capturas nunca se guardan en el archivo del proyecto.",
+    "newSessionName": "Nueva sesión de grabación",
+    "node": {
+      "browser": "Navegador",
+      "captures": "Capturas",
+      "routes": "Rutas"
+    },
+    "tab": {
+      "browserTitle": "Navegador: {{name}}",
+      "capturesTitle": "Capturas: {{name}}",
+      "routesTitle": "Rutas: {{name}}"
+    },
+    "placeholder": {
+      "config": "La configuración de la sesión (URL de la página, protocolos, listas blanca y negra) aparecerá aquí.",
+      "browser": "El navegador de grabación aparecerá aquí.",
+      "captures": "Todavía no se ha capturado ninguna llamada. Inicie una grabación desde la configuración de la sesión para ver aquí las llamadas de la página.",
+      "routes": "Todavía no se ha deducido ninguna ruta. Grabe algunas llamadas y luego deduzca las rutas a partir de las capturas."
+    },
+    "config": {
+      "subtitle": "Navegue por la página mientras Restorm escucha sus llamadas API. Solo se guardan con el proyecto los ajustes siguientes, nunca las llamadas capturadas.",
+      "url": "Página que escuchar",
+      "urlPlaceholder": "https://ejemplo.com, http://localhost:3000 o file:///ruta/pagina.html",
+      "urlInvalid": "Introduzca una URL http(s) o file.",
+      "urlRequired": "Introduzca la URL de la página para activar la grabación.",
+      "record": "Iniciar la grabación",
+      "stop": "Detener la grabación",
+      "protocols": "Protocolos que capturar",
+      "whitelist": "Lista blanca",
+      "blacklist": "Lista negra",
+      "addPattern": "Añadir un patrón",
+      "removePattern": "Eliminar este patrón",
+      "invalidPattern": "Este patrón no es una expresión regular válida.",
+      "patternPlaceholder": "Expresión regular, p. ej. ^https://api\\.ejemplo\\.com/",
+      "noPattern": "Ningún patrón: todo pasa.",
+      "filtersHint": "Una llamada se conserva si coincide con al menos una entrada de la lista blanca (o si está vacía) y con ninguna entrada de la lista negra. Los cambios se aplican a las siguientes llamadas."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pausar la grabación",
+      "resume": "Reanudar la grabación",
+      "stop": "Detener la grabación"
+    },
+    "captures": {
+      "empty": "Todavía no se ha capturado ninguna llamada. Inicie una grabación desde la configuración de la sesión para ver aquí las llamadas de la página en tiempo real.",
+      "filterPlaceholder": "Filtrar las llamadas (expresión regular)",
+      "live": "en curso",
+      "clearRun": "Eliminar las llamadas de esta grabación",
+      "selectOne": "Seleccione una llamada para ver su respuesta.",
+      "loadingDetail": "Cargando la llamada…",
+      "addToWhitelist": "Añadir a la lista blanca…",
+      "addToBlacklist": "Añadir a la lista negra…",
+      "patternLabel": "Patrón (expresión regular)",
+      "add": "Añadir",
+      "addAndApply": "Añadir y aplicar a las llamadas capturadas",
+      "applyConfirm": "Aplicar las listas a las llamadas ya capturadas elimina todas las que ahora rechazan. Esta acción no se puede deshacer.",
+      "applyConfirmOk": "Aplicar y eliminar",
+      "deduce": "Deducir las rutas",
+      "deduceWhileRecording": "Detenga la grabación antes de deducir las rutas.",
+      "deduceUnavailable": "La deducción de rutas aún no está disponible.",
+      "deduceLocked": "La deducción de rutas está disponible a partir del plan Pro."
+    },
+    "routes": {
+      "empty": "Todavía no se ha deducido ninguna ruta. Grabe llamadas y luego use «Deducir las rutas» bajo las capturas: las solicitudes aparecen aquí y bajo la fila Rutas de la barra lateral.",
+      "proCallout": "Deducir las rutas a partir de las llamadas capturadas está disponible a partir del plan Pro. La grabación sigue abierta a todos.",
+      "subscribe": "Ver los planes",
+      "count_one": "{{count}} solicitud deducida",
+      "count_other": "{{count}} solicitudes deducidas",
+      "hint": "Las solicitudes deducidas son solicitudes normales: edítelas libremente; una nueva deducción conserva sus cambios y solo añade las rutas nuevas."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retención del registro de llamadas MCP",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listar las sesiones de grabación",
+    "createRecordingSession": "Crear una sesión de grabación",
+    "updateRecordingSession": "Actualizar una sesión de grabación",
+    "setRecordingFilters": "Definir los filtros de URL de una sesión de grabación",
+    "startRecording": "Iniciar la grabación de una sesión",
+    "stopRecording": "Detener la grabación de una sesión",
+    "getRecordingStatus": "Obtener el estado de una sesión de grabación",
+    "listRecordingCaptures": "Listar las llamadas capturadas de una sesión de grabación",
+    "getRecordingCapture": "Obtener una llamada capturada completa",
+    "deduceRecordingRoutes": "Deducir las rutas de una sesión de grabación",
     "answerScenarioInput": "Responder a una entrada de escenario",
     "arrangeScenario": "Organizar el escenario",
     "cancelRequest": "Cancelar una solicitud",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Se agregó el diseño \"{{name}}\"",
       "modifiedDesign": "Se modificó el diseño \"{{name}}\"",
       "deletedDesign": "Se eliminó el diseño \"{{name}}\"",
+      "addedRecording": "Se agregó la sesión de grabación \"{{name}}\"",
+      "modifiedRecording": "Se modificó la sesión de grabación \"{{name}}\"",
+      "deletedRecording": "Se eliminó la sesión de grabación \"{{name}}\"",
       "addedFolder": "Se agregó la carpeta \"{{name}}\"",
       "modifiedFolder": "Se modificó la carpeta \"{{name}}\"",
       "deletedFolder": "Se eliminó la carpeta \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Movida la solicitud \"{{name}}\"",
       "movedScenario": "Movido el escenario \"{{name}}\"",
       "movedDesign": "Movido el diseño \"{{name}}\"",
+      "movedRecording": "Se movió la sesión de grabación \"{{name}}\"",
       "movedFolder": "Movida la carpeta \"{{name}}\"",
       "movedEnvironmentFolder": "Movida la carpeta de entorno \"{{name}}\"",
       "reorderedFolder": "Elementos reordenados en la carpeta «{{name}}»",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Actualización de la solicitud \"{{name}}\"",
       "singleScenario": "Actualización del escenario \"{{name}}\"",
       "singleDesign": "Actualización del diseño \"{{name}}\"",
+      "singleRecording": "Actualización de la sesión de grabación \"{{name}}\"",
       "singleFolder": "Actualización de la carpeta \"{{name}}\"",
       "singleEnvironmentFolder": "Actualización de la carpeta de entorno \"{{name}}\"",
       "singleFileFormatVersion": "Cambio al formato de archivo {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} escenarios",
       "countDesign_one": "{{count}} diseño",
       "countDesign_other": "{{count}} diseños",
+      "countRecording_one": "{{count}} sesión de grabación",
+      "countRecording_other": "{{count}} sesiones de grabación",
       "countFolder_one": "{{count}} carpeta",
       "countFolder_other": "{{count}} carpetas",
       "countEnvironmentFolder_one": "{{count}} carpeta de entorno",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Envía un informe anonimizado cuando Restorm falla, para que el problema pueda corregirse. Los informes se depuran de URL, tokens, cuerpos de petición y datos personales antes de salir de su equipo. Incluido en el plan gratuito; un plan de pago permite desactivarlo. Todos los detalles: https://restorm.app/privacy",
     "telemetryTitle": "Enviar estadísticas de uso",
     "telemetryDescription": "Envía estadísticas anónimas sobre qué funciones se usan, para orientar lo que se desarrollará a continuación. Desactivado por defecto y nunca activado sin su consentimiento explícito. No contiene datos de peticiones, ni URL, ni datos personales. Todos los detalles: https://restorm.app/privacy",
+    "geolocationTitle": "Compartir su ubicación con el navegador integrado",
+    "geolocationDescription": "Obtiene su posición aproximada (desde el servicio de ubicación del sistema o, en su defecto, a partir de su dirección IP) y la transmite únicamente al mini navegador integrado, para que los sitios que geolocalizan funcionen en una sesión de grabación. No se envía nada a Restorm.",
+    "geolocationConsent": {"title": "¿Compartir su ubicación con el navegador integrado?", "body": "Restorm pedirá su posición al servicio de ubicación de su sistema (y, si este no dispone de ninguna, la estimará a partir de su dirección IP mediante un servicio de terceros) para transmitirla únicamente a las páginas abiertas en el mini navegador integrado. Su posición no sale de su equipo en ningún otro caso y se olvida en cuanto desactiva esta opción.", "accept": "Permitir", "decline": "Ahora no"},
     "crashReportsLockedLabel": "Modificable a partir del plan Pro. En el plan gratuito, los informes de fallos son necesarios para mantener la calidad.",
     "consentToast": {
       "title": "Ayúdenos a mejorar Restorm",

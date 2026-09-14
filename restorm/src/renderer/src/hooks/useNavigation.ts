@@ -5,10 +5,11 @@
 import { useEffect, useCallback, useRef } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario, ApiDesign } from '../../../shared/types/collections'
-import { isFolder, isRequest, isScenario, isApiDesign, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
+import type { RecordingSession, Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario, ApiDesign } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isApiDesign, isRecordingSession, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isStompRequest, isODataRequest, isJsonRpcRequest, isJsonRpcBatchRequest, isTrpcRequest, isAmqpRequest, isRedisRequest, isKafkaRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import { parseDesignSectionRowId, designSectionRowId, designEntityRowId, parseDesignEntityRowId } from '../../../shared/design/designSections'
+import { parseRecordingNodeRowId, parseRecordingTabId, recordingNodeRowId, type RecordingTabNode } from '../../../shared/recording/recordingSections'
 import { setPendingDesignSection, peekPendingDesignSection, getActiveDesignSection, subscribeActiveDesignSection, getActiveDesignEntity, subscribeActiveDesignEntity } from '../services/designSectionIntent'
 import { parseDesignClientRowId, findClientRequest } from '../services/designClientsStore'
 import type { BreadcrumbItem, DesignSectionKey } from '../../../shared/types/editor'
@@ -31,6 +32,7 @@ export interface UseNavigationOptions {
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openRecordingTab: (session: RecordingSession, node: RecordingTabNode, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   /** Current selection anchor — lets a design tab's own section change
@@ -93,6 +95,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     selectedItemId,
@@ -207,6 +210,12 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
             openFolderTab(folder, breadcrumbs)
           }
         }
+      } else if (params.type === 'recording') {
+        // Back/forward may target a virtual node row — reopen that node's tab.
+        const nodeRow = parseRecordingNodeRowId(key)
+        const sessionId = nodeRow ? nodeRow.sessionId : key
+        const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
+        if (item && isRecordingSession(item)) openRecordingTab(item, nodeRow ? nodeRow.kind : 'config', breadcrumbs)
       } else if (params.type === 'design') {
         // Back/forward may target a virtual section row — resolve it to the
         // owning design and restage the section so the tab reopens on it.
@@ -230,7 +239,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     })
 
     return unsubscribe
-  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
+  }, [openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, openRecordingTab, rootItems, selectSingle, setFocusedGroupId, getNearestEnvironmentsForBreadcrumbs])
 
   // Preview-tab setting (default on). Read from the settings STORE via
   // `settings.get` (+ live `onSettingChanged`) rather than the schema-backed
@@ -290,6 +299,19 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       return
     }
 
+    // A recording session's node rows (browser / captures / routes) are
+    // VIRTUAL rows too, but each opens its OWN tab (unlike a design's
+    // sections, which refocus one tab).
+    const recordingNode = parseRecordingNodeRowId(itemId)
+    if (recordingNode !== null) {
+      const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, recordingNode.sessionId)
+      if (!item || !isRecordingSession(item)) return
+      selectSingle(itemId)
+      openRecordingTab(item, recordingNode.kind, breadcrumbs, { temporary })
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'recording' })
+      return
+    }
+
     // A design's sidebar group entries are VIRTUAL rows (not tree
     // items): a click stages the target section, then rides the normal
     // design open path — the single-tab policy refocuses an already-open
@@ -328,6 +350,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     if (!item) return
 
     selectSingle(itemId)
+
+    if (isRecordingSession(item)) {
+      // The session row opens its config tab (temporary on a single click,
+      // like a request; a double-click or an edit promotes it).
+      openRecordingTab(item, 'config', breadcrumbs, { temporary })
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'recording' })
+      return
+    }
 
     if (isApiDesign(item)) {
       // The design node itself opens Settings — the old "Paramètres" section
@@ -392,7 +422,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'kafka-request' })
       }
     }
-  }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, selectSingle, openFolderTab, openScenarioEditorTab, openDesignTab, openRecordingTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Double-click opens (or promotes) a PERMANENT tab — same dispatch as a
   // single click, but forcing `temporary: false` so a preview tab is kept.
@@ -427,12 +457,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       openDesignTab(item, breadcrumbs, { focus: false })
       return
     }
+    if (isRecordingSession(item)) {
+      openRecordingTab(item, 'config', breadcrumbs, { focus: false })
+      return
+    }
 
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { focus: false })
     }
-  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openRecordingTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Open a dragged sidebar item at an explicit split position. Same
   // item→tab dispatch as `handleItemClick`, but with a `placement` so the
@@ -440,9 +474,18 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // dropped it there). No navigation-service event: a split drop is a
   // layout gesture, not a back/forward-history navigation.
   const openItemAtSplit = useCallback((itemId: string, targetGroupId: string, zone: 'left' | 'right' | 'top' | 'bottom' | 'full') => {
+    const placement = { targetGroupId, zone }
+    // A recording node row (browser / captures / routes) is virtual: it opens
+    // that node's tab at the drop placement — side by side with the session.
+    const recordingNode = parseRecordingNodeRowId(itemId)
+    if (recordingNode !== null) {
+      const session = findItemWithBreadcrumbs(rootItems, recordingNode.sessionId)
+      if (!session.item || !isRecordingSession(session.item)) return
+      openRecordingTab(session.item, recordingNode.kind, session.breadcrumbs, { placement })
+      return
+    }
     const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
     if (!item) return
-    const placement = { targetGroupId, zone }
 
     if (isEnvironmentFolder(item)) {
       openEnvironmentFolderTab(item, breadcrumbs, { placement })
@@ -460,11 +503,15 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       openDesignTab(item, breadcrumbs, { placement })
       return
     }
+    if (isRecordingSession(item)) {
+      openRecordingTab(item, 'config', breadcrumbs, { placement })
+      return
+    }
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { placement })
     }
-  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openDesignTab, openRecordingTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle breadcrumb item click — open a workbench tab for the
   // clicked segment, not just update history. The old implementation
@@ -486,6 +533,18 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       // none live in rootItems, so findItemWithBreadcrumbs can't resolve them.
       // Route them like the sidebar does: open/refocus the design tab and stage
       // the Clients section, scoped to the clicked folder when the crumb is one.
+      // A recording node crumb (Browser / Captures / Routes) opens that node's
+      // tab; the session crumb itself opens the config tab below.
+      const recordingNodeCrumb = parseRecordingNodeRowId(itemId)
+      if (recordingNodeCrumb !== null) {
+        const { item: sessionItem, breadcrumbs: sessionCrumbs } = findItemWithBreadcrumbs(rootItems, recordingNodeCrumb.sessionId)
+        if (!sessionItem || !isRecordingSession(sessionItem)) return
+        selectSingle(itemId)
+        openRecordingTab(sessionItem, recordingNodeCrumb.kind, sessionCrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'recording' })
+        return
+      }
+
       const clientRow = parseDesignClientRowId(itemId)
       const sectionRow = parseDesignSectionRowId(itemId)
       const entityRow = parseDesignEntityRowId(itemId)
@@ -524,6 +583,12 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         return
       }
 
+      if (isRecordingSession(foundItem)) {
+        openRecordingTab(foundItem, 'config', breadcrumbs)
+        navigationService.navigateTo(itemId, 'breadcrumb', { type: 'recording' })
+        return
+      }
+
       if (isRequest(foundItem)) {
         const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         openAnyRequestTab(foundItem, breadcrumbs, environments)
@@ -558,7 +623,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         }
       }
     },
-    [rootItems, selectSingle, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, getNearestEnvironmentsForBreadcrumbs]
+    [rootItems, selectSingle, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openDesignTab, openRecordingTab, getNearestEnvironmentsForBreadcrumbs]
   )
 
   // Middle-click ("open in background") variant of the breadcrumb
@@ -622,6 +687,13 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     }
     if (idMatch?.[1] && idMatch[2]) {
       return { itemType: mapType(idMatch[1]), itemId: idMatch[2] }
+    }
+    // A recording session's tabs: the config tab navigates as the session,
+    // each node tab (browser / captures / routes) as its own sidebar node
+    // row — one MRU entry per tab, the same keys the sidebar clicks record.
+    const recording = parseRecordingTabId(tabId)
+    if (recording !== null) {
+      return { itemType: 'recording', itemId: recording.node === 'config' ? recording.sessionId : recordingNodeRowId(recording.sessionId, recording.node) }
     }
     return { itemId: null, itemType: null }
   }, [resolveIndexPath])

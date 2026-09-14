@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-terv"
+        "design": "API-terv",
+        "recording": "Felvételi munkamenet"
       },
       "cut": "Kivágás",
       "copy": "Másolás",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Fájl"
       },
       "loading": "Kérés küldése...",
+      "body": { "download": "Letöltés", "binary": "Bináris tartalom ({{type}}) — a mentéshez használja a Letöltés gombot", "unknownType": "ismeretlen típus" },
       "noResponseBody": "Nincs válasz-törzs — a részletekért lásd az Infos fület",
       "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Beállítások",
       "tag": "Címkék",
       "scenario": "Forgatókönyvek",
-      "design": "API-tervek"
+      "design": "API-tervek",
+      "recording": "Felvételi munkamenetek"
     },
     "tooltip": {
       "noDetails": "Nincs elérhető részlet",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Előzményenként megőrzött bejegyzések",
     "maxEntriesDescription": "Hány bejegyzést őriz meg egy kérés hívási előzménye és egy forgatókönyv futtatási előzménye. A rögzített bejegyzések ettől az értéktől függetlenül mindig megmaradnak. A kezdőképernyő legutóbbi tevékenységeit tartalmazó listákat ez nem érinti."
   },
+  "recording": {
+    "title": "Felvételi munkamenetek",
+    "maxCapturesTitle": "Munkamenetenként megőrzött rögzített hívások",
+    "maxCapturesDescription": "Hány rögzített hívást tart meg a memóriában egy felvételi munkamenet. A korlát elérése után először a legrégebbi hívások törlődnek. A felvételek soha nem kerülnek a projektfájlba.",
+    "newSessionName": "Új felvételi munkamenet",
+    "node": {
+      "browser": "Böngésző",
+      "captures": "Rögzítések",
+      "routes": "Útvonalak"
+    },
+    "tab": {
+      "browserTitle": "Böngésző: {{name}}",
+      "capturesTitle": "Rögzítések: {{name}}",
+      "routesTitle": "Útvonalak: {{name}}"
+    },
+    "placeholder": {
+      "config": "A munkamenet beállításai (az oldal URL-je, protokollok, fehér- és feketelista) itt jelennek meg.",
+      "browser": "A felvételi böngésző itt jelenik meg.",
+      "captures": "Még nincs rögzített hívás. Indítson felvételt a munkamenet beállításaiból, hogy az oldal hívásai itt megjelenjenek.",
+      "routes": "Még nincs levezetett útvonal. Rögzítsen hívásokat, majd vezesse le az útvonalakat a rögzítésekből."
+    },
+    "config": {
+      "subtitle": "Böngésszen az oldalon, amíg a Restorm figyeli az API-hívásait. A projekttel csak az alábbi beállítások kerülnek mentésre — a rögzített hívások soha.",
+      "url": "Figyelt oldal",
+      "urlPlaceholder": "https://pelda.hu, http://localhost:3000 vagy file:///utvonal/oldal.html",
+      "urlInvalid": "Adjon meg egy http(s) vagy file URL-t.",
+      "urlRequired": "Adja meg az oldal URL-jét a felvétel engedélyezéséhez.",
+      "record": "Felvétel indítása",
+      "stop": "Felvétel leállítása",
+      "protocols": "Rögzítendő protokollok",
+      "whitelist": "Fehérlista",
+      "blacklist": "Feketelista",
+      "addPattern": "Minta hozzáadása",
+      "removePattern": "Minta eltávolítása",
+      "invalidPattern": "Ez a minta nem érvényes reguláris kifejezés.",
+      "patternPlaceholder": "Reguláris kifejezés, pl. ^https://api\\.pelda\\.hu/",
+      "noPattern": "Nincs minta — minden átmegy.",
+      "filtersHint": "Egy hívás akkor marad meg, ha a fehérlista legalább egy elemére illeszkedik (vagy a lista üres), és a feketelista egyetlen elemére sem. A módosítások a következő hívásokra vonatkoznak."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Felvétel szüneteltetése",
+      "resume": "Felvétel folytatása",
+      "stop": "Felvétel leállítása"
+    },
+    "captures": {
+      "empty": "Még nincs rögzített hívás. Indítson felvételt a munkamenet beállításaiból, hogy az oldal hívásai valós időben itt jelenjenek meg.",
+      "filterPlaceholder": "Hívások szűrése (reguláris kifejezés)",
+      "live": "folyamatban",
+      "clearRun": "E felvétel hívásainak törlése",
+      "selectOne": "Válasszon egy hívást a válaszának megtekintéséhez.",
+      "loadingDetail": "A hívás betöltése…",
+      "addToWhitelist": "Hozzáadás a fehérlistához…",
+      "addToBlacklist": "Hozzáadás a feketelistához…",
+      "patternLabel": "Minta (reguláris kifejezés)",
+      "add": "Hozzáadás",
+      "addAndApply": "Hozzáadás és alkalmazás a rögzített hívásokra",
+      "applyConfirm": "A listák alkalmazása a már rögzített hívásokra eltávolít minden hívást, amelyet azok immár elutasítanak. Ez nem vonható vissza.",
+      "applyConfirmOk": "Alkalmazás és eltávolítás",
+      "deduce": "Útvonalak levezetése",
+      "deduceWhileRecording": "Állítsa le a felvételt az útvonalak levezetése előtt.",
+      "deduceUnavailable": "Az útvonalak levezetése még nem érhető el.",
+      "deduceLocked": "Az útvonalak levezetése a Pro csomagtól érhető el."
+    },
+    "routes": {
+      "empty": "Még nincs levezetett útvonal. Rögzítsen hívásokat, majd használja a rögzítések alatti „Útvonalak levezetése” gombot — a kérések itt és az oldalsáv Útvonalak sora alatt jelennek meg.",
+      "proCallout": "Az útvonalak levezetése a rögzített hívásokból a Pro csomagtól érhető el. A felvétel mindenki számára nyitott marad.",
+      "subscribe": "Csomagok megtekintése",
+      "count_one": "{{count}} levezetett kérés",
+      "count_other": "{{count}} levezetett kérés",
+      "hint": "A levezetett kérések közönséges kérések: szabadon szerkeszthetők; egy újabb levezetés megőrzi a módosításait, és csak az új útvonalakat adja hozzá."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP-hívásnapló megőrzése",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Rögzítési munkamenetek listázása",
+    "createRecordingSession": "Rögzítési munkamenet létrehozása",
+    "updateRecordingSession": "Rögzítési munkamenet frissítése",
+    "setRecordingFilters": "Rögzítési munkamenet URL-szűrőinek beállítása",
+    "startRecording": "Munkamenet rögzítésének indítása",
+    "stopRecording": "Munkamenet rögzítésének leállítása",
+    "getRecordingStatus": "Rögzítési munkamenet állapotának lekérése",
+    "listRecordingCaptures": "Rögzítési munkamenet rögzített hívásainak listázása",
+    "getRecordingCapture": "Egy rögzített hívás teljes lekérése",
+    "deduceRecordingRoutes": "Rögzítési munkamenet útvonalainak levezetése",
     "answerScenarioInput": "Forgatókönyv-bemenet megválaszolása",
     "arrangeScenario": "Forgatókönyv automatikus elrendezése",
     "cancelRequest": "Kérés megszakítása",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Hozzáadva a(z) „{{name}}” API-terv",
       "modifiedDesign": "Módosítva a(z) „{{name}}” API-terv",
       "deletedDesign": "Törölve a(z) „{{name}}” API-terv",
+      "addedRecording": "A(z) „{{name}}” felvételi munkamenet hozzáadva",
+      "modifiedRecording": "A(z) „{{name}}” felvételi munkamenet módosítva",
+      "deletedRecording": "A(z) „{{name}}” felvételi munkamenet törölve",
       "addedFolder": "Hozzáadva a(z) „{{name}}” mappa",
       "modifiedFolder": "Módosítva a(z) „{{name}}” mappa",
       "deletedFolder": "Törölve a(z) „{{name}}” mappa",
@@ -3219,6 +3313,7 @@
       "movedRequest": "A(z) \"{{name}}\" kérés áthelyezve",
       "movedScenario": "A(z) \"{{name}}\" forgatókönyv áthelyezve",
       "movedDesign": "A(z) \"{{name}}\" API-terv áthelyezve",
+      "movedRecording": "A(z) „{{name}}” felvételi munkamenet áthelyezve",
       "movedFolder": "A(z) \"{{name}}\" mappa áthelyezve",
       "movedEnvironmentFolder": "A(z) \"{{name}}\" környezeti mappa áthelyezve",
       "reorderedFolder": "Elemek átrendezve a(z) „{{name}}” mappában",
@@ -3230,6 +3325,7 @@
       "singleRequest": "A(z) „{{name}}” kérés frissítése",
       "singleScenario": "A(z) „{{name}}” forgatókönyv frissítése",
       "singleDesign": "A(z) „{{name}}” API-terv frissítése",
+      "singleRecording": "A(z) „{{name}}” felvételi munkamenet frissítése",
       "singleFolder": "A(z) „{{name}}” mappa frissítése",
       "singleEnvironmentFolder": "A(z) „{{name}}” környezeti mappa frissítése",
       "singleFileFormatVersion": "Váltás a(z) {{name}} fájlformátumra",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} forgatókönyv",
       "countDesign_one": "{{count}} API-terv",
       "countDesign_other": "{{count}} API-terv",
+      "countRecording_one": "{{count}} felvételi munkamenet",
+      "countRecording_other": "{{count}} felvételi munkamenet",
       "countFolder_one": "{{count}} mappa",
       "countFolder_other": "{{count}} mappa",
       "countEnvironmentFolder_one": "{{count}} környezeti mappa",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Anonimizált jelentést küld, amikor a Restorm összeomlik, hogy a hiba javítható legyen. A jelentésekből az URL-ek, tokenek, kéréstörzsek és személyes adatok eltávolításra kerülnek, mielőtt elhagynák a gépét. Az ingyenes csomag része; fizetős csomaggal kikapcsolható. Teljes tájékoztató: https://restorm.app/privacy",
     "telemetryTitle": "Használati statisztikák küldése",
     "telemetryDescription": "Névtelen statisztikát küld arról, mely funkciókat használják, hogy a további fejlesztés irányt kapjon. Alapértelmezetten kikapcsolva, és kifejezett hozzájárulása nélkül soha nem aktív. Nem tartalmaz kérésadatokat, URL-eket vagy személyes adatokat. Teljes tájékoztató: https://restorm.app/privacy",
+    "geolocationTitle": "Tartózkodási hely megosztása a beágyazott böngészővel",
+    "geolocationDescription": "Lekéri az Ön hozzávetőleges tartózkodási helyét (a rendszer helymeghatározó szolgáltatásától, vagy ennek hiányában az IP-címe alapján), és kizárólag a beágyazott mini böngészőnek adja át, hogy a helymeghatározást használó webhelyek működjenek egy felvételi munkamenetben. A Restorm felé semmi nem kerül elküldésre.",
+    "geolocationConsent": {"title": "Megosztja tartózkodási helyét a beágyazott böngészővel?", "body": "A Restorm a rendszer helymeghatározó szolgáltatásától kéri le az Ön tartózkodási helyét (és ha az nem áll rendelkezésre, az IP-címe alapján, egy külső szolgáltatás segítségével becsüli meg), majd kizárólag a beágyazott mini böngészőben megnyitott oldalaknak adja át. Tartózkodási helye más esetben soha nem hagyja el a számítógépét, és a rendszer elfelejti, amint kikapcsolja ezt a beállítást.", "accept": "Engedélyezés", "decline": "Most nem"},
     "crashReportsLockedLabel": "A Pro csomagtól módosítható. Az ingyenes csomagban az összeomlási jelentések a minőség fenntartásához szükségesek.",
     "consentToast": {
       "title": "Segítsen nekünk a Restorm fejlesztésében",

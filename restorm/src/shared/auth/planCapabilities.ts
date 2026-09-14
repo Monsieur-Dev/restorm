@@ -40,6 +40,17 @@ export const DESIGN_RUN_CAPABILITY = 'design.run'
 /** The one shared reading of the design-serve gate, so the serve button and the
  * settings machinery can never disagree on who may serve a design as a mock.
  * (Code generation is NOT gated — it is free on every plan.) */
+/**
+ * Deducing the routes of a recording session (Pro and above). Recording
+ * itself is open to every plan; only turning the captures into a request
+ * tree is paid. Same plan-derived rule as `design.run`.
+ */
+export const RECORDING_DEDUCE_CAPABILITY = 'recording.deduceRoutes'
+
+export function isRecordingDeduceLocked(authState: { plan?: string | null | undefined }): boolean {
+  return (authState.plan ?? 'community') === 'community'
+}
+
 export function isDesignRunLocked(authState: { plan?: string | null | undefined }): boolean {
   return (authState.plan ?? 'community') === 'community'
 }

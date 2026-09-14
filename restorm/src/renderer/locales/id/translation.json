@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Desain API"
+        "design": "Desain API",
+        "recording": "Sesi perekaman"
       },
       "cut": "Potong",
       "copy": "Salin",
@@ -443,6 +444,7 @@
         "requestBodyFile": "Berkas"
       },
       "loading": "Mengirim permintaan...",
+      "body": { "download": "Unduh", "binary": "Konten biner ({{type}}) — gunakan Unduh untuk menyimpannya", "unknownType": "jenis tidak dikenal" },
       "noResponseBody": "Tidak ada isi respons — lihat Infos untuk detail",
       "noResponse": "Klik Kirim untuk menjalankan permintaan",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "Pengaturan",
       "tag": "Tag",
       "scenario": "Skenario",
-      "design": "Desain API"
+      "design": "Desain API",
+      "recording": "Sesi perekaman"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "Entri yang disimpan per riwayat",
     "maxEntriesDescription": "Berapa banyak entri yang disimpan oleh riwayat panggilan sebuah permintaan dan riwayat eksekusi sebuah skenario. Entri yang disematkan selalu disimpan, berapa pun nilai ini. Daftar aktivitas terbaru di layar beranda tidak terpengaruh."
   },
+  "recording": {
+    "title": "Sesi perekaman",
+    "maxCapturesTitle": "Panggilan yang ditangkap disimpan per sesi",
+    "maxCapturesDescription": "Berapa banyak panggilan yang ditangkap disimpan di memori oleh sesi perekaman. Setelah batas tercapai, panggilan terlama dihapus terlebih dahulu. Tangkapan tidak pernah disimpan ke berkas proyek.",
+    "newSessionName": "Sesi perekaman baru",
+    "node": {
+      "browser": "Peramban",
+      "captures": "Tangkapan",
+      "routes": "Rute"
+    },
+    "tab": {
+      "browserTitle": "Peramban: {{name}}",
+      "capturesTitle": "Tangkapan: {{name}}",
+      "routesTitle": "Rute: {{name}}"
+    },
+    "placeholder": {
+      "config": "Pengaturan sesi (URL halaman, protokol, daftar putih dan hitam) akan muncul di sini.",
+      "browser": "Peramban perekaman akan muncul di sini.",
+      "captures": "Belum ada panggilan yang ditangkap. Mulai perekaman dari pengaturan sesi agar panggilan halaman muncul di sini.",
+      "routes": "Belum ada rute yang disimpulkan. Rekam beberapa panggilan, lalu simpulkan rute dari tangkapan."
+    },
+    "config": {
+      "subtitle": "Jelajahi halaman sementara Restorm mendengarkan panggilan API-nya. Hanya pengaturan di bawah ini yang disimpan bersama proyek — panggilan yang ditangkap tidak pernah disimpan.",
+      "url": "Halaman yang didengarkan",
+      "urlPlaceholder": "https://contoh.com, http://localhost:3000 atau file:///jalur/halaman.html",
+      "urlInvalid": "Masukkan URL http(s) atau file.",
+      "urlRequired": "Masukkan URL halaman untuk mengaktifkan perekaman.",
+      "record": "Mulai merekam",
+      "stop": "Berhenti merekam",
+      "protocols": "Protokol yang ditangkap",
+      "whitelist": "Daftar putih",
+      "blacklist": "Daftar hitam",
+      "addPattern": "Tambahkan pola",
+      "removePattern": "Hapus pola ini",
+      "invalidPattern": "Pola ini bukan ekspresi reguler yang valid.",
+      "patternPlaceholder": "Ekspresi reguler, mis. ^https://api\\.contoh\\.com/",
+      "noPattern": "Tidak ada pola — semuanya lolos.",
+      "filtersHint": "Panggilan disimpan jika cocok dengan setidaknya satu entri daftar putih (atau daftar kosong) dan tidak cocok dengan entri daftar hitam mana pun. Perubahan berlaku untuk panggilan berikutnya."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Jeda perekaman",
+      "resume": "Lanjutkan perekaman",
+      "stop": "Hentikan perekaman"
+    },
+    "captures": {
+      "empty": "Belum ada panggilan yang ditangkap. Mulai perekaman dari pengaturan sesi agar panggilan halaman muncul di sini secara langsung.",
+      "filterPlaceholder": "Saring panggilan (ekspresi reguler)",
+      "live": "berjalan",
+      "clearRun": "Hapus panggilan dari perekaman ini",
+      "selectOne": "Pilih panggilan untuk melihat responsnya.",
+      "loadingDetail": "Memuat panggilan…",
+      "addToWhitelist": "Tambahkan ke daftar putih…",
+      "addToBlacklist": "Tambahkan ke daftar hitam…",
+      "patternLabel": "Pola (ekspresi reguler)",
+      "add": "Tambahkan",
+      "addAndApply": "Tambahkan dan terapkan ke panggilan yang ditangkap",
+      "applyConfirm": "Menerapkan daftar ke panggilan yang sudah ditangkap menghapus semua panggilan yang kini ditolak. Tindakan ini tidak dapat dibatalkan.",
+      "applyConfirmOk": "Terapkan dan hapus",
+      "deduce": "Simpulkan rute",
+      "deduceWhileRecording": "Hentikan perekaman sebelum menyimpulkan rute.",
+      "deduceUnavailable": "Penyimpulan rute belum tersedia.",
+      "deduceLocked": "Penyimpulan rute tersedia mulai paket Pro."
+    },
+    "routes": {
+      "empty": "Belum ada rute yang disimpulkan. Rekam panggilan, lalu gunakan “Simpulkan rute” di bawah tangkapan — permintaan muncul di sini dan di bawah baris Rute pada bilah sisi.",
+      "proCallout": "Menyimpulkan rute dari panggilan yang ditangkap tersedia mulai paket Pro. Perekaman tetap terbuka untuk semua.",
+      "subscribe": "Lihat paket",
+      "count_one": "{{count}} permintaan yang disimpulkan",
+      "count_other": "{{count}} permintaan yang disimpulkan",
+      "hint": "Permintaan yang disimpulkan adalah permintaan biasa: ubah dengan bebas; penyimpulan ulang mempertahankan perubahan Anda dan hanya menambahkan rute baru."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retensi log panggilan MCP",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Daftar sesi perekaman",
+    "createRecordingSession": "Buat sesi perekaman",
+    "updateRecordingSession": "Perbarui sesi perekaman",
+    "setRecordingFilters": "Atur filter URL sesi perekaman",
+    "startRecording": "Mulai merekam sesi",
+    "stopRecording": "Berhenti merekam sesi",
+    "getRecordingStatus": "Dapatkan status sesi perekaman",
+    "listRecordingCaptures": "Daftar panggilan yang ditangkap dari sesi perekaman",
+    "getRecordingCapture": "Dapatkan satu panggilan yang ditangkap secara lengkap",
+    "deduceRecordingRoutes": "Simpulkan rute sesi perekaman",
     "answerScenarioInput": "Jawab masukan skenario",
     "arrangeScenario": "Tata otomatis skenario",
     "cancelRequest": "Batalkan permintaan",
@@ -3209,6 +3300,9 @@
       "addedDesign": "Menambahkan desain \"{{name}}\"",
       "modifiedDesign": "Mengubah desain \"{{name}}\"",
       "deletedDesign": "Menghapus desain \"{{name}}\"",
+      "addedRecording": "Sesi perekaman \"{{name}}\" ditambahkan",
+      "modifiedRecording": "Sesi perekaman \"{{name}}\" diubah",
+      "deletedRecording": "Sesi perekaman \"{{name}}\" dihapus",
       "addedFolder": "Menambahkan folder \"{{name}}\"",
       "modifiedFolder": "Mengubah folder \"{{name}}\"",
       "deletedFolder": "Menghapus folder \"{{name}}\"",
@@ -3218,6 +3312,7 @@
       "movedRequest": "Memindahkan permintaan \"{{name}}\"",
       "movedScenario": "Memindahkan skenario \"{{name}}\"",
       "movedDesign": "Memindahkan desain \"{{name}}\"",
+      "movedRecording": "Sesi perekaman \"{{name}}\" dipindahkan",
       "movedFolder": "Memindahkan folder \"{{name}}\"",
       "movedEnvironmentFolder": "Memindahkan folder lingkungan \"{{name}}\"",
       "reorderedFolder": "Urutan item diubah di folder \"{{name}}\"",
@@ -3229,6 +3324,7 @@
       "singleRequest": "Pembaruan permintaan \"{{name}}\"",
       "singleScenario": "Pembaruan skenario \"{{name}}\"",
       "singleDesign": "Pembaruan desain \"{{name}}\"",
+      "singleRecording": "Pembaruan sesi perekaman \"{{name}}\"",
       "singleFolder": "Pembaruan folder \"{{name}}\"",
       "singleEnvironmentFolder": "Pembaruan folder lingkungan \"{{name}}\"",
       "singleFileFormatVersion": "Beralih ke format berkas {{name}}",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "{{count}} skenario",
       "countDesign_one": "{{count}} desain",
       "countDesign_other": "{{count}} desain",
+      "countRecording_one": "{{count}} sesi perekaman",
+      "countRecording_other": "{{count}} sesi perekaman",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folder",
       "countEnvironmentFolder_one": "{{count}} folder lingkungan",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "Mengirim laporan yang dianonimkan saat Restorm mengalami kerusakan, agar masalahnya dapat diperbaiki. Laporan dibersihkan dari URL, token, isi permintaan, dan data pribadi sebelum meninggalkan komputer Anda. Termasuk dalam paket gratis; paket berbayar dapat mematikannya. Detail lengkap: https://restorm.app/privacy",
     "telemetryTitle": "Kirim statistik penggunaan",
     "telemetryDescription": "Mengirim statistik anonim tentang fitur mana yang digunakan, untuk mengarahkan pengembangan berikutnya. Mati secara bawaan dan tidak pernah aktif tanpa persetujuan tegas Anda. Tidak berisi data permintaan, URL, maupun data pribadi. Detail lengkap: https://restorm.app/privacy",
+    "geolocationTitle": "Bagikan lokasi Anda dengan browser tertanam",
+    "geolocationDescription": "Memperoleh posisi perkiraan Anda (dari layanan lokasi sistem, atau dari alamat IP Anda sebagai cadangan) dan meneruskannya hanya ke mini web browser tertanam, agar situs yang menggunakan geolokasi berfungsi dalam sesi perekaman. Tidak ada yang dikirim ke Restorm.",
+    "geolocationConsent": {"title": "Bagikan lokasi Anda dengan browser tertanam?", "body": "Restorm akan meminta posisi Anda dari layanan lokasi sistem Anda (dan, jika tidak tersedia, memperkirakannya dari alamat IP Anda melalui layanan pihak ketiga) lalu meneruskannya hanya ke halaman yang dibuka di mini web browser tertanam. Selain itu, posisi Anda tidak pernah meninggalkan komputer Anda dan akan dilupakan segera setelah Anda menonaktifkan opsi ini.", "accept": "Izinkan", "decline": "Nanti saja"},
     "crashReportsLockedLabel": "Dapat diubah mulai paket Pro. Pada paket gratis, laporan crash diperlukan untuk menjaga kualitas.",
     "consentToast": {
       "title": "Bantu kami meningkatkan Restorm",

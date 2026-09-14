@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { buildEmptyAreaContextMenu, type SidebarContextMenuItem } from './contextMenuBuilder'
+import { buildEmptyAreaContextMenu, buildAddSubmenu, type SidebarContextMenuItem } from './contextMenuBuilder'
 
 const t = (key: string): string => key
 
@@ -43,5 +43,26 @@ describe('buildEmptyAreaContextMenu', () => {
 
     items.find((entry) => entry.id === 'add-env-folder')?.onClick?.()
     expect(onCreateEnvironmentFolder).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('buildAddSubmenu — the recording session entry', () => {
+  it('sits right under API design and adds a recording session', () => {
+    const onAddChildItem = vi.fn()
+    const items = buildAddSubmenu('parent-1', t, onAddChildItem)
+    const designIndex = items.findIndex((entry) => entry.id === 'add-design-parent-1')
+    expect(designIndex).toBeGreaterThanOrEqual(0)
+    const recording = items[designIndex + 1]
+    expect(recording?.id).toBe('add-recording-parent-1')
+    expect(recording?.label).toBe('sidebar.contextMenu.add.recording')
+    expect(recording?.['data-testid']).toBe('sidebar-context-menu-add-recording')
+    recording?.onClick?.()
+    expect(onAddChildItem).toHaveBeenCalledWith('parent-1', 'recording')
+  })
+
+  it('is left out of a scenario\'s Add menu (a session never lives inside a scenario)', () => {
+    const items = buildAddSubmenu('scenario-1', t, vi.fn(), { allowRecording: false })
+    expect(items.some((entry) => entry.id.startsWith('add-recording-'))).toBe(false)
+    expect(items.some((entry) => entry.id === 'add-design-scenario-1')).toBe(true)
   })
 })

@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Snimite veb stranicu, dobijte njen API kao zahteve.**
+
+- **Sesije snimanja.** Nova vrsta stavke u bočnoj traci otvara veb stranicu u ugrađenom mini pregledaču i beleži svaki API poziv koji ona upućuje — REST, GraphQL, gRPC-web i WebSocket — uživo, sa belom i crnom listom u obliku regularnih izraza, pauzom i zaustavljanjem iz linije adrese i pulsirajućim sjajem oko sesije dok snimanje traje. Svaki zabeleženi poziv čita se tačno kao odgovor zahteva (telo, informacije, kolačići, graf); kontekstni meni poziva dodaje njegov url na listu, po želji uz uklanjanje onoga što je već zabeleženo. Snimci ostaju u memoriji, ograničeni novim podešavanjem aplikacije, i nikada ne dodiruju vašu datoteku projekta.
+- **Izvedi rute (Pro).** Jedno dugme pretvara snimke u stablo fascikli sa pravim zahtevima koji se mogu ponovo izvršiti: promenljivi segmenti putanje postaju parametri putanje `{{param}}`, fascikle prate statičke prefikse, gRPC-web pozivi se razvrstavaju po servisu, a svaki zahtev je unapred popunjen iz poslednjeg uspešnog poziva, sa zabeleženim pozivima u njegovoj istoriji odgovora. Ponovno izvođenje spaja — vaše izmene ostaju sačuvane.
+- **Upravljajte iz svog AI asistenta.** Deset MCP alata kreira i podešava sesije, pokreće i zaustavlja snimanje, čita snimke i izvodi rute.
+- **Podelite svoju lokaciju sa mini pregledačem (na zahtev).** Nova postavka u odeljku Privatnost, podrazumevano isključena, omogućava stranicama otvorenim u ugrađenom pregledaču — tokom snimanja ili van njega — da čitaju vašu približnu lokaciju, kao što bi to učinila funkcija lociranja samog sajta u običnom pregledaču. Uključivanje najpre traži vašu saglasnost; lokacija dolazi iz sistemske usluge lociranja (GeoClue na Linuxu), a u suprotnom iz procene na nivou grada na osnovu vaše IP adrese. Isključivanje odmah zaboravlja lokaciju.
+- **Bogatija kartica Odgovor.** Slike se sada prikazuju direktno, video i audio se reprodukuju, Markdown se iscrtava, a uređivač koda bira jezik prema Content-Type — uz prevedeno dugme Preuzmi, uvek pri ruci. Binarni odgovor ponovo izvršen iz istorije više ne prikazuje svoj base64.
+- **Uvoz: nalepljena JSON specifikacija dobro se čita.** JSON dokument u jednom redu nalepljen u prazno polje za uvoz uredno se formatira pre otvaranja u uređivaču.
+- **Dugačke liste ostaju brze.** Lista snimaka (i bočna traka preko 400 redova) iscrtava samo ono što je na ekranu.
+- Datoteke projekta koje sadrže sesiju snimanja čuvaju se u formatu 1.2; ranije verzije Restorma traže da ažurirate pre nego što ih otvorite.
+
 ## v1.1.4
 
 **Povežite svog AI asistenta na macOS-u — sada pouzdano.**

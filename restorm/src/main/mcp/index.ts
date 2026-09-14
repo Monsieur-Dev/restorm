@@ -29,6 +29,7 @@ import { registerScenarioEngineTools } from './tools/scenarioEngineTools'
 import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
 import { registerGitTools } from './tools/git'
+import { registerRecordingTools } from './tools/recording'
 import { createMcpProGate } from './mcpProGate'
 import { getEntitlementService, resolveBackendVersion } from '../services/auth/authComposition'
 import { hasCapability } from '../../shared/auth/authState'
@@ -79,6 +80,7 @@ export function registerRestormMcp(mcp: McpService, instanceHost: InstanceLifecy
   registerScenarioRunTools(mcp)
   registerScenarioEngineTools(mcp)
   registerGitTools(mcp)
+  registerRecordingTools(mcp)
   installScenarioEngineIPC()
   registerResources(mcp)
 }

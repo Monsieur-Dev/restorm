@@ -21,6 +21,7 @@ import {
 import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { protocolSpec } from '../../shared/protocolRegistry'
 import { DESIGN_CODICON } from '../../shared/design/designSections'
+import { RECORDING_CODICON } from '../../shared/recording/recordingSections'
 import { composeRoutePath, groupChainBasePath } from '../../shared/design/apiDesignDoc'
 
 /** Search categories configuration for Restorm. Kept aligned with the
@@ -41,7 +42,7 @@ interface FolderData {
   name: string
   tags: string[]
   notes?: string
-  items: (FolderData | RequestData | DesignData)[]
+  items: (FolderData | RequestData | ScenarioData | DesignData | RecordingData)[]
   configuration?: unknown
 }
 
@@ -97,12 +98,89 @@ interface ScenarioData {
   type: 'scenario'
   id: string
   name?: string
-  items?: (FolderData | RequestData | ScenarioData | DesignData)[]
+  items?: (FolderData | RequestData | ScenarioData | DesignData | RecordingData)[]
 }
 
 /** Check if an item is a Scenario (a container, but not a folder). */
 function isScenarioData(item: unknown): item is ScenarioData {
   return typeof item === 'object' && item !== null && (item as { type?: unknown }).type === 'scenario'
+}
+
+/** Simplified recording-session type — a container like a scenario (its
+ * deduced routes live in `items`), indexed as one document of its own. */
+interface RecordingData {
+  type: 'recording'
+  id: string
+  name: string
+  notes?: string
+  url: string
+  whitelist?: string[]
+  blacklist?: string[]
+  items?: (FolderData | RequestData | ScenarioData | DesignData | RecordingData)[]
+}
+
+/** Check if an item is a recording session. MUST run before `isRequest` in
+ * every dispatch, for the same reason as `isApiDesignData`. */
+function isRecordingData(item: unknown): item is RecordingData {
+  return typeof item === 'object' && item !== null && (item as { type?: unknown }).type === 'recording'
+}
+
+function recordingToSearchDocument(session: RecordingData, parentPath: string[] = [], parentNames: string[] = []): SearchDocument {
+  return {
+    id: session.id,
+    title: session.name,
+    ...(session.url !== '' ? { description: session.url } : {}),
+    category: 'recording',
+    icon: RECORDING_CODICON,
+    keywords: [session.url, ...(session.whitelist ?? []), ...(session.blacklist ?? [])].filter((s) => s !== '').join(' '),
+    navigation: { type: 'recording', recordingId: session.id, path: [...parentPath, session.id] },
+    metadata: {
+      ...(session.notes ? { notes: session.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
+/** Index a recording session (one document) + its deduced routes. */
+function indexRecordingRecursively(session: RecordingData, parentPath: string[] = [], parentNames: string[] = []): void {
+  searchService.indexDocument(recordingToSearchDocument(session, parentPath, parentNames))
+  publishIndexUpdate('indexed', session.id, 'recording')
+  const currentPath = [...parentPath, session.id]
+  const currentNames = [...parentNames, session.name]
+  for (const item of session.items ?? []) {
+    if (isFolder(item)) {
+      indexFolderRecursively(item, currentPath, currentNames)
+    } else if (isScenarioData(item)) {
+      indexScenarioRecursively(item, currentPath, currentNames)
+    } else if (isApiDesignData(item)) {
+      indexDesignDocuments(item, currentPath, currentNames)
+    } else if (isRecordingData(item)) {
+      indexRecordingRecursively(item, currentPath, currentNames)
+    } else if (isRequest(item)) {
+      searchService.indexDocument(requestToSearchDocument(item, session.id, currentPath))
+      publishIndexUpdate('indexed', item.id, 'request')
+    }
+  }
+}
+
+/** Remove a recording session's document + its deduced routes. */
+function removeRecordingRecursively(session: RecordingData): void {
+  searchService.removeDocument(session.id)
+  publishIndexUpdate('removed', session.id, 'recording')
+  for (const item of session.items ?? []) {
+    if (isFolder(item)) {
+      removeFolderRecursively(item)
+    } else if (isScenarioData(item)) {
+      removeScenarioRecursively(item)
+    } else if (isApiDesignData(item)) {
+      removeDesignDocuments(item.id)
+    } else if (isRecordingData(item)) {
+      removeRecordingRecursively(item)
+    } else {
+      searchService.removeDocument(item.id)
+      publishIndexUpdate('removed', item.id, 'request')
+    }
+  }
 }
 
 /** Simplified API-design type for indexing — the design + its models /
@@ -379,6 +457,8 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = [], p
       indexScenarioRecursively(item, currentPath, currentNames)
     } else if (isApiDesignData(item)) {
       indexDesignDocuments(item, currentPath, currentNames)
+    } else if (isRecordingData(item)) {
+      indexRecordingRecursively(item, currentPath, currentNames)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -402,6 +482,8 @@ function indexScenarioRecursively(scenario: ScenarioData, parentPath: string[] =
       indexScenarioRecursively(item, currentPath, currentNames)
     } else if (isApiDesignData(item)) {
       indexDesignDocuments(item, currentPath, currentNames)
+    } else if (isRecordingData(item)) {
+      indexRecordingRecursively(item, currentPath, currentNames)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, scenario.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
@@ -425,6 +507,8 @@ function removeFolderRecursively(folder: FolderData): void {
       removeScenarioRecursively(item)
     } else if (isApiDesignData(item)) {
       removeDesignDocuments(item.id)
+    } else if (isRecordingData(item)) {
+      removeRecordingRecursively(item)
     } else {
       searchService.removeDocument(item.id)
       publishIndexUpdate('removed', item.id, 'request')
@@ -441,6 +525,8 @@ function removeScenarioRecursively(scenario: ScenarioData): void {
       removeScenarioRecursively(item)
     } else if (isApiDesignData(item)) {
       removeDesignDocuments(item.id)
+    } else if (isRecordingData(item)) {
+      removeRecordingRecursively(item)
     } else {
       searchService.removeDocument(item.id)
       publishIndexUpdate('removed', item.id, 'request')
@@ -583,6 +669,38 @@ class SearchIndexService {
       eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.DESIGN_DELETED, (payload) => {
         logger.debug('[SearchIndexService] DESIGN_DELETED', { id: payload.id })
         removeDesignDocuments(payload.id)
+      })
+    )
+
+    // Recording sessions: the session document + its deduced routes follow
+    // the same create / update (re-walk) / delete pattern as designs — a
+    // deduction is an update of the session (its `items` grew).
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.RECORDING_CREATED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_CREATED', { id: payload.id })
+        if (isRecordingData(payload.document)) {
+          const ancestry = designAncestry(payload.id)
+          indexRecordingRecursively(payload.document, ancestry.path, ancestry.names)
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.RECORDING_UPDATED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_UPDATED', { id: payload.id })
+        if (isRecordingData(payload.document)) {
+          const ancestry = designAncestry(payload.id)
+          indexRecordingRecursively(payload.document, ancestry.path, ancestry.names)
+        }
+      })
+    )
+
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.RECORDING_DELETED, (payload) => {
+        logger.debug('[SearchIndexService] RECORDING_DELETED', { id: payload.id })
+        // The event carries no document: drop whatever is indexed under it.
+        searchService.removeDocument(payload.id)
+        publishIndexUpdate('removed', payload.id, 'recording')
       })
     )
 

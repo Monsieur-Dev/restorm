@@ -319,7 +319,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Projekt API"
+        "design": "Projekt API",
+        "recording": "Sesja nagrywania"
       },
       "cut": "Wytnij",
       "copy": "Kopiuj",
@@ -446,6 +447,7 @@
         "requestBodyFile": "Plik"
       },
       "loading": "Wysyłanie żądania...",
+      "body": { "download": "Pobierz", "binary": "Zawartość binarna ({{type}}) — użyj opcji Pobierz, aby ją zapisać", "unknownType": "nieznany typ" },
       "noResponseBody": "Brak treści odpowiedzi — szczegóły w zakładce Infos",
       "noResponse": "Proszę kliknąć Wyślij, aby wykonać żądanie",
       "history": {
@@ -754,7 +756,8 @@
       "settings": "Ustawienia",
       "tag": "Tagi",
       "scenario": "Scenariusze",
-      "design": "Projekty API"
+      "design": "Projekty API",
+      "recording": "Sesje nagrywania"
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",
@@ -2812,6 +2815,84 @@
     "maxEntriesTitle": "Wpisy przechowywane w każdej historii",
     "maxEntriesDescription": "Ile wpisów przechowują historia wywołań żądania oraz historia uruchomień scenariusza. Przypięte wpisy są zawsze zachowywane, niezależnie od tej wartości. Nie dotyczy to list ostatniej aktywności na ekranie startowym."
   },
+  "recording": {
+    "title": "Sesje nagrywania",
+    "maxCapturesTitle": "Przechwycone wywołania przechowywane na sesję",
+    "maxCapturesDescription": "Ile przechwyconych wywołań sesja nagrywania przechowuje w pamięci. Po osiągnięciu limitu najstarsze wywołania są usuwane w pierwszej kolejności. Przechwycone dane nigdy nie są zapisywane w pliku projektu.",
+    "newSessionName": "Nowa sesja nagrywania",
+    "node": {
+      "browser": "Przeglądarka",
+      "captures": "Przechwycenia",
+      "routes": "Trasy"
+    },
+    "tab": {
+      "browserTitle": "Przeglądarka: {{name}}",
+      "capturesTitle": "Przechwycenia: {{name}}",
+      "routesTitle": "Trasy: {{name}}"
+    },
+    "placeholder": {
+      "config": "Ustawienia sesji (adres URL strony, protokoły, biała i czarna lista) pojawią się tutaj.",
+      "browser": "Przeglądarka nagrywania pojawi się tutaj.",
+      "captures": "Nie przechwycono jeszcze żadnego wywołania. Proszę rozpocząć nagrywanie w ustawieniach sesji, aby zobaczyć tutaj wywołania strony.",
+      "routes": "Nie wywnioskowano jeszcze żadnej trasy. Proszę nagrać wywołania, a następnie wywnioskować trasy z przechwyceń."
+    },
+    "config": {
+      "subtitle": "Proszę przeglądać stronę, podczas gdy Restorm nasłuchuje jej wywołań API. Z projektem zapisywane są tylko poniższe ustawienia — nigdy przechwycone wywołania.",
+      "url": "Nasłuchiwana strona",
+      "urlPlaceholder": "https://przyklad.pl, http://localhost:3000 lub file:///sciezka/strona.html",
+      "urlInvalid": "Proszę podać adres URL http(s) lub file.",
+      "urlRequired": "Proszę podać adres URL strony, aby włączyć nagrywanie.",
+      "record": "Rozpocznij nagrywanie",
+      "stop": "Zatrzymaj nagrywanie",
+      "protocols": "Przechwytywane protokoły",
+      "whitelist": "Biała lista",
+      "blacklist": "Czarna lista",
+      "addPattern": "Dodaj wzorzec",
+      "removePattern": "Usuń ten wzorzec",
+      "invalidPattern": "Ten wzorzec nie jest poprawnym wyrażeniem regularnym.",
+      "patternPlaceholder": "Wyrażenie regularne, np. ^https://api\\.przyklad\\.pl/",
+      "noPattern": "Brak wzorca — wszystko przechodzi.",
+      "filtersHint": "Wywołanie jest zachowywane, jeśli pasuje do co najmniej jednej pozycji białej listy (lub gdy jest ona pusta) i do żadnej pozycji czarnej listy. Zmiany dotyczą kolejnych wywołań."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Wstrzymaj nagrywanie",
+      "resume": "Wznów nagrywanie",
+      "stop": "Zatrzymaj nagrywanie"
+    },
+    "captures": {
+      "empty": "Nie przechwycono jeszcze żadnego wywołania. Proszę rozpocząć nagrywanie w ustawieniach sesji, aby na bieżąco widzieć tutaj wywołania strony.",
+      "filterPlaceholder": "Filtruj wywołania (wyrażenie regularne)",
+      "live": "w toku",
+      "clearRun": "Usuń wywołania z tego nagrania",
+      "selectOne": "Proszę wybrać wywołanie, aby zobaczyć jego odpowiedź.",
+      "loadingDetail": "Wczytywanie wywołania…",
+      "addToWhitelist": "Dodaj do białej listy…",
+      "addToBlacklist": "Dodaj do czarnej listy…",
+      "patternLabel": "Wzorzec (wyrażenie regularne)",
+      "add": "Dodaj",
+      "addAndApply": "Dodaj i zastosuj do przechwyconych wywołań",
+      "applyConfirm": "Zastosowanie list do już przechwyconych wywołań usuwa wszystkie te, które są teraz odrzucane. Tej operacji nie można cofnąć.",
+      "applyConfirmOk": "Zastosuj i usuń",
+      "deduce": "Wywnioskuj trasy",
+      "deduceWhileRecording": "Proszę zatrzymać nagrywanie przed wywnioskowaniem tras.",
+      "deduceUnavailable": "Wnioskowanie tras nie jest jeszcze dostępne.",
+      "deduceLocked": "Wnioskowanie tras jest dostępne od planu Pro."
+    },
+    "routes": {
+      "empty": "Nie wywnioskowano jeszcze żadnej trasy. Proszę nagrać wywołania, a następnie użyć „Wywnioskuj trasy” pod przechwyceniami — żądania pojawią się tutaj i pod wierszem Trasy na pasku bocznym.",
+      "proCallout": "Wnioskowanie tras z przechwyconych wywołań jest dostępne od planu Pro. Nagrywanie pozostaje otwarte dla wszystkich.",
+      "subscribe": "Zobacz plany",
+      "count_one": "{{count}} wywnioskowane żądanie",
+      "count_other": "{{count}} wywnioskowanych żądań",
+      "hint": "Wywnioskowane żądania są zwykłymi żądaniami: można je dowolnie edytować; ponowne wnioskowanie zachowuje zmiany i dodaje tylko nowe trasy."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Przechowywanie dziennika wywołań MCP",
@@ -2852,6 +2933,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Wyświetl sesje nagrywania",
+    "createRecordingSession": "Utwórz sesję nagrywania",
+    "updateRecordingSession": "Zaktualizuj sesję nagrywania",
+    "setRecordingFilters": "Ustaw filtry adresów URL sesji nagrywania",
+    "startRecording": "Rozpocznij nagrywanie sesji",
+    "stopRecording": "Zatrzymaj nagrywanie sesji",
+    "getRecordingStatus": "Pobierz stan sesji nagrywania",
+    "listRecordingCaptures": "Wyświetl przechwycone wywołania sesji nagrywania",
+    "getRecordingCapture": "Pobierz pełne dane jednego przechwyconego wywołania",
+    "deduceRecordingRoutes": "Wywnioskuj trasy sesji nagrywania",
     "answerScenarioInput": "Odpowiedz na dane wejściowe scenariusza",
     "arrangeScenario": "Automatycznie ułóż scenariusz",
     "cancelRequest": "Anuluj żądanie",
@@ -3212,6 +3303,9 @@
       "addedDesign": "Dodano projekt API „{{name}}”",
       "modifiedDesign": "Zmodyfikowano projekt API „{{name}}”",
       "deletedDesign": "Usunięto projekt API „{{name}}”",
+      "addedRecording": "Dodano sesję nagrywania „{{name}}”",
+      "modifiedRecording": "Zmodyfikowano sesję nagrywania „{{name}}”",
+      "deletedRecording": "Usunięto sesję nagrywania „{{name}}”",
       "addedFolder": "Dodano folder „{{name}}”",
       "modifiedFolder": "Zmodyfikowano folder „{{name}}”",
       "deletedFolder": "Usunięto folder „{{name}}”",
@@ -3221,6 +3315,7 @@
       "movedRequest": "Przeniesiono żądanie \"{{name}}\"",
       "movedScenario": "Przeniesiono scenariusz \"{{name}}\"",
       "movedDesign": "Przeniesiono projekt API \"{{name}}\"",
+      "movedRecording": "Przeniesiono sesję nagrywania „{{name}}”",
       "movedFolder": "Przeniesiono folder \"{{name}}\"",
       "movedEnvironmentFolder": "Przeniesiono folder środowiska \"{{name}}\"",
       "reorderedFolder": "Zmieniono kolejność elementów w folderze „{{name}}”",
@@ -3232,6 +3327,7 @@
       "singleRequest": "Aktualizacja żądania „{{name}}”",
       "singleScenario": "Aktualizacja scenariusza „{{name}}”",
       "singleDesign": "Aktualizacja projektu API „{{name}}”",
+      "singleRecording": "Aktualizacja sesji nagrywania „{{name}}”",
       "singleFolder": "Aktualizacja folderu „{{name}}”",
       "singleEnvironmentFolder": "Aktualizacja folderu środowiska „{{name}}”",
       "singleFileFormatVersion": "Przejście na format pliku {{name}}",
@@ -3241,6 +3337,8 @@
       "countScenario_other": "{{count}} scenariuszy",
       "countDesign_one": "{{count}} projekt API",
       "countDesign_other": "{{count}} projektów API",
+      "countRecording_one": "{{count}} sesja nagrywania",
+      "countRecording_other": "{{count}} sesji nagrywania",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folderów",
       "countEnvironmentFolder_one": "{{count}} folder środowiska",
@@ -3334,6 +3432,9 @@
     "crashReportsDescription": "Wysyła zanonimizowany raport, gdy Restorm ulegnie awarii, aby usterkę można było naprawić. Raporty są oczyszczane z adresów URL, tokenów, treści żądań i danych osobowych, zanim opuszczą Pana/Pani komputer. Wliczone w plan bezpłatny; plan płatny pozwala to wyłączyć. Pełne informacje: https://restorm.app/privacy",
     "telemetryTitle": "Wysyłaj statystyki użycia",
     "telemetryDescription": "Wysyła anonimowe statystyki dotyczące używanych funkcji, aby ukierunkować dalszy rozwój. Domyślnie wyłączone i nigdy nie włączane bez Pana/Pani wyraźnej zgody. Nie zawiera danych żądań, adresów URL ani danych osobowych. Pełne informacje: https://restorm.app/privacy",
+    "geolocationTitle": "Udostępnianie lokalizacji wbudowanej przeglądarce",
+    "geolocationDescription": "Ustala przybliżoną lokalizację (z systemowej usługi lokalizacji lub, w razie jej braku, na podstawie adresu IP) i przekazuje ją wyłącznie wbudowanej mini przeglądarce, aby witryny korzystające z geolokalizacji działały w sesji nagrywania. Do firmy Restorm nic nie jest wysyłane.",
+    "geolocationConsent": {"title": "Udostępnić lokalizację wbudowanej przeglądarce?", "body": "Restorm poprosi systemową usługę lokalizacji o Pana/Pani położenie (a jeśli nie będzie ono dostępne, oszacuje je na podstawie adresu IP za pośrednictwem usługi zewnętrznej) i przekaże je wyłącznie stronom otwartym we wbudowanej mini przeglądarce. W żadnym innym przypadku Pana/Pani położenie nie opuszcza komputera i jest zapominane, gdy tylko wyłączy Pan/Pani tę opcję.", "accept": "Zezwól", "decline": "Nie teraz"},
     "crashReportsLockedLabel": "Możliwe do zmiany od planu Pro. W planie bezpłatnym raporty o awariach są niezbędne do utrzymania jakości.",
     "consentToast": {
       "title": "Pomóż nam ulepszyć Restorm",

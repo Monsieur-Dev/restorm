@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Ghi lại một trang web, nhận API của nó dưới dạng yêu cầu.**
+
+- **Phiên ghi.** Một loại mục mới trong thanh bên mở một trang web trong trình duyệt mini tích hợp và ghi lại mọi lời gọi API mà trang thực hiện — REST, GraphQL, gRPC-web và WebSocket — theo thời gian thực, với danh sách trắng và danh sách đen bằng biểu thức chính quy, tạm dừng và dừng từ dòng địa chỉ, cùng một vầng sáng nhấp nháy quanh phiên trong khi chạy. Mỗi lời gọi được ghi hiển thị đúng như phản hồi của một yêu cầu (nội dung, thông tin, cookie, đồ thị); menu ngữ cảnh của một lời gọi thêm url của nó vào một danh sách, tùy chọn dọn bớt những gì đã ghi. Các bản ghi nằm trong bộ nhớ, bị giới hạn bởi một thiết lập ứng dụng mới, và không bao giờ chạm vào tệp dự án của bạn.
+- **Suy ra các tuyến (Pro).** Một nút biến các bản ghi thành một cây thư mục gồm các yêu cầu thật, có thể chạy lại: các đoạn đường dẫn thay đổi trở thành tham số đường dẫn `{{param}}`, các thư mục đi theo tiền tố tĩnh, các lời gọi gRPC-web được xếp theo dịch vụ, và mỗi yêu cầu được điền sẵn từ lời gọi thành công gần nhất, với các lời gọi đã ghi nằm trong lịch sử phản hồi của nó. Suy ra lần nữa sẽ hợp nhất — các chỉnh sửa của bạn được giữ lại.
+- **Điều khiển từ trợ lý AI của bạn.** Mười công cụ MCP tạo và cấu hình phiên, bắt đầu và dừng ghi, đọc các bản ghi và suy ra các tuyến.
+- **Chia sẻ vị trí của bạn với trình duyệt mini (tùy chọn).** Một thiết lập Quyền riêng tư mới, tắt theo mặc định, cho phép các trang mở trong trình duyệt tích hợp — dù đang ghi hay không — đọc vị trí gần đúng của bạn, giống như tính năng định vị của chính trang web sẽ làm trong một trình duyệt thông thường. Khi bật, bạn sẽ được hỏi ý kiến đồng ý trước; vị trí lấy từ dịch vụ định vị của hệ thống (GeoClue trên Linux), nếu không có thì từ ước tính ở cấp thành phố dựa trên địa chỉ IP của bạn. Khi tắt, vị trí sẽ bị quên ngay lập tức.
+- **Tab Phản hồi phong phú hơn.** Hình ảnh giờ hiển thị trực tiếp, video và âm thanh phát được, Markdown được kết xuất, và trình soạn mã chọn ngôn ngữ theo Content-Type — cùng một nút Tải xuống đã dịch, luôn trong tầm tay. Một phản hồi nhị phân chạy lại từ lịch sử không còn hiển thị base64 của nó.
+- **Nhập: một đặc tả JSON được dán vào dễ đọc.** Một tài liệu JSON trên một dòng được dán vào ô nhập trống sẽ được định dạng lại gọn gàng trước khi mở trong trình soạn thảo.
+- **Danh sách dài vẫn nhanh.** Danh sách bản ghi (và thanh bên khi vượt 400 dòng) chỉ kết xuất những gì đang hiện trên màn hình.
+- Các tệp dự án chứa một phiên ghi được lưu ở định dạng 1.2; các phiên bản Restorm trước đó sẽ yêu cầu bạn cập nhật trước khi mở.
+
 ## v1.1.4
 
 **Kết nối trợ lý AI của bạn trên macOS — giờ đã đáng tin cậy.**

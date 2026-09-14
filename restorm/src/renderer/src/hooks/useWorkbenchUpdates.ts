@@ -32,7 +32,7 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/types/collections'
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
-import { isAnyFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import { parseDesignEntityRowId } from '../../../shared/design/designSections'
 import { renameDesignEntity } from '../components/Design/designMutations'
 import { searchIndexService } from '../services/SearchIndexService'
@@ -83,9 +83,12 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
     // Design edits move the sidebar too (section-row counts, error
     // dots), through the same debounced counter.
     const designSubscription = eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, bump)
+    // A recording session's config edits (url, lists) re-render its rows too.
+    const recordingSubscription = eventBus.subscribe(DocumentEvents.RECORDING_UPDATED, bump)
     return () => {
       requestSubscription.unsubscribe()
       designSubscription.unsubscribe()
+      recordingSubscription.unsubscribe()
       if (requestUpdateTimerRef.current !== null) clearTimeout(requestUpdateTimerRef.current)
     }
   }, [])
@@ -408,7 +411,7 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (!effectiveIcon && foundItem && isAnyFolder(foundItem)) {
         delete foundItem.icon
         effectiveIcon = getFolderIcon(foundItem)
-      } else if (foundItem && !isScenario(foundItem) && !isApiDesign(foundItem)) {
+      } else if (foundItem && !isScenario(foundItem) && !isApiDesign(foundItem) && !isRecordingSession(foundItem)) {
         if (effectiveIcon) {
           foundItem.icon = effectiveIcon
         } else {

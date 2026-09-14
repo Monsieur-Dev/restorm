@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Opptakssesjon"
       },
       "cut": "Klipp ut",
       "copy": "Kopier",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Fil"
       },
       "loading": "Sender forespørsel...",
+      "body": { "download": "Last ned", "binary": "Binært innhold ({{type}}) — bruk Last ned for å lagre det", "unknownType": "ukjent type" },
       "noResponseBody": "Ingen svartekst — se Infos for detaljer",
       "noResponse": "Klikk Send for å utføre forespørselen",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Innstillinger",
       "tag": "Tagger",
       "scenario": "Scenarier",
-      "design": "API-design"
+      "design": "API-design",
+      "recording": "Opptakssesjoner"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgjengelig",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Oppføringer som beholdes per historikk",
     "maxEntriesDescription": "Hvor mange oppføringer kallhistorikken for en forespørsel og kjørehistorikken for et scenario hver beholder. Festede oppføringer beholdes alltid, uansett denne verdien. Listene over nylig aktivitet på startskjermen påvirkes ikke."
   },
+  "recording": {
+    "title": "Opptakssesjoner",
+    "maxCapturesTitle": "Fangede kall beholdt per sesjon",
+    "maxCapturesDescription": "Hvor mange fangede kall en opptakssesjon holder i minnet. Når grensen er nådd, fjernes de eldste kallene først. Opptak lagres aldri i prosjektfilen.",
+    "newSessionName": "Ny opptakssesjon",
+    "node": {
+      "browser": "Nettleser",
+      "captures": "Opptak",
+      "routes": "Ruter"
+    },
+    "tab": {
+      "browserTitle": "Nettleser: {{name}}",
+      "capturesTitle": "Opptak: {{name}}",
+      "routesTitle": "Ruter: {{name}}"
+    },
+    "placeholder": {
+      "config": "Sesjonsinnstillingene (sidens URL, protokoller, hvite- og svarteliste) vises her.",
+      "browser": "Opptaksnettleseren vises her.",
+      "captures": "Ingen kall er fanget ennå. Start et opptak fra sesjonsinnstillingene for å se sidens kall her.",
+      "routes": "Ingen ruter er utledet ennå. Ta opp noen kall, og utled deretter rutene fra opptakene."
+    },
+    "config": {
+      "subtitle": "Naviger på siden mens Restorm lytter til API-kallene dens. Bare innstillingene nedenfor lagres med prosjektet — aldri de fangede kallene.",
+      "url": "Side som lyttes på",
+      "urlPlaceholder": "https://eksempel.no, http://localhost:3000 eller file:///sti/side.html",
+      "urlInvalid": "Oppgi en http(s)- eller file-URL.",
+      "urlRequired": "Oppgi sidens URL for å kunne ta opp.",
+      "record": "Start opptak",
+      "stop": "Stopp opptak",
+      "protocols": "Protokoller som fanges",
+      "whitelist": "Hviteliste",
+      "blacklist": "Svarteliste",
+      "addPattern": "Legg til et mønster",
+      "removePattern": "Fjern dette mønsteret",
+      "invalidPattern": "Dette mønsteret er ikke et gyldig regulært uttrykk.",
+      "patternPlaceholder": "Regulært uttrykk, f.eks. ^https://api\\.eksempel\\.no/",
+      "noPattern": "Ingen mønstre — alt slipper gjennom.",
+      "filtersHint": "Et kall beholdes hvis det treffer minst én oppføring i hvitelisten (eller listen er tom) og ingen oppføring i svartelisten. Endringer gjelder de neste kallene."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Sett opptaket på pause",
+      "resume": "Fortsett opptaket",
+      "stop": "Stopp opptaket"
+    },
+    "captures": {
+      "empty": "Ingen kall er fanget ennå. Start et opptak fra sesjonsinnstillingene for å se sidens kall dukke opp her etter hvert som de skjer.",
+      "filterPlaceholder": "Filtrer kallene (regulært uttrykk)",
+      "live": "pågår",
+      "clearRun": "Slett kallene fra dette opptaket",
+      "selectOne": "Velg et kall for å se svaret.",
+      "loadingDetail": "Laster kallet…",
+      "addToWhitelist": "Legg til i hvitelisten…",
+      "addToBlacklist": "Legg til i svartelisten…",
+      "patternLabel": "Mønster (regulært uttrykk)",
+      "add": "Legg til",
+      "addAndApply": "Legg til og bruk på de fangede kallene",
+      "applyConfirm": "Å bruke listene på kallene som allerede er fanget, fjerner alle de nå avviser. Dette kan ikke angres.",
+      "applyConfirmOk": "Bruk og fjern",
+      "deduce": "Utled rutene",
+      "deduceWhileRecording": "Stopp opptaket før rutene utledes.",
+      "deduceUnavailable": "Utledning av ruter er ikke tilgjengelig ennå.",
+      "deduceLocked": "Utledning av ruter er tilgjengelig fra Pro-planen."
+    },
+    "routes": {
+      "empty": "Ingen ruter er utledet ennå. Ta opp kall, og bruk deretter «Utled rutene» under opptakene — forespørslene vises her og under raden Ruter i sidepanelet.",
+      "proCallout": "Utledning av ruter fra de fangede kallene er tilgjengelig fra Pro-planen. Opptak er fortsatt åpent for alle.",
+      "subscribe": "Se planene",
+      "count_one": "{{count}} utledet forespørsel",
+      "count_other": "{{count}} utledede forespørsler",
+      "hint": "De utledede forespørslene er vanlige forespørsler: rediger dem fritt; en ny utledning beholder endringene dine og legger bare til nye ruter."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Oppbevaring av MCP-kallogg",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Vis opptaksøkter",
+    "createRecordingSession": "Opprett en opptaksøkt",
+    "updateRecordingSession": "Oppdater en opptaksøkt",
+    "setRecordingFilters": "Angi URL-filtre for en opptaksøkt",
+    "startRecording": "Start opptak av en økt",
+    "stopRecording": "Stopp opptak av en økt",
+    "getRecordingStatus": "Hent status for en opptaksøkt",
+    "listRecordingCaptures": "Vis de registrerte kallene i en opptaksøkt",
+    "getRecordingCapture": "Hent ett registrert kall i sin helhet",
+    "deduceRecordingRoutes": "Utled rutene i en opptaksøkt",
     "answerScenarioInput": "Svar på en scenarioinndata",
     "arrangeScenario": "Ordne scenarioet automatisk",
     "cancelRequest": "Avbryt en forespørsel",
@@ -3210,6 +3301,9 @@
       "addedDesign": "La til designet \"{{name}}\"",
       "modifiedDesign": "Endret designet \"{{name}}\"",
       "deletedDesign": "Slettet designet \"{{name}}\"",
+      "addedRecording": "Opptakssesjonen \"{{name}}\" er lagt til",
+      "modifiedRecording": "Opptakssesjonen \"{{name}}\" er endret",
+      "deletedRecording": "Opptakssesjonen \"{{name}}\" er slettet",
       "addedFolder": "La til mappen \"{{name}}\"",
       "modifiedFolder": "Endret mappen \"{{name}}\"",
       "deletedFolder": "Slettet mappen \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Flyttet forespørselen \"{{name}}\"",
       "movedScenario": "Flyttet scenariet \"{{name}}\"",
       "movedDesign": "Flyttet designet \"{{name}}\"",
+      "movedRecording": "Opptakssesjonen \"{{name}}\" er flyttet",
       "movedFolder": "Flyttet mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttet miljømappen \"{{name}}\"",
       "reorderedFolder": "Elementer omorganisert i mappen «{{name}}»",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Oppdatering av forespørselen \"{{name}}\"",
       "singleScenario": "Oppdatering av scenarioet \"{{name}}\"",
       "singleDesign": "Oppdatering av designet \"{{name}}\"",
+      "singleRecording": "Oppdatering av opptakssesjonen \"{{name}}\"",
       "singleFolder": "Oppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Oppdatering av miljømappen \"{{name}}\"",
       "singleFileFormatVersion": "Bytte til filformat {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} scenarioer",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} design",
+      "countRecording_one": "{{count}} opptakssesjon",
+      "countRecording_other": "{{count}} opptakssesjoner",
       "countFolder_one": "{{count}} mappe",
       "countFolder_other": "{{count}} mapper",
       "countEnvironmentFolder_one": "{{count}} miljømappe",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Sender en anonymisert rapport når Restorm krasjer, slik at feilen kan rettes. Rapporter renses for URL-er, tokener, forespørselsinnhold og personopplysninger før de forlater maskinen din. Inkludert i gratisplanen; en betalt plan lar deg slå det av. Alle detaljer: https://restorm.app/privacy",
     "telemetryTitle": "Send bruksstatistikk",
     "telemetryDescription": "Sender anonym statistikk om hvilke funksjoner som brukes, for å styre videre utvikling. Av som standard, og aldri slått på uten ditt uttrykkelige samtykke. Inneholder ingen forespørselsdata, ingen URL-er og ingen personopplysninger. Alle detaljer: https://restorm.app/privacy",
+    "geolocationTitle": "Del posisjonen din med den innebygde nettleseren",
+    "geolocationDescription": "Henter din omtrentlige posisjon (fra systemets posisjonstjeneste, eller fra IP-adressen din som reserve) og gir den kun videre til den innebygde minibrowseren, slik at nettsteder som bruker geolokasjon fungerer i en opptakssesjon. Ingenting sendes til Restorm.",
+    "geolocationConsent": {"title": "Dele posisjonen din med den innebygde nettleseren?", "body": "Restorm ber systemets posisjonstjeneste om posisjonen din (og hvis den ikke har noen, anslår den ut fra IP-adressen din via en tredjepartstjeneste) og gir den kun videre til sidene som åpnes i den innebygde minibrowseren. Posisjonen din forlater ellers aldri datamaskinen din, og glemmes så snart du slår dette av.", "accept": "Tillat", "decline": "Ikke nå"},
     "crashReportsLockedLabel": "Kan endres fra Pro-abonnementet. I gratisabonnementet er krasjrapporter nødvendige for å opprettholde kvaliteten.",
     "consentToast": {
       "title": "Hjelp oss med å forbedre Restorm",

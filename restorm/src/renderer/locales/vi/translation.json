@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Thiết kế API"
+        "design": "Thiết kế API",
+        "recording": "Phiên ghi"
       },
       "cut": "Cắt",
       "copy": "Sao chép",
@@ -443,6 +444,7 @@
         "requestBodyFile": "Tệp"
       },
       "loading": "Đang gửi yêu cầu...",
+      "body": { "download": "Tải xuống", "binary": "Nội dung nhị phân ({{type}}) — dùng Tải xuống để lưu lại", "unknownType": "loại không xác định" },
       "noResponseBody": "Không có nội dung phản hồi — xem Infos để biết chi tiết",
       "noResponse": "Nhấp Gửi để thực thi yêu cầu",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "Cài đặt",
       "tag": "Thẻ",
       "scenario": "Kịch bản",
-      "design": "Thiết kế API"
+      "design": "Thiết kế API",
+      "recording": "Phiên ghi"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "Số mục được giữ trong mỗi lịch sử",
     "maxEntriesDescription": "Số mục mà lịch sử lệnh gọi của một yêu cầu và lịch sử chạy của một kịch bản mỗi loại giữ lại. Các mục đã ghim luôn được giữ lại, bất kể giá trị này. Các danh sách hoạt động gần đây trên màn hình chính không bị ảnh hưởng."
   },
+  "recording": {
+    "title": "Phiên ghi",
+    "maxCapturesTitle": "Số lệnh gọi đã ghi được giữ lại cho mỗi phiên",
+    "maxCapturesDescription": "Số lệnh gọi đã ghi mà một phiên ghi giữ trong bộ nhớ. Khi đạt giới hạn, các lệnh gọi cũ nhất bị loại bỏ trước. Dữ liệu ghi không bao giờ được lưu vào tệp dự án.",
+    "newSessionName": "Phiên ghi mới",
+    "node": {
+      "browser": "Trình duyệt",
+      "captures": "Bản ghi",
+      "routes": "Tuyến"
+    },
+    "tab": {
+      "browserTitle": "Trình duyệt: {{name}}",
+      "capturesTitle": "Bản ghi: {{name}}",
+      "routesTitle": "Tuyến: {{name}}"
+    },
+    "placeholder": {
+      "config": "Cài đặt của phiên (URL trang, giao thức, danh sách trắng và đen) sẽ xuất hiện ở đây.",
+      "browser": "Trình duyệt ghi sẽ xuất hiện ở đây.",
+      "captures": "Chưa có lệnh gọi nào được ghi. Hãy bắt đầu ghi từ cài đặt của phiên để thấy các lệnh gọi của trang xuất hiện ở đây.",
+      "routes": "Chưa có tuyến nào được suy ra. Hãy ghi một số lệnh gọi, rồi suy ra các tuyến từ các bản ghi."
+    },
+    "config": {
+      "subtitle": "Duyệt trang trong khi Restorm lắng nghe các lệnh gọi API của trang. Chỉ các cài đặt bên dưới được lưu cùng dự án — không bao giờ lưu các lệnh gọi đã ghi.",
+      "url": "Trang cần lắng nghe",
+      "urlPlaceholder": "https://vidu.com, http://localhost:3000 hoặc file:///duong-dan/trang.html",
+      "urlInvalid": "Hãy nhập một URL http(s) hoặc file.",
+      "urlRequired": "Hãy nhập URL của trang để bật ghi.",
+      "record": "Bắt đầu ghi",
+      "stop": "Dừng ghi",
+      "protocols": "Giao thức cần ghi",
+      "whitelist": "Danh sách trắng",
+      "blacklist": "Danh sách đen",
+      "addPattern": "Thêm mẫu",
+      "removePattern": "Xóa mẫu này",
+      "invalidPattern": "Mẫu này không phải là biểu thức chính quy hợp lệ.",
+      "patternPlaceholder": "Biểu thức chính quy, ví dụ ^https://api\\.vidu\\.com/",
+      "noPattern": "Không có mẫu — mọi thứ đều được giữ.",
+      "filtersHint": "Một lệnh gọi được giữ lại nếu khớp với ít nhất một mục của danh sách trắng (hoặc danh sách trống) và không khớp với mục nào của danh sách đen. Các thay đổi áp dụng cho các lệnh gọi tiếp theo."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Tạm dừng ghi",
+      "resume": "Tiếp tục ghi",
+      "stop": "Dừng ghi"
+    },
+    "captures": {
+      "empty": "Chưa có lệnh gọi nào được ghi. Hãy bắt đầu ghi từ cài đặt của phiên để thấy các lệnh gọi của trang xuất hiện ở đây theo thời gian thực.",
+      "filterPlaceholder": "Lọc các lệnh gọi (biểu thức chính quy)",
+      "live": "đang ghi",
+      "clearRun": "Xóa các lệnh gọi của lần ghi này",
+      "selectOne": "Hãy chọn một lệnh gọi để xem phản hồi của nó.",
+      "loadingDetail": "Đang tải lệnh gọi…",
+      "addToWhitelist": "Thêm vào danh sách trắng…",
+      "addToBlacklist": "Thêm vào danh sách đen…",
+      "patternLabel": "Mẫu (biểu thức chính quy)",
+      "add": "Thêm",
+      "addAndApply": "Thêm và áp dụng cho các lệnh gọi đã ghi",
+      "applyConfirm": "Áp dụng các danh sách cho các lệnh gọi đã ghi sẽ xóa mọi lệnh gọi mà chúng nay từ chối. Không thể hoàn tác thao tác này.",
+      "applyConfirmOk": "Áp dụng và xóa",
+      "deduce": "Suy ra các tuyến",
+      "deduceWhileRecording": "Hãy dừng ghi trước khi suy ra các tuyến.",
+      "deduceUnavailable": "Tính năng suy ra tuyến chưa khả dụng.",
+      "deduceLocked": "Suy ra các tuyến khả dụng từ gói Pro."
+    },
+    "routes": {
+      "empty": "Chưa có tuyến nào được suy ra. Hãy ghi các lệnh gọi, rồi dùng “Suy ra các tuyến” bên dưới các bản ghi — các yêu cầu sẽ xuất hiện ở đây và dưới dòng Tuyến trong thanh bên.",
+      "proCallout": "Suy ra các tuyến từ các lệnh gọi đã ghi khả dụng từ gói Pro. Việc ghi vẫn mở cho mọi người.",
+      "subscribe": "Xem các gói",
+      "count_one": "{{count}} yêu cầu được suy ra",
+      "count_other": "{{count}} yêu cầu được suy ra",
+      "hint": "Các yêu cầu được suy ra là yêu cầu thông thường: hãy chỉnh sửa tùy ý; suy ra lại sẽ giữ các thay đổi của bạn và chỉ thêm các tuyến mới."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Lưu giữ nhật ký lệnh gọi MCP",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Liệt kê các phiên ghi",
+    "createRecordingSession": "Tạo một phiên ghi",
+    "updateRecordingSession": "Cập nhật một phiên ghi",
+    "setRecordingFilters": "Đặt bộ lọc URL cho một phiên ghi",
+    "startRecording": "Bắt đầu ghi một phiên",
+    "stopRecording": "Dừng ghi một phiên",
+    "getRecordingStatus": "Lấy trạng thái của một phiên ghi",
+    "listRecordingCaptures": "Liệt kê các lời gọi đã bắt của một phiên ghi",
+    "getRecordingCapture": "Lấy đầy đủ một lời gọi đã bắt",
+    "deduceRecordingRoutes": "Suy ra các route của một phiên ghi",
     "answerScenarioInput": "Trả lời đầu vào kịch bản",
     "arrangeScenario": "Tự sắp xếp kịch bản",
     "cancelRequest": "Hủy yêu cầu",
@@ -3209,6 +3300,9 @@
       "addedDesign": "Đã thêm thiết kế \"{{name}}\"",
       "modifiedDesign": "Đã sửa thiết kế \"{{name}}\"",
       "deletedDesign": "Đã xóa thiết kế \"{{name}}\"",
+      "addedRecording": "Đã thêm phiên ghi \"{{name}}\"",
+      "modifiedRecording": "Đã sửa phiên ghi \"{{name}}\"",
+      "deletedRecording": "Đã xóa phiên ghi \"{{name}}\"",
       "addedFolder": "Đã thêm thư mục \"{{name}}\"",
       "modifiedFolder": "Đã sửa thư mục \"{{name}}\"",
       "deletedFolder": "Đã xóa thư mục \"{{name}}\"",
@@ -3218,6 +3312,7 @@
       "movedRequest": "Đã di chuyển yêu cầu \"{{name}}\"",
       "movedScenario": "Đã di chuyển kịch bản \"{{name}}\"",
       "movedDesign": "Đã di chuyển thiết kế \"{{name}}\"",
+      "movedRecording": "Đã di chuyển phiên ghi \"{{name}}\"",
       "movedFolder": "Đã di chuyển thư mục \"{{name}}\"",
       "movedEnvironmentFolder": "Đã di chuyển thư mục môi trường \"{{name}}\"",
       "reorderedFolder": "Đã sắp xếp lại các mục trong thư mục \"{{name}}\"",
@@ -3229,6 +3324,7 @@
       "singleRequest": "Cập nhật yêu cầu \"{{name}}\"",
       "singleScenario": "Cập nhật kịch bản \"{{name}}\"",
       "singleDesign": "Cập nhật thiết kế \"{{name}}\"",
+      "singleRecording": "Cập nhật phiên ghi \"{{name}}\"",
       "singleFolder": "Cập nhật thư mục \"{{name}}\"",
       "singleEnvironmentFolder": "Cập nhật thư mục môi trường \"{{name}}\"",
       "singleFileFormatVersion": "Chuyển sang định dạng tệp {{name}}",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "{{count}} kịch bản",
       "countDesign_one": "{{count}} thiết kế",
       "countDesign_other": "{{count}} thiết kế",
+      "countRecording_one": "{{count}} phiên ghi",
+      "countRecording_other": "{{count}} phiên ghi",
       "countFolder_one": "{{count}} thư mục",
       "countFolder_other": "{{count}} thư mục",
       "countEnvironmentFolder_one": "{{count}} thư mục môi trường",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "Gửi một báo cáo đã ẩn danh khi Restorm gặp sự cố, để lỗi có thể được khắc phục. Báo cáo được loại bỏ URL, mã thông báo, nội dung yêu cầu và dữ liệu cá nhân trước khi rời khỏi máy của bạn. Bao gồm trong gói miễn phí; gói trả phí cho phép tắt tính năng này. Chi tiết đầy đủ: https://restorm.app/privacy",
     "telemetryTitle": "Gửi thống kê sử dụng",
     "telemetryDescription": "Gửi thống kê ẩn danh về những tính năng được sử dụng, nhằm định hướng phát triển tiếp theo. Mặc định tắt và không bao giờ bật nếu không có sự đồng ý rõ ràng của bạn. Không chứa dữ liệu yêu cầu, URL hay dữ liệu cá nhân. Chi tiết đầy đủ: https://restorm.app/privacy",
+    "geolocationTitle": "Chia sẻ vị trí của bạn với trình duyệt nhúng",
+    "geolocationDescription": "Lấy vị trí gần đúng của bạn (từ dịch vụ định vị của hệ thống, hoặc từ địa chỉ IP của bạn khi không có) và chỉ chuyển cho trình duyệt web mini nhúng, để các trang web dùng định vị hoạt động được trong một phiên ghi. Không có gì được gửi đến Restorm.",
+    "geolocationConsent": {"title": "Chia sẻ vị trí của bạn với trình duyệt nhúng?", "body": "Restorm sẽ hỏi dịch vụ định vị của hệ thống về vị trí của bạn (và nếu không có, sẽ ước tính từ địa chỉ IP của bạn thông qua một dịch vụ tra cứu bên thứ ba) rồi chỉ chuyển cho các trang mở trong trình duyệt web mini nhúng. Ngoài ra, vị trí của bạn không bao giờ rời khỏi máy tính và sẽ bị xóa ngay khi bạn tắt tùy chọn này.", "accept": "Cho phép", "decline": "Để sau"},
     "crashReportsLockedLabel": "Có thể thay đổi từ gói Pro. Ở gói miễn phí, báo cáo sự cố là cần thiết để duy trì chất lượng.",
     "consentToast": {
       "title": "Hãy giúp chúng tôi cải thiện Restorm",

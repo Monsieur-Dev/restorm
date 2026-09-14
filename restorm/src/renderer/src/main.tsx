@@ -14,6 +14,7 @@ import { CapabilityGateHost } from './components/CapabilityGateHost'
 import { initializeGraphQL } from './services/GraphQLIntegration'
 import { registerRendererSources } from './secrets/registerRendererSources'
 import { UpdateActionsRenderer } from './components/Settings/UpdateActionsRenderer'
+import { GeolocationToggleRenderer } from './components/Settings/GeolocationToggleRenderer'
 import { initRendererCrashReporting } from './crash/initRendererCrashReporting'
 import { initRendererSentry } from './crash/rendererSentry'
 import { RendererErrorBoundary } from './components/CrashRecovery/RendererErrorBoundary'
@@ -87,6 +88,9 @@ try {
 // Custom settings renderer for the "Updates" group (version + live status +
 // "Check now"), bound to the `update-actions` setting type in settings.yaml.
 ElectronCoreUi.registerSettingRenderer('update-actions', UpdateActionsRenderer)
+// The privacy toggle that shares the user's position with the embedded
+// browser asks for consent before it is switched on.
+ElectronCoreUi.registerSettingRenderer('geolocation-toggle', GeolocationToggleRenderer)
 
 const App = lazy(() => import('./App').then((m) => ({ default: m.App })))
 

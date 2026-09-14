@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design de API"
+        "design": "Design de API",
+        "recording": "Sessão de gravação"
       },
       "cut": "Cortar",
       "copy": "Copiar",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Ficheiro"
       },
       "loading": "A enviar pedido...",
+      "body": { "download": "Transferir", "binary": "Conteúdo binário ({{type}}) — use Transferir para o guardar", "unknownType": "tipo desconhecido" },
       "noResponseBody": "Sem corpo de resposta — consulte Infos para detalhes",
       "noResponse": "Clique em Enviar para executar o pedido",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Definições",
       "tag": "Etiquetas",
       "scenario": "Cenários",
-      "design": "Designs de API"
+      "design": "Designs de API",
+      "recording": "Sessões de gravação"
     },
     "tooltip": {
       "noDetails": "Não há detalhes disponíveis",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Entradas mantidas por histórico",
     "maxEntriesDescription": "Quantas entradas o histórico de chamadas de um pedido e o histórico de execuções de um cenário mantêm cada um. As entradas fixadas são sempre mantidas, qualquer que seja este valor. As listas de atividade recente do ecrã inicial não são afetadas."
   },
+  "recording": {
+    "title": "Sessões de gravação",
+    "maxCapturesTitle": "Chamadas capturadas mantidas por sessão",
+    "maxCapturesDescription": "Quantas chamadas capturadas uma sessão de gravação mantém em memória. Atingido o limite, as chamadas mais antigas são eliminadas primeiro. As capturas nunca são guardadas no ficheiro do projeto.",
+    "newSessionName": "Nova sessão de gravação",
+    "node": {
+      "browser": "Navegador",
+      "captures": "Capturas",
+      "routes": "Rotas"
+    },
+    "tab": {
+      "browserTitle": "Navegador: {{name}}",
+      "capturesTitle": "Capturas: {{name}}",
+      "routesTitle": "Rotas: {{name}}"
+    },
+    "placeholder": {
+      "config": "As definições da sessão (URL da página, protocolos, listas branca e negra) aparecerão aqui.",
+      "browser": "O navegador de gravação aparecerá aqui.",
+      "captures": "Ainda não foi capturada nenhuma chamada. Inicie uma gravação a partir das definições da sessão para ver aqui as chamadas da página.",
+      "routes": "Ainda não foi deduzida nenhuma rota. Grave algumas chamadas e depois deduza as rotas a partir das capturas."
+    },
+    "config": {
+      "subtitle": "Navegue na página enquanto o Restorm escuta as suas chamadas API. Apenas as definições abaixo são guardadas com o projeto — nunca as chamadas capturadas.",
+      "url": "Página a escutar",
+      "urlPlaceholder": "https://exemplo.com, http://localhost:3000 ou file:///caminho/pagina.html",
+      "urlInvalid": "Introduza um URL http(s) ou file.",
+      "urlRequired": "Introduza o URL da página para ativar a gravação.",
+      "record": "Iniciar a gravação",
+      "stop": "Parar a gravação",
+      "protocols": "Protocolos a capturar",
+      "whitelist": "Lista branca",
+      "blacklist": "Lista negra",
+      "addPattern": "Adicionar um padrão",
+      "removePattern": "Remover este padrão",
+      "invalidPattern": "Este padrão não é uma expressão regular válida.",
+      "patternPlaceholder": "Expressão regular, p. ex. ^https://api\\.exemplo\\.com/",
+      "noPattern": "Nenhum padrão — tudo passa.",
+      "filtersHint": "Uma chamada é mantida se corresponder a pelo menos uma entrada da lista branca (ou se esta estiver vazia) e a nenhuma entrada da lista negra. As alterações aplicam-se às chamadas seguintes."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pausar a gravação",
+      "resume": "Retomar a gravação",
+      "stop": "Parar a gravação"
+    },
+    "captures": {
+      "empty": "Ainda não foi capturada nenhuma chamada. Inicie uma gravação a partir das definições da sessão para ver aqui as chamadas da página em tempo real.",
+      "filterPlaceholder": "Filtrar as chamadas (expressão regular)",
+      "live": "em curso",
+      "clearRun": "Eliminar as chamadas desta gravação",
+      "selectOne": "Selecione uma chamada para ver a sua resposta.",
+      "loadingDetail": "A carregar a chamada…",
+      "addToWhitelist": "Adicionar à lista branca…",
+      "addToBlacklist": "Adicionar à lista negra…",
+      "patternLabel": "Padrão (expressão regular)",
+      "add": "Adicionar",
+      "addAndApply": "Adicionar e aplicar às chamadas capturadas",
+      "applyConfirm": "Aplicar as listas às chamadas já capturadas elimina todas as que agora recusam. Esta ação não pode ser anulada.",
+      "applyConfirmOk": "Aplicar e eliminar",
+      "deduce": "Deduzir as rotas",
+      "deduceWhileRecording": "Pare a gravação antes de deduzir as rotas.",
+      "deduceUnavailable": "A dedução de rotas ainda não está disponível.",
+      "deduceLocked": "A dedução das rotas está disponível a partir do plano Pro."
+    },
+    "routes": {
+      "empty": "Ainda não foi deduzida nenhuma rota. Grave chamadas e depois use «Deduzir as rotas» sob as capturas — os pedidos aparecem aqui e sob a linha Rotas da barra lateral.",
+      "proCallout": "Deduzir as rotas a partir das chamadas capturadas está disponível a partir do plano Pro. A gravação continua aberta a todos.",
+      "subscribe": "Ver os planos",
+      "count_one": "{{count}} pedido deduzido",
+      "count_other": "{{count}} pedidos deduzidos",
+      "hint": "Os pedidos deduzidos são pedidos normais: edite-os livremente; uma nova dedução mantém as suas alterações e apenas adiciona as novas rotas."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Retenção do registo de chamadas MCP",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listar as sessões de gravação",
+    "createRecordingSession": "Criar uma sessão de gravação",
+    "updateRecordingSession": "Atualizar uma sessão de gravação",
+    "setRecordingFilters": "Definir os filtros de URL de uma sessão de gravação",
+    "startRecording": "Iniciar a gravação de uma sessão",
+    "stopRecording": "Parar a gravação de uma sessão",
+    "getRecordingStatus": "Obter o estado de uma sessão de gravação",
+    "listRecordingCaptures": "Listar as chamadas capturadas de uma sessão de gravação",
+    "getRecordingCapture": "Obter uma chamada capturada completa",
+    "deduceRecordingRoutes": "Deduzir as rotas de uma sessão de gravação",
     "answerScenarioInput": "Responder a uma entrada de cenário",
     "arrangeScenario": "Organizar o cenário",
     "cancelRequest": "Cancelar um pedido",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Adicionado o design \"{{name}}\"",
       "modifiedDesign": "Modificado o design \"{{name}}\"",
       "deletedDesign": "Removido o design \"{{name}}\"",
+      "addedRecording": "Sessão de gravação \"{{name}}\" adicionada",
+      "modifiedRecording": "Sessão de gravação \"{{name}}\" modificada",
+      "deletedRecording": "Sessão de gravação \"{{name}}\" eliminada",
       "addedFolder": "Adicionada a pasta \"{{name}}\"",
       "modifiedFolder": "Modificada a pasta \"{{name}}\"",
       "deletedFolder": "Removida a pasta \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Movido o pedido \"{{name}}\"",
       "movedScenario": "Movido o cenário \"{{name}}\"",
       "movedDesign": "Movido o design \"{{name}}\"",
+      "movedRecording": "Sessão de gravação \"{{name}}\" movida",
       "movedFolder": "Movida a pasta \"{{name}}\"",
       "movedEnvironmentFolder": "Movida a pasta de ambiente \"{{name}}\"",
       "reorderedFolder": "Itens reordenados na pasta «{{name}}»",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Atualização da requisição \"{{name}}\"",
       "singleScenario": "Atualização do cenário \"{{name}}\"",
       "singleDesign": "Atualização do design \"{{name}}\"",
+      "singleRecording": "Atualização da sessão de gravação \"{{name}}\"",
       "singleFolder": "Atualização da pasta \"{{name}}\"",
       "singleEnvironmentFolder": "Atualização da pasta de ambiente \"{{name}}\"",
       "singleFileFormatVersion": "Mudança para o formato de ficheiro {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} cenários",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} designs",
+      "countRecording_one": "{{count}} sessão de gravação",
+      "countRecording_other": "{{count}} sessões de gravação",
       "countFolder_one": "{{count}} pasta",
       "countFolder_other": "{{count}} pastas",
       "countEnvironmentFolder_one": "{{count}} pasta de ambiente",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Envia um relatório anonimizado quando o Restorm falha, para que o problema possa ser corrigido. Os relatórios são limpos de URL, tokens, corpos de pedido e dados pessoais antes de saírem do seu computador. Incluído no plano gratuito; um plano pago permite desativá-lo. Todos os detalhes: https://restorm.app/privacy",
     "telemetryTitle": "Enviar estatísticas de utilização",
     "telemetryDescription": "Envia estatísticas anónimas sobre as funcionalidades utilizadas, para orientar o que será desenvolvido a seguir. Desativado por predefinição e nunca ativado sem o seu consentimento explícito. Não contém dados de pedidos, nem URL, nem dados pessoais. Todos os detalhes: https://restorm.app/privacy",
+    "geolocationTitle": "Partilhar a sua localização com o navegador integrado",
+    "geolocationDescription": "Obtém a sua posição aproximada (a partir do serviço de localização do sistema ou, em alternativa, do seu endereço IP) e transmite-a apenas ao mini navegador integrado, para que os sites que utilizam geolocalização funcionem numa sessão de gravação. Nada é enviado ao Restorm.",
+    "geolocationConsent": {"title": "Partilhar a sua localização com o navegador integrado?", "body": "O Restorm pedirá a sua posição ao serviço de localização do seu sistema (e, se este não a tiver, irá estimá-la a partir do seu endereço IP através de um serviço de terceiros) para a transmitir apenas às páginas abertas no mini navegador integrado. Em nenhum outro caso a sua posição sai do seu computador, e é esquecida assim que desativar esta opção.", "accept": "Permitir", "decline": "Agora não"},
     "crashReportsLockedLabel": "Alterável a partir do plano Pro. No plano gratuito, os relatórios de falha são necessários para manter a qualidade.",
     "consentToast": {
       "title": "Ajude-nos a melhorar o Restorm",

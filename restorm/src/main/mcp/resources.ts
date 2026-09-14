@@ -63,9 +63,10 @@ export function registerResources(mcp: McpService): void {
     {
       title: 'Project tree',
       description:
-        'Full hierarchical id + name tree of every folder, env-folder, scenario and request in the ' +
-        'project. Each node carries a `kind` ("folder" | "env-folder" | "scenario" | "request"); a ' +
-        'scenario is a folder-like container, so it nests its child items. Request leaves carry their ' +
+        'Full hierarchical id + name tree of every folder, env-folder, scenario, recording session and ' +
+        'request in the project. Each node carries a `kind` ("folder" | "env-folder" | "scenario" | ' +
+        '"recording" | "request"); a scenario or a recording session is a folder-like container, so it ' +
+        'nests its child items (a recording\'s children are its deduced routes). Request leaves carry their ' +
         '`protocol` so the client can decide whether to fetch the full payload via `get_request` / ' +
         '`restorm://request/{id}`.',
       mimeType: 'application/json'

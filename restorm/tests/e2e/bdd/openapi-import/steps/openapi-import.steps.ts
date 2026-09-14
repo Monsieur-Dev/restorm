@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import type { ElectronApplication, Page } from '@playwright/test'
 import { test, expect, OPENAPI_IMPORT_TEMP_DIR, configureNextSaveFileDialogForE2E } from '../../fixtures/openapi-import.fixture'
@@ -77,4 +77,48 @@ Then('the environment folder {string} should expose a sub-folder named {string}'
   }
 
   await expect(sidebar.getByText(child, { exact: true }).first()).toBeVisible({ timeout: 5000 })
+})
+
+// ── Paste pretty-print ────────────────────────────────────────────────
+
+function requirePage(): Page {
+  if (!page) throw new Error('app must be launched before driving UI steps')
+  return page
+}
+
+When('I paste the minified OpenAPI 3.0 Petstore spec into the import source field', async () => {
+  const p = requirePage()
+  const minified = JSON.stringify(JSON.parse(readFileSync(join(FIXTURES_DIR, 'petstore-3.0.json'), 'utf8')) as unknown)
+  expect(minified.includes('\n')).toBe(false)
+  await p.keyboard.press('Control+I')
+  const importModal = p.locator('[data-testid="import-modal"]')
+  await expect(importModal).toBeVisible({ timeout: 5000 })
+  const input = importModal.locator('[data-testid="source-input"] textarea, [data-testid="source-input"] input, [data-testid="source-input"]').first()
+  await input.focus()
+  // A real clipboard paste: a ClipboardEvent carrying the text, dispatched on
+  // the focused field (the OS clipboard is not scriptable under xvfb).
+  await input.evaluate((el: Element, text: string) => {
+    const dt = new DataTransfer()
+    dt.setData('text/plain', text)
+    el.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: dt }))
+  }, minified)
+})
+
+Then('the import source opens in the editor on several lines', async () => {
+  const p = requirePage()
+  const editor = p.locator('[data-testid="source-input-editor"]')
+  await expect(editor).toBeVisible({ timeout: 5000 })
+  // At least four rendered lines: the one-line paste was re-indented.
+  await expect(editor.locator('.view-line').nth(3)).toBeVisible({ timeout: 5000 })
+})
+
+Then("the import preview lists the spec's routes", async () => {
+  const p = requirePage()
+  await expect(p.locator('[data-testid="import-modal"] .import-preview-section')).toBeVisible({ timeout: 10000 })
+})
+
+Then('the import source editor has the keyboard focus', async () => {
+  const p = requirePage()
+  // The paste grew the single-line field into the editor: the focus followed.
+  await expect.poll(() => p.evaluate(() => document.activeElement?.closest('[data-testid="source-input-editor"]') !== null), { timeout: 5000 }).toBe(true)
 })

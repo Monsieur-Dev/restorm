@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API 디자인"
+        "design": "API 디자인",
+        "recording": "기록 세션"
       },
       "cut": "잘라내기",
       "copy": "복사",
@@ -443,6 +444,7 @@
         "requestBodyFile": "파일"
       },
       "loading": "요청을 보내는 중...",
+      "body": { "download": "다운로드", "binary": "바이너리 콘텐츠({{type}}) — 저장하려면 다운로드를 사용하십시오", "unknownType": "알 수 없는 유형" },
       "noResponseBody": "응답 본문이 없습니다 — 자세한 내용은 Infos 참조",
       "noResponse": "요청을 실행하려면 보내기를 클릭하세요",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "설정",
       "tag": "태그",
       "scenario": "시나리오",
-      "design": "API 디자인"
+      "design": "API 디자인",
+      "recording": "기록 세션"
     },
     "tooltip": {
       "noDetails": "표시할 세부 정보가 없습니다",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "기록별 보관 항목 수",
     "maxEntriesDescription": "요청의 호출 기록과 시나리오의 실행 기록이 각각 보관하는 항목 수입니다. 고정된 항목은 이 값과 관계없이 항상 보관됩니다. 홈 화면의 최근 활동 목록에는 영향을 주지 않습니다."
   },
+  "recording": {
+    "title": "기록 세션",
+    "maxCapturesTitle": "세션별로 보관하는 기록된 호출 수",
+    "maxCapturesDescription": "기록 세션이 메모리에 보관하는 기록된 호출의 수입니다. 상한에 도달하면 가장 오래된 호출부터 삭제됩니다. 기록 내용은 프로젝트 파일에 저장되지 않습니다.",
+    "newSessionName": "새 기록 세션",
+    "node": {
+      "browser": "브라우저",
+      "captures": "캡처",
+      "routes": "경로"
+    },
+    "tab": {
+      "browserTitle": "브라우저: {{name}}",
+      "capturesTitle": "캡처: {{name}}",
+      "routesTitle": "경로: {{name}}"
+    },
+    "placeholder": {
+      "config": "세션 설정(페이지 URL, 프로토콜, 허용 목록과 차단 목록)이 여기에 표시됩니다.",
+      "browser": "기록 브라우저가 여기에 표시됩니다.",
+      "captures": "아직 기록된 호출이 없습니다. 세션 설정에서 기록을 시작하면 페이지의 호출이 여기에 표시됩니다.",
+      "routes": "아직 추론된 경로가 없습니다. 호출을 기록한 뒤 캡처에서 경로를 추론하십시오."
+    },
+    "config": {
+      "subtitle": "Restorm이 페이지의 API 호출을 감지하는 동안 페이지를 탐색하십시오. 프로젝트에는 아래 설정만 저장되며, 기록된 호출은 저장되지 않습니다.",
+      "url": "감지할 페이지",
+      "urlPlaceholder": "https://example.com, http://localhost:3000 또는 file:///path/page.html",
+      "urlInvalid": "http(s) 또는 file URL을 입력하십시오.",
+      "urlRequired": "기록을 활성화하려면 페이지 URL을 입력하십시오.",
+      "record": "기록 시작",
+      "stop": "기록 중지",
+      "protocols": "기록할 프로토콜",
+      "whitelist": "허용 목록",
+      "blacklist": "차단 목록",
+      "addPattern": "패턴 추가",
+      "removePattern": "이 패턴 제거",
+      "invalidPattern": "이 패턴은 유효한 정규 표현식이 아닙니다.",
+      "patternPlaceholder": "정규 표현식, 예: ^https://api\\.example\\.com/",
+      "noPattern": "패턴 없음 — 모두 통과합니다.",
+      "filtersHint": "호출은 허용 목록의 항목 중 하나 이상과 일치하고(또는 목록이 비어 있고) 차단 목록의 어떤 항목과도 일치하지 않을 때 보관됩니다. 변경 사항은 다음 호출부터 적용됩니다."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "기록 일시 중지",
+      "resume": "기록 계속",
+      "stop": "기록 중지"
+    },
+    "captures": {
+      "empty": "아직 기록된 호출이 없습니다. 세션 설정에서 기록을 시작하면 페이지의 호출이 실시간으로 여기에 표시됩니다.",
+      "filterPlaceholder": "호출 필터링(정규 표현식)",
+      "live": "기록 중",
+      "clearRun": "이 기록의 호출 삭제",
+      "selectOne": "호출을 선택하면 응답을 볼 수 있습니다.",
+      "loadingDetail": "호출을 불러오는 중…",
+      "addToWhitelist": "허용 목록에 추가…",
+      "addToBlacklist": "차단 목록에 추가…",
+      "patternLabel": "패턴(정규 표현식)",
+      "add": "추가",
+      "addAndApply": "추가하고 기록된 호출에 적용",
+      "applyConfirm": "이미 기록된 호출에 목록을 적용하면 이제 거부되는 모든 호출이 제거됩니다. 이 작업은 취소할 수 없습니다.",
+      "applyConfirmOk": "적용 및 제거",
+      "deduce": "경로 추론",
+      "deduceWhileRecording": "경로를 추론하기 전에 기록을 중지하십시오.",
+      "deduceUnavailable": "경로 추론은 아직 사용할 수 없습니다.",
+      "deduceLocked": "경로 추론은 Pro 플랜부터 사용할 수 있습니다."
+    },
+    "routes": {
+      "empty": "아직 추론된 경로가 없습니다. 호출을 기록한 뒤 캡처 아래의 “경로 추론”을 사용하십시오. 요청은 여기와 사이드바의 경로 행 아래에 표시됩니다.",
+      "proCallout": "기록된 호출에서 경로를 추론하는 기능은 Pro 플랜부터 사용할 수 있습니다. 기록은 모두에게 열려 있습니다.",
+      "subscribe": "플랜 보기",
+      "count_one": "추론된 요청 {{count}}개",
+      "count_other": "추론된 요청 {{count}}개",
+      "hint": "추론된 요청은 일반 요청입니다. 자유롭게 편집하십시오. 다시 추론하면 변경 사항은 유지되고 새 경로만 추가됩니다."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 호출 로그 보존",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "녹화 세션 목록 표시",
+    "createRecordingSession": "녹화 세션 만들기",
+    "updateRecordingSession": "녹화 세션 업데이트",
+    "setRecordingFilters": "녹화 세션의 URL 필터 설정",
+    "startRecording": "세션 녹화 시작",
+    "stopRecording": "세션 녹화 중지",
+    "getRecordingStatus": "녹화 세션 상태 가져오기",
+    "listRecordingCaptures": "녹화 세션에서 캡처된 호출 목록 표시",
+    "getRecordingCapture": "캡처된 호출 하나를 전체 가져오기",
+    "deduceRecordingRoutes": "녹화 세션의 경로 추론",
     "answerScenarioInput": "시나리오 입력에 응답",
     "arrangeScenario": "시나리오 자동 정렬",
     "cancelRequest": "요청 취소",
@@ -3209,6 +3300,9 @@
       "addedDesign": "디자인 \"{{name}}\" 추가됨",
       "modifiedDesign": "디자인 \"{{name}}\" 수정됨",
       "deletedDesign": "디자인 \"{{name}}\" 삭제됨",
+      "addedRecording": "기록 세션 \"{{name}}\"을(를) 추가했습니다",
+      "modifiedRecording": "기록 세션 \"{{name}}\"을(를) 수정했습니다",
+      "deletedRecording": "기록 세션 \"{{name}}\"을(를) 삭제했습니다",
       "addedFolder": "폴더 \"{{name}}\" 추가됨",
       "modifiedFolder": "폴더 \"{{name}}\" 수정됨",
       "deletedFolder": "폴더 \"{{name}}\" 삭제됨",
@@ -3218,6 +3312,7 @@
       "movedRequest": "요청 \"{{name}}\"을(를) 이동",
       "movedScenario": "시나리오 \"{{name}}\"을(를) 이동",
       "movedDesign": "디자인 \"{{name}}\"을(를) 이동",
+      "movedRecording": "기록 세션 \"{{name}}\"을(를) 이동했습니다",
       "movedFolder": "폴더 \"{{name}}\"을(를) 이동",
       "movedEnvironmentFolder": "환경 폴더 \"{{name}}\"을(를) 이동",
       "reorderedFolder": "폴더 \"{{name}}\"의 항목 순서를 변경했습니다",
@@ -3229,6 +3324,7 @@
       "singleRequest": "요청 \"{{name}}\" 업데이트",
       "singleScenario": "시나리오 \"{{name}}\" 업데이트",
       "singleDesign": "디자인 \"{{name}}\" 업데이트",
+      "singleRecording": "기록 세션 \"{{name}}\" 업데이트",
       "singleFolder": "폴더 \"{{name}}\" 업데이트",
       "singleEnvironmentFolder": "환경 폴더 \"{{name}}\" 업데이트",
       "singleFileFormatVersion": "파일 형식 {{name}}(으)로 전환",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "시나리오 {{count}}개",
       "countDesign_one": "디자인 {{count}}개",
       "countDesign_other": "디자인 {{count}}개",
+      "countRecording_one": "기록 세션 {{count}}개",
+      "countRecording_other": "기록 세션 {{count}}개",
       "countFolder_one": "폴더 {{count}}개",
       "countFolder_other": "폴더 {{count}}개",
       "countEnvironmentFolder_one": "환경 폴더 {{count}}개",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "Restorm이 충돌할 때 익명화된 보고서를 보내 문제를 고칠 수 있도록 합니다. 보고서는 기기를 떠나기 전에 URL, 토큰, 요청 본문, 개인정보가 제거됩니다. 무료 요금제에 포함되며, 유료 요금제에서는 끌 수 있습니다. 자세한 내용: https://restorm.app/privacy",
     "telemetryTitle": "사용 통계 보내기",
     "telemetryDescription": "어떤 기능이 사용되는지에 대한 익명 통계를 보내 다음 개발 방향을 정하는 데 활용합니다. 기본적으로 꺼져 있으며 명시적인 동의 없이는 절대 켜지지 않습니다. 요청 데이터, URL, 개인정보를 포함하지 않습니다. 자세한 내용: https://restorm.app/privacy",
+    "geolocationTitle": "내장 브라우저와 위치 공유",
+    "geolocationDescription": "대략적인 위치를 확인하고(시스템 위치 서비스에서, 없으면 IP 주소로 대체) 내장 미니 웹 브라우저에만 전달하여, 위치 정보를 사용하는 사이트가 기록 세션에서 작동하도록 합니다. Restorm으로는 아무것도 전송되지 않습니다.",
+    "geolocationConsent": {"title": "내장 브라우저와 위치를 공유하시겠습니까?", "body": "Restorm이 시스템 위치 서비스에 현재 위치를 요청하고(위치 정보가 없으면 제3자 조회 서비스를 통해 IP 주소로 추정), 내장 미니 웹 브라우저에서 열린 페이지에만 전달합니다. 그 외의 경우 위치 정보는 컴퓨터 밖으로 나가지 않으며, 이 옵션을 끄는 즉시 삭제됩니다.", "accept": "허용", "decline": "나중에"},
     "crashReportsLockedLabel": "Pro 요금제부터 변경할 수 있습니다. 무료 요금제에서는 품질 유지를 위해 충돌 보고서가 필요합니다.",
     "consentToast": {
       "title": "Restorm 개선에 참여해 주세요",

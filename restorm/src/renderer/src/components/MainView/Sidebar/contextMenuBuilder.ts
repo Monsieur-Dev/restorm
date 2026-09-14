@@ -6,6 +6,7 @@ import React from 'react'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { RegistryBadge } from '../../common/RegistryBadge'
 import { parseDesignSectionRowId, parseDesignEntityRowId } from '../../../../../shared/design/designSections'
+import { parseRecordingNodeRowId } from '../../../../../shared/recording/recordingSections'
 
 export interface SidebarContextMenuItem {
   id: string
@@ -69,6 +70,7 @@ export type AddChildKind =
   | 'trpc'
   | 'scenario'
   | 'design'
+  | 'recording'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
 
@@ -103,6 +105,8 @@ export interface BuildContextMenuOptions {
   /** Flags API-design rows — routed through the design branch (no Add
    * submenu, plus the explicit split-panel escape hatch). */
   isItemDesign?: (itemId: string) => boolean
+  /** Whether a row is a recording session (own menu, no Add submenu). */
+  isItemRecording?: (itemId: string) => boolean
   /** `true` when the folder carries an imported ApiDocumentation —
    * drives the "Create a design from this API" prefill entry. */
   canCreateDesignFromDoc?: (itemId: string) => boolean
@@ -272,10 +276,17 @@ const addEntryToMenuItem = (
  * Structure: folder / scenario / auth, a separator, the HTTP block
  * (methods + mock server) inline, a separator, then one nested submenu
  * per protocol. */
+export interface AddSubmenuOptions {
+  /** A recording session may live at the root, in a folder or in an env
+   * folder — never inside a scenario, whose Add menu leaves the entry out. */
+  allowRecording?: boolean
+}
+
 export const buildAddSubmenu = (
   parentId: string,
   t: TranslateFunction,
-  onAddChildItem: AddChildHandler
+  onAddChildItem: AddChildHandler,
+  submenuOptions: AddSubmenuOptions = {}
 ): SidebarContextMenuItem[] => [
   {
     id: `add-folder-${parentId}`,
@@ -298,6 +309,13 @@ export const buildAddSubmenu = (
     'data-testid': 'sidebar-context-menu-add-design',
     onClick: () => { onAddChildItem(parentId, 'design') }
   },
+  ...(submenuOptions.allowRecording === false ? [] : [{
+    id: `add-recording-${parentId}`,
+    label: t('sidebar.contextMenu.add.recording'),
+    icon: React.createElement(RegistryBadge, { badgeId: 'recording' }),
+    'data-testid': 'sidebar-context-menu-add-recording',
+    onClick: () => { onAddChildItem(parentId, 'recording') }
+  }]),
   {
     id: `add-auth-${parentId}`,
     label: t('sidebar.contextMenu.add.auth'),
@@ -437,7 +455,7 @@ const clipboardEntries = (
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario, isItemDesign, onOpenInSplit, canCreateDesignFromDoc, onCreateDesignFromDoc } = options
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, isItemScenario, isItemDesign, isItemRecording, onOpenInSplit, canCreateDesignFromDoc, onCreateDesignFromDoc } = options
   const itemId = item.id
 
   // A design's virtual section rows carry no menu of their own: every
@@ -451,6 +469,49 @@ export const buildContextMenuForItem = (
   // `attachContextMenus` from clobbering it with the generic item menu.
   if (parseDesignEntityRowId(itemId) !== null) {
     return []
+  }
+
+  // A recording session's virtual node rows (browser / captures / routes)
+  // carry no menu: every action belongs to the session row or to the node's
+  // own tab (the captures trash lives there).
+  if (parseRecordingNodeRowId(itemId) !== null) {
+    return []
+  }
+
+  // A recording session: no Add submenu (its children are deduced, never
+  // authored), no paste into it; open-in-split, cut/copy, clone, rename, delete.
+  if (isItemRecording?.(itemId) === true) {
+    return [
+      ...(onOpenInSplit !== undefined ? [{
+        id: 'open-in-split',
+        label: t('sidebar.contextMenu.openInSplit'),
+        icon: 'split-horizontal',
+        onClick: () => { onOpenInSplit(itemId) }
+      }, { id: 'sep-split', isSeparator: true as const, label: '' }] : []),
+      ...clipboardEntries(itemId, t, onCutItem, onCopyItem, undefined, undefined),
+      {
+        id: 'clone-item',
+        label: t('sidebar.contextMenu.clone'),
+        icon: 'copy',
+        shortcut: 'Ctrl+D',
+        onClick: () => { onCloneItem(itemId) }
+      },
+      {
+        id: 'rename-item',
+        label: t('sidebar.contextMenu.rename'),
+        icon: 'edit',
+        shortcut: 'F2',
+        onClick: () => { onRenameItem(itemId) }
+      },
+      { id: 'sep-item', isSeparator: true, label: '' },
+      {
+        id: 'delete-item',
+        label: t('sidebar.contextMenu.delete'),
+        icon: 'trash',
+        shortcut: 'Suppr',
+        onClick: () => { onDeleteItem(itemId) }
+      }
+    ]
   }
 
   if (isItemDesign?.(itemId) === true) {
@@ -515,7 +576,7 @@ export const buildContextMenuForItem = (
         id: 'add-child',
         label: t('sidebar.contextMenu.add.title'),
         icon: 'add',
-        items: buildAddSubmenu(itemId, t, onAddChildItem)
+        items: buildAddSubmenu(itemId, t, onAddChildItem, { allowRecording: false })
       },
       { id: 'sep-add', isSeparator: true, label: '' },
       ...clipboardEntries(itemId, t, onCutItem, onCopyItem, onPasteItem, canPaste),
@@ -797,6 +858,8 @@ export interface AttachContextMenusOptions {
   /** Flags API-design rows — routed through the design branch (no Add
    * submenu, plus the explicit split-panel escape hatch). */
   isItemDesign?: (itemId: string) => boolean
+  /** Flags recording-session rows (own menu, no Add submenu). */
+  isItemRecording?: (itemId: string) => boolean
   /** `true` when the folder carries an imported ApiDocumentation —
    * drives the "Create a design from this API" prefill entry. */
   canCreateDesignFromDoc?: (itemId: string) => boolean

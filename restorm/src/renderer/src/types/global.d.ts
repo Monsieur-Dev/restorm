@@ -15,6 +15,7 @@ import type {
   GitState
 } from 'electron-core-ui/types'
 import type { ResponseHistoryDetail, ResponseHistoryEntry } from '../../../shared/types/collections'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus, RecordingHistoryPlanEntry } from '../../../shared/types/recordingCapture'
 import type { CloudTemplate, CloudTemplatesView } from '../../../shared/types/codegenTemplates'
 import type { DesignIssueView } from '../../../shared/design/describeDesignIssue'
 import type { AuthState, CheckoutResult, PortalResult } from '../../../shared/auth/authState'
@@ -272,6 +273,26 @@ declare global {
         onCodeSnippetsUpdated: (callback: (result: CodeSnippetsResult) => void) => (() => void)
         onAvailableVariables: (callback: (result: AvailableVariablesResult) => void) => (() => void)
         clearAll: () => Promise<void>
+      }
+      recording: {
+        start: (sessionId: string, tabId: string, url: string, config: RecordingFilterConfig) => Promise<{ ok: true; status: RecordingStatus } | { ok: false; error: string }>
+        stop: (sessionId: string) => Promise<RecordingStatus>
+        setPaused: (sessionId: string, paused: boolean) => Promise<RecordingStatus>
+        status: (sessionId: string) => Promise<RecordingStatus>
+        list: (sessionId: string) => Promise<RecordedCallSummary[]>
+        runs: (sessionId: string) => Promise<RecordingRun[]>
+        get: (sessionId: string, captureId: string) => Promise<RecordedCallDetail | null>
+        clearRun: (sessionId: string, runId: string) => Promise<{ removed: string[] }>
+        remove: (sessionId: string, ids: string[]) => Promise<{ removed: string[] }>
+        setFilters: (sessionId: string, config: RecordingFilterConfig) => Promise<{ ok: boolean }>
+        applyFilters: (sessionId: string) => Promise<{ removed: string[] }>
+        materializeHistory: (sessionId: string, plan: RecordingHistoryPlanEntry[]) => Promise<{ stored: number }>
+        onCaptureAdded: (callback: (summary: RecordedCallSummary) => void) => (() => void)
+        onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void) => (() => void)
+        onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void) => (() => void)
+        onRunChanged: (callback: (run: RecordingRun) => void) => (() => void)
+        onRunRemoved: (callback: (payload: { sessionId: string; runId: string }) => void) => (() => void)
+        onStatusChanged: (callback: (status: RecordingStatus) => void) => (() => void)
       }
       miniBrowser: {
         create: (tabId: string, initialUrl?: string) => Promise<{ ok: boolean }>
@@ -578,7 +599,7 @@ declare global {
         getMcpLogs: () => Promise<unknown[]>
         onMcpLogsChanged: (callback: () => void) => () => void
         clearMcpLogs: () => Promise<void>
-        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }) => void
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }) => void
         pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
         pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void
         pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
@@ -602,14 +623,17 @@ declare global {
         onScenarioToast: (callback: (payload: { title: string; message: string; level: string; durationMs?: number; nodeId: string }) => void) => () => void
         onScenarioEngineEvent: (cb: (event: unknown) => void) => () => void
         pushMcpActiveStateBootstrap: (payload: {
-          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void) => () => void
         replyMcpOpenTab: (payload: { requestId: string; opened: boolean }) => void
-        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
+        onMcpStartRecording: (callback: (payload: { requestId: string; sessionId: string }) => void) => () => void
+        replyMcpStartRecording: (payload: { requestId: string; accepted: boolean }) => void
+        onMcpStopRecording: (callback: (payload: { sessionId: string }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
-        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void) => () => void
         onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
         onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
         onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void) => () => void

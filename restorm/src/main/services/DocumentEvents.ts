@@ -12,7 +12,7 @@ export interface DocumentEventPayload {
   /** Document ID */
   id: string
   /** Document type */
-  type: 'folder' | 'request' | 'environment' | 'design'
+  type: 'folder' | 'request' | 'environment' | 'design' | 'recording'
   /** Event source - where the change originated (default: 'user') */
   source?: EventSource
 }
@@ -46,7 +46,10 @@ export const DocumentEvents = {
   ENVIRONMENT_DELETED: 'document:environment:deleted',
   DESIGN_CREATED: 'document:design:created',
   DESIGN_UPDATED: 'document:design:updated',
-  DESIGN_DELETED: 'document:design:deleted'
+  DESIGN_DELETED: 'document:design:deleted',
+  RECORDING_CREATED: 'document:recording:created',
+  RECORDING_UPDATED: 'document:recording:updated',
+  RECORDING_DELETED: 'document:recording:deleted'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]

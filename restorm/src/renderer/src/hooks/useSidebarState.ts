@@ -7,7 +7,8 @@ import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
-import { isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
+import { useRecordingStatusVersion } from '../services/recordingStatusStore'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import type { DesignEntityActionHandler } from '../services/designSidebarNodes'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -68,6 +69,9 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // The transient client trees hang under each design's Clients row; bump the
   // item memo when they (re)generate or clear, so those rows appear/vanish.
   const designClientsVersion = useSyncExternalStore(subscribeDesignClients, getDesignClientsVersion)
+  // A recording session's row set depends on its live status (the browser row
+  // exists only while recording; the captures count rides the label).
+  const recordingStatusVersion = useRecordingStatusVersion()
 
   // Convert root folders to ListView items
   // updateCount is used as a dependency to force re-computation when items are mutated in-place
@@ -76,6 +80,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     // Read indirectly by `designToListViewItem` (the Clients rows) from the
     // client store — touch the version so the memo rebuilds when it changes.
     void designClientsVersion
+    void recordingStatusVersion
     // A design node's section rows freeze `i18n.t(...)` labels into their
     // titles — the first translated strings ever baked into sidebar rows —
     // so a language switch must rebuild them.
@@ -114,11 +119,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       // which goes through `folderItemToListViewItem` to get its expandable
       // scenario row. Keep the original `'items' in item` test (not `isAnyFolder`)
       // so a folder missing a `configuration` field still renders with children.
-      'items' in item && !isScenario(item)
+      'items' in item && !isScenario(item) && !isRecordingSession(item)
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, i18n.language, onDesignEntityAction])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds, designClientsVersion, recordingStatusVersion, i18n.language, onDesignEntityAction])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread
@@ -135,6 +140,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   const isItemDesign = useCallback((itemId: string): boolean => {
     const item = findItemById(rootItems, itemId)
     return item !== null && isApiDesign(item)
+  }, [rootItems])
+
+  const isItemRecording = useCallback((itemId: string): boolean => {
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isRecordingSession(item)
   }, [rootItems])
 
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
@@ -157,9 +167,10 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
       ...(onOpenInSplit !== undefined && { onOpenInSplit }),
       isItemScenario,
-      isItemDesign
+      isItemDesign,
+      isItemRecording
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit, isItemScenario, isItemDesign]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, onCutItem, onCopyItem, onPasteItem, canPaste, canRefreshFromSource, onRefreshFromSource, canCreateDesignFromDoc, onCreateDesignFromDoc, onOpenInSplit, isItemScenario, isItemDesign, isItemRecording]
   )
 
   return {

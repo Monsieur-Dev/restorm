@@ -319,7 +319,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Návrh API"
+        "design": "Návrh API",
+        "recording": "Relace nahrávání"
       },
       "cut": "Vyjmout",
       "copy": "Kopírovat",
@@ -446,6 +447,7 @@
         "requestBodyFile": "Soubor"
       },
       "loading": "Odesílání požadavku...",
+      "body": { "download": "Stáhnout", "binary": "Binární obsah ({{type}}) — uložte jej pomocí tlačítka Stáhnout", "unknownType": "neznámý typ" },
       "noResponseBody": "Bez těla odpovědi — podrobnosti viz Infos",
       "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
       "history": {
@@ -754,7 +756,8 @@
       "settings": "Nastavení",
       "tag": "Štítky",
       "scenario": "Scénáře",
-      "design": "Návrhy API"
+      "design": "Návrhy API",
+      "recording": "Relace nahrávání"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
@@ -2812,6 +2815,84 @@
     "maxEntriesTitle": "Počet záznamů uchovávaných v historii",
     "maxEntriesDescription": "Kolik záznamů uchovává historie volání požadavku a historie spuštění scénáře. Připnuté záznamy se uchovávají vždy, bez ohledu na tuto hodnotu. Seznamů nedávné aktivity na úvodní obrazovce se to netýká."
   },
+  "recording": {
+    "title": "Relace nahrávání",
+    "maxCapturesTitle": "Zachycená volání uchovávaná na relaci",
+    "maxCapturesDescription": "Kolik zachycených volání relace nahrávání uchovává v paměti. Po dosažení limitu jsou nejstarší volání odstraněna jako první. Zachycená data se nikdy neukládají do souboru projektu.",
+    "newSessionName": "Nová relace nahrávání",
+    "node": {
+      "browser": "Prohlížeč",
+      "captures": "Zachycená volání",
+      "routes": "Trasy"
+    },
+    "tab": {
+      "browserTitle": "Prohlížeč: {{name}}",
+      "capturesTitle": "Zachycená volání: {{name}}",
+      "routesTitle": "Trasy: {{name}}"
+    },
+    "placeholder": {
+      "config": "Nastavení relace (URL stránky, protokoly, bílá a černá listina) se zobrazí zde.",
+      "browser": "Prohlížeč pro nahrávání se zobrazí zde.",
+      "captures": "Zatím nebylo zachyceno žádné volání. Spusťte nahrávání v nastavení relace a volání stránky se zobrazí zde.",
+      "routes": "Zatím nebyla odvozena žádná trasa. Nahrajte volání a poté odvoďte trasy ze zachycených volání."
+    },
+    "config": {
+      "subtitle": "Procházejte stránku, zatímco Restorm naslouchá jejím volání API. S projektem se ukládají pouze níže uvedená nastavení — nikdy zachycená volání.",
+      "url": "Sledovaná stránka",
+      "urlPlaceholder": "https://priklad.cz, http://localhost:3000 nebo file:///cesta/stranka.html",
+      "urlInvalid": "Zadejte URL http(s) nebo file.",
+      "urlRequired": "Zadejte URL stránky, aby bylo možné nahrávat.",
+      "record": "Spustit nahrávání",
+      "stop": "Zastavit nahrávání",
+      "protocols": "Zachytávané protokoly",
+      "whitelist": "Bílá listina",
+      "blacklist": "Černá listina",
+      "addPattern": "Přidat vzor",
+      "removePattern": "Odebrat tento vzor",
+      "invalidPattern": "Tento vzor není platný regulární výraz.",
+      "patternPlaceholder": "Regulární výraz, např. ^https://api\\.priklad\\.cz/",
+      "noPattern": "Žádný vzor — vše projde.",
+      "filtersHint": "Volání se zachová, pokud odpovídá alespoň jedné položce bílé listiny (nebo je-li prázdná) a žádné položce černé listiny. Změny se uplatní na další volání."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pozastavit nahrávání",
+      "resume": "Pokračovat v nahrávání",
+      "stop": "Zastavit nahrávání"
+    },
+    "captures": {
+      "empty": "Zatím nebylo zachyceno žádné volání. Spusťte nahrávání v nastavení relace a volání stránky se zde budou zobrazovat průběžně.",
+      "filterPlaceholder": "Filtrovat volání (regulární výraz)",
+      "live": "probíhá",
+      "clearRun": "Odstranit volání tohoto nahrávání",
+      "selectOne": "Vyberte volání pro zobrazení jeho odpovědi.",
+      "loadingDetail": "Načítání volání…",
+      "addToWhitelist": "Přidat na bílou listinu…",
+      "addToBlacklist": "Přidat na černou listinu…",
+      "patternLabel": "Vzor (regulární výraz)",
+      "add": "Přidat",
+      "addAndApply": "Přidat a použít na zachycená volání",
+      "applyConfirm": "Použití listin na již zachycená volání odstraní všechna, která nyní odmítají. Tuto akci nelze vrátit zpět.",
+      "applyConfirmOk": "Použít a odstranit",
+      "deduce": "Odvodit trasy",
+      "deduceWhileRecording": "Před odvozením tras zastavte nahrávání.",
+      "deduceUnavailable": "Odvozování tras zatím není k dispozici.",
+      "deduceLocked": "Odvozování tras je dostupné od tarifu Pro."
+    },
+    "routes": {
+      "empty": "Zatím nebyla odvozena žádná trasa. Nahrajte volání a poté použijte „Odvodit trasy“ pod zachycenými voláními — požadavky se zobrazí zde a pod řádkem Trasy v postranním panelu.",
+      "proCallout": "Odvozování tras ze zachycených volání je dostupné od tarifu Pro. Nahrávání zůstává otevřené všem.",
+      "subscribe": "Zobrazit tarify",
+      "count_one": "{{count}} odvozený požadavek",
+      "count_other": "{{count}} odvozených požadavků",
+      "hint": "Odvozené požadavky jsou běžné požadavky: upravujte je libovolně; nové odvození zachová vaše změny a přidá pouze nové trasy."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Uchování protokolu volání MCP",
@@ -2852,6 +2933,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Zobrazit relace nahrávání",
+    "createRecordingSession": "Vytvořit relaci nahrávání",
+    "updateRecordingSession": "Aktualizovat relaci nahrávání",
+    "setRecordingFilters": "Nastavit filtry URL relace nahrávání",
+    "startRecording": "Spustit nahrávání relace",
+    "stopRecording": "Zastavit nahrávání relace",
+    "getRecordingStatus": "Získat stav relace nahrávání",
+    "listRecordingCaptures": "Zobrazit zachycená volání relace nahrávání",
+    "getRecordingCapture": "Získat jedno zachycené volání v plném rozsahu",
+    "deduceRecordingRoutes": "Odvodit trasy relace nahrávání",
     "answerScenarioInput": "Odpovědět na vstup scénáře",
     "arrangeScenario": "Automaticky uspořádat scénář",
     "cancelRequest": "Zrušit požadavek",
@@ -3212,6 +3303,9 @@
       "addedDesign": "Přidán návrh API „{{name}}“",
       "modifiedDesign": "Upraven návrh API „{{name}}“",
       "deletedDesign": "Odstraněn návrh API „{{name}}“",
+      "addedRecording": "Přidána relace nahrávání „{{name}}“",
+      "modifiedRecording": "Upravena relace nahrávání „{{name}}“",
+      "deletedRecording": "Odstraněna relace nahrávání „{{name}}“",
       "addedFolder": "Přidána složka „{{name}}“",
       "modifiedFolder": "Upravena složka „{{name}}“",
       "deletedFolder": "Odstraněna složka „{{name}}“",
@@ -3221,6 +3315,7 @@
       "movedRequest": "Přesunut požadavek \"{{name}}\"",
       "movedScenario": "Přesunut scénář \"{{name}}\"",
       "movedDesign": "Přesunut návrh API \"{{name}}\"",
+      "movedRecording": "Přesunuta relace nahrávání „{{name}}“",
       "movedFolder": "Přesunuta složka \"{{name}}\"",
       "movedEnvironmentFolder": "Přesunuta složka prostředí \"{{name}}\"",
       "reorderedFolder": "Změněno pořadí položek ve složce „{{name}}“",
@@ -3232,6 +3327,7 @@
       "singleRequest": "Aktualizace požadavku „{{name}}“",
       "singleScenario": "Aktualizace scénáře „{{name}}“",
       "singleDesign": "Aktualizace návrhu API „{{name}}“",
+      "singleRecording": "Aktualizace relace nahrávání „{{name}}“",
       "singleFolder": "Aktualizace složky „{{name}}“",
       "singleEnvironmentFolder": "Aktualizace složky prostředí „{{name}}“",
       "singleFileFormatVersion": "Přechod na formát souboru {{name}}",
@@ -3241,6 +3337,8 @@
       "countScenario_other": "{{count}} scénářů",
       "countDesign_one": "{{count}} návrh API",
       "countDesign_other": "{{count}} návrhů API",
+      "countRecording_one": "{{count}} relace nahrávání",
+      "countRecording_other": "{{count}} relací nahrávání",
       "countFolder_one": "{{count}} složka",
       "countFolder_other": "{{count}} složek",
       "countEnvironmentFolder_one": "{{count}} složka prostředí",
@@ -3334,6 +3432,9 @@
     "crashReportsDescription": "Odešle anonymizované hlášení, když Restorm spadne, aby bylo možné závadu opravit. Hlášení jsou před odesláním z vašeho počítače zbavena URL, tokenů, těl požadavků a osobních údajů. Součást bezplatného tarifu; placený tarif umožňuje odesílání vypnout. Úplné informace: https://restorm.app/privacy",
     "telemetryTitle": "Odesílat statistiky používání",
     "telemetryDescription": "Odesílá anonymní statistiky o tom, které funkce se používají, aby bylo možné nasměrovat další vývoj. Ve výchozím stavu vypnuto a nikdy zapnuto bez vašeho výslovného souhlasu. Neobsahuje data požadavků, URL ani osobní údaje. Úplné informace: https://restorm.app/privacy",
+    "geolocationTitle": "Sdílet vaši polohu s vestavěným prohlížečem",
+    "geolocationDescription": "Zjistí vaši přibližnou polohu (ze systémové služby určování polohy, případně z vaší IP adresy) a předá ji pouze vestavěnému mini-prohlížeči, aby weby využívající geolokaci fungovaly v relaci nahrávání. Společnosti Restorm se nic neodesílá.",
+    "geolocationConsent": {"title": "Sdílet vaši polohu s vestavěným prohlížečem?", "body": "Restorm požádá systémovou službu určování polohy o vaši polohu (a pokud ji nezná, odhadne ji z vaší IP adresy pomocí služby třetí strany) a předá ji pouze stránkám otevřeným ve vestavěném mini-prohlížeči. V žádném jiném případě vaše poloha neopustí váš počítač a je zapomenuta, jakmile tuto možnost vypnete.", "accept": "Povolit", "decline": "Teď ne"},
     "crashReportsLockedLabel": "Lze změnit od tarifu Pro. V bezplatném tarifu jsou zprávy o pádech nutné pro udržení kvality.",
     "consentToast": {
       "title": "Pomozte nám vylepšit Restorm",

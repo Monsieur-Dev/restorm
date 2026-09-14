@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Optagelsessession"
       },
       "cut": "Klip",
       "copy": "Kopiér",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Fil"
       },
       "loading": "Sender anmodning...",
+      "body": { "download": "Download", "binary": "Binært indhold ({{type}}) — brug Download for at gemme det", "unknownType": "ukendt type" },
       "noResponseBody": "Ingen svar-body — se Infos for detaljer",
       "noResponse": "Klik på Send for at udføre anmodningen",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Indstillinger",
       "tag": "Tags",
       "scenario": "Scenarier",
-      "design": "API-designs"
+      "design": "API-designs",
+      "recording": "Optagelsessessioner"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgængelige",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Poster gemt pr. historik",
     "maxEntriesDescription": "Hvor mange poster opkaldshistorikken for en anmodning og kørselshistorikken for et scenarie hver gemmer. Fastgjorte poster gemmes altid, uanset denne værdi. Listerne over seneste aktivitet på startskærmen påvirkes ikke."
   },
+  "recording": {
+    "title": "Optagelsessessioner",
+    "maxCapturesTitle": "Opsamlede kald gemt pr. session",
+    "maxCapturesDescription": "Hvor mange opsamlede kald en optagelsessession holder i hukommelsen. Når grænsen er nået, fjernes de ældste kald først. Optagelser gemmes aldrig i projektfilen.",
+    "newSessionName": "Ny optagelsessession",
+    "node": {
+      "browser": "Browser",
+      "captures": "Optagelser",
+      "routes": "Ruter"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Optagelser: {{name}}",
+      "routesTitle": "Ruter: {{name}}"
+    },
+    "placeholder": {
+      "config": "Sessionens indstillinger (sidens URL, protokoller, hvid- og sortliste) vises her.",
+      "browser": "Optagelsesbrowseren vises her.",
+      "captures": "Ingen kald er opsamlet endnu. Start en optagelse fra sessionens indstillinger for at se sidens kald her.",
+      "routes": "Ingen ruter er udledt endnu. Optag nogle kald, og udled derefter ruterne fra optagelserne."
+    },
+    "config": {
+      "subtitle": "Naviger på siden, mens Restorm lytter til dens API-kald. Kun indstillingerne nedenfor gemmes med projektet — aldrig de opsamlede kald.",
+      "url": "Side der lyttes på",
+      "urlPlaceholder": "https://eksempel.dk, http://localhost:3000 eller file:///sti/side.html",
+      "urlInvalid": "Angiv en http(s)- eller file-URL.",
+      "urlRequired": "Angiv sidens URL for at kunne optage.",
+      "record": "Start optagelse",
+      "stop": "Stop optagelse",
+      "protocols": "Protokoller der opsamles",
+      "whitelist": "Hvidliste",
+      "blacklist": "Sortliste",
+      "addPattern": "Tilføj et mønster",
+      "removePattern": "Fjern dette mønster",
+      "invalidPattern": "Dette mønster er ikke et gyldigt regulært udtryk.",
+      "patternPlaceholder": "Regulært udtryk, f.eks. ^https://api\\.eksempel\\.dk/",
+      "noPattern": "Ingen mønstre — alt slipper igennem.",
+      "filtersHint": "Et kald beholdes, hvis det matcher mindst én post på hvidlisten (eller listen er tom) og ingen post på sortlisten. Ændringer gælder for de næste kald."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Sæt optagelsen på pause",
+      "resume": "Genoptag optagelsen",
+      "stop": "Stop optagelsen"
+    },
+    "captures": {
+      "empty": "Ingen kald er opsamlet endnu. Start en optagelse fra sessionens indstillinger for at se sidens kald dukke op her, efterhånden som de sker.",
+      "filterPlaceholder": "Filtrér kaldene (regulært udtryk)",
+      "live": "i gang",
+      "clearRun": "Slet kaldene fra denne optagelse",
+      "selectOne": "Vælg et kald for at se dets svar.",
+      "loadingDetail": "Indlæser kaldet…",
+      "addToWhitelist": "Føj til hvidlisten…",
+      "addToBlacklist": "Føj til sortlisten…",
+      "patternLabel": "Mønster (regulært udtryk)",
+      "add": "Tilføj",
+      "addAndApply": "Tilføj og anvend på de opsamlede kald",
+      "applyConfirm": "At anvende listerne på de allerede opsamlede kald fjerner alle dem, de nu afviser. Det kan ikke fortrydes.",
+      "applyConfirmOk": "Anvend og fjern",
+      "deduce": "Udled ruterne",
+      "deduceWhileRecording": "Stop optagelsen, før ruterne udledes.",
+      "deduceUnavailable": "Udledning af ruter er endnu ikke tilgængelig.",
+      "deduceLocked": "Udledning af ruter er tilgængelig fra Pro-planen."
+    },
+    "routes": {
+      "empty": "Ingen ruter er udledt endnu. Optag kald, og brug derefter „Udled ruterne“ under optagelserne — anmodningerne vises her og under rækken Ruter i sidepanelet.",
+      "proCallout": "Udledning af ruter fra de opsamlede kald er tilgængelig fra Pro-planen. Optagelse er fortsat åben for alle.",
+      "subscribe": "Se planerne",
+      "count_one": "{{count}} udledt anmodning",
+      "count_other": "{{count}} udledte anmodninger",
+      "hint": "De udledte anmodninger er almindelige anmodninger: rediger dem frit; en ny udledning bevarer dine ændringer og tilføjer kun nye ruter."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Opbevaring af MCP-kaldlog",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Vis optagelsessessioner",
+    "createRecordingSession": "Opret en optagelsessession",
+    "updateRecordingSession": "Opdater en optagelsessession",
+    "setRecordingFilters": "Angiv URL-filtre for en optagelsessession",
+    "startRecording": "Start optagelse af en session",
+    "stopRecording": "Stop optagelse af en session",
+    "getRecordingStatus": "Hent status for en optagelsessession",
+    "listRecordingCaptures": "Vis de optagne kald i en optagelsessession",
+    "getRecordingCapture": "Hent ét optaget kald i sin helhed",
+    "deduceRecordingRoutes": "Udled ruterne i en optagelsessession",
     "answerScenarioInput": "Besvar et scenarieinput",
     "arrangeScenario": "Arranger scenariet automatisk",
     "cancelRequest": "Annuller en anmodning",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Tilføjede designet \"{{name}}\"",
       "modifiedDesign": "Ændrede designet \"{{name}}\"",
       "deletedDesign": "Slettede designet \"{{name}}\"",
+      "addedRecording": "Optagelsessessionen \"{{name}}\" er tilføjet",
+      "modifiedRecording": "Optagelsessessionen \"{{name}}\" er ændret",
+      "deletedRecording": "Optagelsessessionen \"{{name}}\" er slettet",
       "addedFolder": "Tilføjede mappen \"{{name}}\"",
       "modifiedFolder": "Ændrede mappen \"{{name}}\"",
       "deletedFolder": "Slettede mappen \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Flyttede anmodningen \"{{name}}\"",
       "movedScenario": "Flyttede scenariet \"{{name}}\"",
       "movedDesign": "Flyttede designet \"{{name}}\"",
+      "movedRecording": "Optagelsessessionen \"{{name}}\" er flyttet",
       "movedFolder": "Flyttede mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttede miljømappen \"{{name}}\"",
       "reorderedFolder": "Elementer omarrangeret i mappen \"{{name}}\"",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Opdatering af forespørgslen \"{{name}}\"",
       "singleScenario": "Opdatering af scenariet \"{{name}}\"",
       "singleDesign": "Opdatering af designet \"{{name}}\"",
+      "singleRecording": "Opdatering af optagelsessessionen \"{{name}}\"",
       "singleFolder": "Opdatering af mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Opdatering af miljømappen \"{{name}}\"",
       "singleFileFormatVersion": "Skift til filformat {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} scenarier",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} designs",
+      "countRecording_one": "{{count}} optagelsessession",
+      "countRecording_other": "{{count}} optagelsessessioner",
       "countFolder_one": "{{count}} mappe",
       "countFolder_other": "{{count}} mapper",
       "countEnvironmentFolder_one": "{{count}} miljømappe",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Sender en anonymiseret rapport, når Restorm går ned, så fejlen kan rettes. Rapporter renses for URL'er, tokens, forespørgselsindhold og personoplysninger, før de forlader din maskine. Indgår i den gratis plan; en betalt plan lader dig slå det fra. Alle detaljer: https://restorm.app/privacy",
     "telemetryTitle": "Send brugsstatistik",
     "telemetryDescription": "Sender anonym statistik om, hvilke funktioner der bruges, så udviklingen kan prioriteres. Slået fra som standard og aldrig aktiveret uden dit udtrykkelige samtykke. Indeholder ingen forespørgselsdata, ingen URL'er og ingen personoplysninger. Alle detaljer: https://restorm.app/privacy",
+    "geolocationTitle": "Del din placering med den indbyggede browser",
+    "geolocationDescription": "Henter din omtrentlige placering (fra systemets placeringstjeneste, eller fra din IP-adresse som reserve) og giver den kun videre til den indbyggede mini-webbrowser, så websteder, der bruger geolokation, virker i en optagelsessession. Der sendes intet til Restorm.",
+    "geolocationConsent": {"title": "Del din placering med den indbyggede browser?", "body": "Restorm beder systemets placeringstjeneste om din placering (og hvis den ikke har nogen, anslås den ud fra din IP-adresse via en tredjepartstjeneste) og giver den kun videre til de sider, der åbnes i den indbyggede mini-webbrowser. Din placering forlader ellers aldrig din computer og glemmes, så snart du slår indstillingen fra.", "accept": "Tillad", "decline": "Ikke nu"},
     "crashReportsLockedLabel": "Kan ændres fra Pro-abonnementet. På det gratis abonnement er nedbrudsrapporter nødvendige for at opretholde kvaliteten.",
     "consentToast": {
       "title": "Hjælp os med at forbedre Restorm",

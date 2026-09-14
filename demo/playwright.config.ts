@@ -330,8 +330,10 @@ export default defineConfig({
   
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:5173',
+    /* Base URL to use in actions like `await page.goto('/')`. Override it
+       (with the matching `vite --port`) when 5173 is held by another dev
+       server on the machine, e.g. a Restorm `electron-vite dev`. */
+    baseURL: process.env['DEMO_E2E_BASE_URL'] ?? 'http://localhost:5173',
 
     /* Pin the UI language. The i18n bootstrap defaults to the browser locale
        whenever nothing is explicitly stored — which is every run here, since

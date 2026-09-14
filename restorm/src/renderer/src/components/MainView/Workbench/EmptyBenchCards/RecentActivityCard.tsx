@@ -4,7 +4,7 @@ import { MosaicCard, Table, type TableColumn } from 'electron-core-ui/renderer'
 import {
   isEnvironmentFolder,
   isScenario,
-  isApiDesign,
+  isApiDesign, isRecordingSession,
   type FolderItem
 } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
@@ -66,6 +66,9 @@ function indexItems(
       if (item.items) indexItems(item.items, apiName, out)
     } else if (isApiDesign(item)) {
       // A design is neither a request row nor a container of them.
+    } else if (isRecordingSession(item)) {
+      // A session's deduced routes are ordinary requests — index them.
+      if (item.items) indexItems(item.items, apiName, out)
     } else if ('items' in item) {
       indexItems(item.items, apiName, out)
     } else {

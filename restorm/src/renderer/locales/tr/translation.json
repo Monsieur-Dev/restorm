@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API tasarımı"
+        "design": "API tasarımı",
+        "recording": "Kayıt oturumu"
       },
       "cut": "Kes",
       "copy": "Kopyala",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Dosya"
       },
       "loading": "İstek gönderiliyor...",
+      "body": { "download": "İndir", "binary": "İkili içerik ({{type}}) — kaydetmek için İndir'i kullanın", "unknownType": "bilinmeyen tür" },
       "noResponseBody": "Yanıt gövdesi yok — ayrıntılar için Infos'a bakın",
       "noResponse": "İsteği yürütmek için Gönder'e tıklayın",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Ayarlar",
       "tag": "Etiketler",
       "scenario": "Senaryolar",
-      "design": "API tasarımları"
+      "design": "API tasarımları",
+      "recording": "Kayıt oturumları"
     },
     "tooltip": {
       "noDetails": "Ayrıntı yok",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Geçmiş başına saklanan girdiler",
     "maxEntriesDescription": "Bir isteğin çağrı geçmişinin ve bir senaryonun çalıştırma geçmişinin her birinin sakladığı girdi sayısı. Sabitlenen girdiler, bu değerden bağımsız olarak her zaman saklanır. Başlangıç ekranındaki son etkinlik listeleri etkilenmez."
   },
+  "recording": {
+    "title": "Kayıt oturumları",
+    "maxCapturesTitle": "Oturum başına saklanan yakalanan çağrılar",
+    "maxCapturesDescription": "Bir kayıt oturumunun bellekte kaç yakalanan çağrı sakladığı. Sınıra ulaşıldığında önce en eski çağrılar silinir. Yakalamalar hiçbir zaman proje dosyasına kaydedilmez.",
+    "newSessionName": "Yeni kayıt oturumu",
+    "node": {
+      "browser": "Tarayıcı",
+      "captures": "Yakalamalar",
+      "routes": "Rotalar"
+    },
+    "tab": {
+      "browserTitle": "Tarayıcı: {{name}}",
+      "capturesTitle": "Yakalamalar: {{name}}",
+      "routesTitle": "Rotalar: {{name}}"
+    },
+    "placeholder": {
+      "config": "Oturum ayarları (sayfa URL'si, protokoller, beyaz ve kara listeler) burada görünecektir.",
+      "browser": "Kayıt tarayıcısı burada görünecektir.",
+      "captures": "Henüz yakalanan çağrı yok. Sayfanın çağrılarını burada görmek için oturum ayarlarından bir kayıt başlatınız.",
+      "routes": "Henüz çıkarılan rota yok. Çağrıları kaydediniz, ardından rotaları yakalamalardan çıkarınız."
+    },
+    "config": {
+      "subtitle": "Restorm API çağrılarını dinlerken sayfada gezininiz. Projeyle birlikte yalnızca aşağıdaki ayarlar kaydedilir — yakalanan çağrılar hiçbir zaman kaydedilmez.",
+      "url": "Dinlenecek sayfa",
+      "urlPlaceholder": "https://ornek.com, http://localhost:3000 veya file:///yol/sayfa.html",
+      "urlInvalid": "Bir http(s) veya file URL'si giriniz.",
+      "urlRequired": "Kaydı etkinleştirmek için sayfanın URL'sini giriniz.",
+      "record": "Kaydı başlat",
+      "stop": "Kaydı durdur",
+      "protocols": "Yakalanacak protokoller",
+      "whitelist": "Beyaz liste",
+      "blacklist": "Kara liste",
+      "addPattern": "Desen ekle",
+      "removePattern": "Bu deseni kaldır",
+      "invalidPattern": "Bu desen geçerli bir düzenli ifade değildir.",
+      "patternPlaceholder": "Düzenli ifade, örn. ^https://api\\.ornek\\.com/",
+      "noPattern": "Desen yok — her şey geçer.",
+      "filtersHint": "Bir çağrı, beyaz listedeki en az bir girdiyle eşleşiyorsa (veya liste boşsa) ve kara listedeki hiçbir girdiyle eşleşmiyorsa saklanır. Değişiklikler sonraki çağrılara uygulanır."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Kaydı duraklat",
+      "resume": "Kayda devam et",
+      "stop": "Kaydı durdur"
+    },
+    "captures": {
+      "empty": "Henüz yakalanan çağrı yok. Sayfanın çağrılarını gerçekleştikçe burada görmek için oturum ayarlarından bir kayıt başlatınız.",
+      "filterPlaceholder": "Çağrıları filtrele (düzenli ifade)",
+      "live": "devam ediyor",
+      "clearRun": "Bu kaydın çağrılarını sil",
+      "selectOne": "Yanıtını görmek için bir çağrı seçiniz.",
+      "loadingDetail": "Çağrı yükleniyor…",
+      "addToWhitelist": "Beyaz listeye ekle…",
+      "addToBlacklist": "Kara listeye ekle…",
+      "patternLabel": "Desen (düzenli ifade)",
+      "add": "Ekle",
+      "addAndApply": "Ekle ve yakalanan çağrılara uygula",
+      "applyConfirm": "Listelerin zaten yakalanmış çağrılara uygulanması, artık reddettikleri tüm çağrıları kaldırır. Bu işlem geri alınamaz.",
+      "applyConfirmOk": "Uygula ve kaldır",
+      "deduce": "Rotaları çıkar",
+      "deduceWhileRecording": "Rotaları çıkarmadan önce kaydı durdurunuz.",
+      "deduceUnavailable": "Rota çıkarma henüz kullanılamıyor.",
+      "deduceLocked": "Rota çıkarma Pro planından itibaren kullanılabilir."
+    },
+    "routes": {
+      "empty": "Henüz çıkarılan rota yok. Çağrıları kaydediniz, ardından yakalamaların altındaki “Rotaları çıkar” düğmesini kullanınız — istekler burada ve kenar çubuğundaki Rotalar satırının altında görünür.",
+      "proCallout": "Yakalanan çağrılardan rota çıkarma Pro planından itibaren kullanılabilir. Kayıt herkese açık kalır.",
+      "subscribe": "Planları görün",
+      "count_one": "{{count}} çıkarılan istek",
+      "count_other": "{{count}} çıkarılan istek",
+      "hint": "Çıkarılan istekler sıradan isteklerdir: serbestçe düzenleyiniz; yeniden çıkarma değişikliklerinizi korur ve yalnızca yeni rotaları ekler."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP çağrı günlüğü saklama",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Kayıt oturumlarını listele",
+    "createRecordingSession": "Bir kayıt oturumu oluştur",
+    "updateRecordingSession": "Bir kayıt oturumunu güncelle",
+    "setRecordingFilters": "Bir kayıt oturumunun URL filtrelerini ayarla",
+    "startRecording": "Bir oturumun kaydını başlat",
+    "stopRecording": "Bir oturumun kaydını durdur",
+    "getRecordingStatus": "Bir kayıt oturumunun durumunu al",
+    "listRecordingCaptures": "Bir kayıt oturumunun yakalanan çağrılarını listele",
+    "getRecordingCapture": "Yakalanan bir çağrının tamamını al",
+    "deduceRecordingRoutes": "Bir kayıt oturumunun rotalarını çıkar",
     "answerScenarioInput": "Senaryo girişini yanıtla",
     "arrangeScenario": "Senaryoyu otomatik düzenle",
     "cancelRequest": "İsteği iptal et",
@@ -3210,6 +3301,9 @@
       "addedDesign": "\"{{name}}\" tasarımı eklendi",
       "modifiedDesign": "\"{{name}}\" tasarımı değiştirildi",
       "deletedDesign": "\"{{name}}\" tasarımı silindi",
+      "addedRecording": "\"{{name}}\" kayıt oturumu eklendi",
+      "modifiedRecording": "\"{{name}}\" kayıt oturumu değiştirildi",
+      "deletedRecording": "\"{{name}}\" kayıt oturumu silindi",
       "addedFolder": "\"{{name}}\" klasörü eklendi",
       "modifiedFolder": "\"{{name}}\" klasörü değiştirildi",
       "deletedFolder": "\"{{name}}\" klasörü silindi",
@@ -3219,6 +3313,7 @@
       "movedRequest": "\"{{name}}\" isteği taşındı",
       "movedScenario": "\"{{name}}\" senaryosu taşındı",
       "movedDesign": "\"{{name}}\" tasarımı taşındı",
+      "movedRecording": "\"{{name}}\" kayıt oturumu taşındı",
       "movedFolder": "\"{{name}}\" klasörü taşındı",
       "movedEnvironmentFolder": "\"{{name}}\" ortam klasörü taşındı",
       "reorderedFolder": "\"{{name}}\" klasöründeki öğeler yeniden sıralandı",
@@ -3230,6 +3325,7 @@
       "singleRequest": "\"{{name}}\" isteğinde güncelleme",
       "singleScenario": "\"{{name}}\" senaryosunda güncelleme",
       "singleDesign": "\"{{name}}\" tasarımında güncelleme",
+      "singleRecording": "\"{{name}}\" kayıt oturumunun güncellenmesi",
       "singleFolder": "\"{{name}}\" klasöründe güncelleme",
       "singleEnvironmentFolder": "\"{{name}}\" ortam klasöründe güncelleme",
       "singleFileFormatVersion": "{{name}} dosya biçimine geçiş",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} senaryo",
       "countDesign_one": "{{count}} tasarım",
       "countDesign_other": "{{count}} tasarım",
+      "countRecording_one": "{{count}} kayıt oturumu",
+      "countRecording_other": "{{count}} kayıt oturumu",
       "countFolder_one": "{{count}} klasör",
       "countFolder_other": "{{count}} klasör",
       "countEnvironmentFolder_one": "{{count}} ortam klasörü",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Restorm çöktüğünde arızanın giderilebilmesi için anonimleştirilmiş bir rapor gönderir. Raporlar makinenizden ayrılmadan önce URL'lerden, belirteçlerden, istek gövdelerinden ve kişisel verilerden arındırılır. Ücretsiz plana dahildir; ücretli bir plan bunu kapatmanıza izin verir. Tüm ayrıntılar: https://restorm.app/privacy",
     "telemetryTitle": "Kullanım istatistikleri gönder",
     "telemetryDescription": "Hangi özelliklerin kullanıldığına dair anonim istatistikler gönderir, böylece sıradaki geliştirmeler yönlendirilir. Varsayılan olarak kapalıdır ve açık onayınız olmadan asla etkinleştirilmez. İstek verisi, URL veya kişisel veri içermez. Tüm ayrıntılar: https://restorm.app/privacy",
+    "geolocationTitle": "Konumunuzu yerleşik tarayıcıyla paylaşın",
+    "geolocationDescription": "Yaklaşık konumunuzu alır (sistemin konum hizmetinden veya yedek olarak IP adresinizden) ve yalnızca yerleşik mini web tarayıcısına iletir; böylece konum bilgisi kullanan siteler bir kayıt oturumunda çalışır. Restorm'a hiçbir şey gönderilmez.",
+    "geolocationConsent": {"title": "Konumunuz yerleşik tarayıcıyla paylaşılsın mı?", "body": "Restorm, konumunuzu sisteminizin konum hizmetinden ister (bilgi yoksa üçüncü taraf bir sorgulama hizmeti aracılığıyla IP adresinizden tahmin eder) ve yalnızca yerleşik mini web tarayıcısında açılan sayfalara iletir. Konumunuz bunun dışında bilgisayarınızdan asla çıkmaz ve bu seçeneği kapattığınız anda unutulur.", "accept": "İzin ver", "decline": "Şimdi değil"},
     "crashReportsLockedLabel": "Pro planından itibaren değiştirilebilir. Ücretsiz planda, kaliteyi korumak için çökme raporları gereklidir.",
     "consentToast": {
       "title": "Restorm'u geliştirmemize yardımcı olun",

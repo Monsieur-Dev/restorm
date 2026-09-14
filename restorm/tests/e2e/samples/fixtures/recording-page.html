@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Recording test page</title></head>
+<body>
+  <h1 data-testid="recording-page-title">Recording test page</h1>
+  <p>A local page a recording session can listen to. It calls the API given
+  by its <code>?api=</code> parameter every second (30 times), so a recording
+  started after the page loaded still sees API calls arriving.</p>
+  <script>
+    const api = new URLSearchParams(location.search).get('api')
+    let n = 0
+    const tick = () => {
+      n += 1
+      if (api) fetch(api + '/api/ping?n=' + n).catch(() => undefined)
+      if (n < 30) setTimeout(tick, 1000)
+    }
+    tick()
+  </script>
+</body>
+</html>

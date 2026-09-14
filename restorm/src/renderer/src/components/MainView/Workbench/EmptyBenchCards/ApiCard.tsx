@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, eventBus, MosaicCard, Table, getColorFromString, type TableColumn } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, FolderItem } from '../../../../../../shared/types/folderTypes'
-import { isScenario, isApiDesign } from '../../../../../../shared/types/folderTypes'
+import { isScenario, isApiDesign, isRecordingSession } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
 import {
   addFavorite,
@@ -62,6 +62,9 @@ function collectItems(items: FolderItem[]): RequestRow[] {
       if (item.items) result.push(...collectItems(item.items))
     } else if (isApiDesign(item)) {
       // A design is neither a request row nor a container of them.
+    } else if (isRecordingSession(item)) {
+      // A session's deduced routes are ordinary requests — list them.
+      if (item.items) result.push(...collectItems(item.items))
     } else if ('items' in item) {
       result.push(...collectItems(item.items))
     } else {

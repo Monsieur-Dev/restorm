@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Grave uma página web e obtenha a sua API em pedidos.**
+
+- **Sessões de gravação.** Um novo tipo de elemento da barra lateral abre uma página web no mini-navegador integrado e captura cada chamada API que ela efetua — REST, GraphQL, gRPC-web e WebSocket — em direto, com listas branca e negra em expressões regulares, pausa e paragem a partir da barra de endereço, e um halo pulsante à volta da sessão enquanto decorre. Cada chamada capturada lê-se exatamente como a resposta de um pedido (corpo, informações, cookies, grafo); o menu de contexto de uma chamada adiciona o seu url a uma lista, com a possibilidade de limpar o que já tinha sido capturado. As capturas ficam em memória, limitadas por uma nova definição da aplicação, e nunca tocam no seu ficheiro de projeto.
+- **Deduzir as rotas (Pro).** Um botão transforma as capturas numa árvore de pastas de verdadeiros pedidos que pode voltar a executar: os segmentos de caminho que variam tornam-se parâmetros de caminho `{{param}}`, as pastas seguem os prefixos estáticos, as chamadas gRPC-web são arrumadas por serviço e cada pedido é pré-preenchido a partir da última chamada bem-sucedida, com as chamadas capturadas no seu histórico de respostas. Deduzir de novo funde os resultados — as suas alterações são conservadas.
+- **Controle-a a partir do seu assistente de IA.** Dez ferramentas MCP criam e configuram sessões, iniciam e param uma gravação, leem as capturas e deduzem as rotas.
+- **Partilhe a sua localização com o mini-navegador (opcional).** Uma nova definição de Privacidade, desativada por predefinição, permite às páginas abertas no navegador integrado — durante uma gravação ou não — ler a sua localização aproximada, tal como faria a função de localização do próprio site num navegador comum. Ativá-la pede primeiro o seu consentimento; a localização vem do serviço de localização do sistema (GeoClue em Linux) ou, na sua falta, de uma estimativa ao nível da cidade com base no seu endereço IP. Desativá-la esquece a localização de imediato.
+- **Separador Resposta mais rico.** As imagens passam a aparecer em linha, os vídeos e o áudio reproduzem-se, o Markdown é renderizado e o editor de código escolhe a linguagem a partir do Content-Type — com um botão Transferir traduzido, sempre à mão. Uma resposta binária voltada a executar a partir do histórico já não mostra o seu base64.
+- **Importação: uma especificação JSON colada lê-se bem.** Um documento JSON numa única linha colado no campo de importação vazio é formatado de forma legível antes de abrir no editor.
+- **As listas longas continuam rápidas.** A lista das capturas (e a barra lateral acima de 400 linhas) só renderiza o que está no ecrã.
+- Os ficheiros de projeto que contêm uma sessão de gravação são guardados no formato 1.2; as versões anteriores do Restorm pedem-lhe para atualizar antes de os abrir.
+
 ## v1.1.4
 
 **Ligue o seu assistente de IA no macOS — agora fiável.**

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "Design d'API"
+        "design": "Design d'API",
+        "recording": "Session d’enregistrement"
       },
       "cut": "Couper",
       "copy": "Copier",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Fichier"
       },
       "loading": "Envoi de la requête...",
+      "body": { "download": "Télécharger", "binary": "Contenu binaire ({{type}}) — utilisez Télécharger pour l'enregistrer", "unknownType": "type inconnu" },
       "noResponseBody": "Pas de corps de réponse — voir Infos pour le détail",
       "noResponse": "Cliquez sur Envoyer pour exécuter la requête",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Paramètres",
       "tag": "Tags",
       "scenario": "Scénarios",
-      "design": "Designs d'API"
+      "design": "Designs d'API",
+      "recording": "Sessions d’enregistrement"
     },
     "tooltip": {
       "noDetails": "Aucun détail disponible",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Entrées conservées par historique",
     "maxEntriesDescription": "Nombre d'entrées conservées dans l'historique des appels d'une requête et dans l'historique des exécutions d'un scénario. Les entrées épinglées sont toujours conservées, quelle que soit cette valeur. Les listes d'activité récente de l'accueil ne sont pas concernées."
   },
+  "recording": {
+    "title": "Sessions d’enregistrement",
+    "maxCapturesTitle": "Appels capturés conservés par session",
+    "maxCapturesDescription": "Nombre d’appels capturés qu’une session d’enregistrement garde en mémoire. Une fois le plafond atteint, les appels les plus anciens sont supprimés en premier. Les captures ne sont jamais enregistrées dans le fichier du projet.",
+    "newSessionName": "Nouvelle session d’enregistrement",
+    "node": {
+      "browser": "Navigateur",
+      "captures": "Captures",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Navigateur : {{name}}",
+      "capturesTitle": "Captures : {{name}}",
+      "routesTitle": "Routes : {{name}}"
+    },
+    "placeholder": {
+      "config": "Les paramètres de la session (url de la page, protocoles, listes blanche et noire) apparaîtront ici.",
+      "browser": "Le navigateur d’enregistrement apparaîtra ici.",
+      "captures": "Aucun appel capturé pour le moment. Lancez un enregistrement depuis les paramètres de la session pour voir apparaître ici les appels de la page.",
+      "routes": "Aucune route déduite pour le moment. Enregistrez des appels, puis déduisez les routes à partir des captures."
+    },
+    "config": {
+      "subtitle": "Naviguez dans la page pendant que Restorm écoute ses appels API. Seuls les paramètres ci-dessous sont enregistrés avec le projet — jamais les appels capturés.",
+      "url": "Page à écouter",
+      "urlPlaceholder": "https://exemple.com, http://localhost:3000 ou file:///chemin/page.html",
+      "urlInvalid": "Saisissez une url http(s) ou file.",
+      "urlRequired": "Saisissez l’url de la page pour activer l’enregistrement.",
+      "record": "Lancer l’enregistrement",
+      "stop": "Arrêter l’enregistrement",
+      "protocols": "Protocoles à capturer",
+      "whitelist": "Liste blanche",
+      "blacklist": "Liste noire",
+      "addPattern": "Ajouter un motif",
+      "removePattern": "Supprimer ce motif",
+      "invalidPattern": "Ce motif n’est pas une expression régulière valide.",
+      "patternPlaceholder": "Expression régulière, ex. ^https://api\\.exemple\\.com/",
+      "noPattern": "Aucun motif — tout passe.",
+      "filtersHint": "Un appel est conservé s’il correspond à au moins une entrée de la liste blanche (ou si elle est vide) et à aucune entrée de la liste noire. Les modifications s’appliquent aux appels suivants."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Mettre l’enregistrement en pause",
+      "resume": "Reprendre l’enregistrement",
+      "stop": "Arrêter l’enregistrement"
+    },
+    "captures": {
+      "empty": "Aucun appel capturé pour le moment. Lancez un enregistrement depuis les paramètres de la session pour voir apparaître ici les appels de la page au fil de l’eau.",
+      "filterPlaceholder": "Filtrer les appels (expression régulière)",
+      "live": "en cours",
+      "clearRun": "Supprimer les appels de cet enregistrement",
+      "selectOne": "Sélectionnez un appel pour voir sa réponse.",
+      "loadingDetail": "Chargement de l’appel…",
+      "addToWhitelist": "Ajouter à la liste blanche…",
+      "addToBlacklist": "Ajouter à la liste noire…",
+      "patternLabel": "Motif (expression régulière)",
+      "add": "Ajouter",
+      "addAndApply": "Ajouter et appliquer aux appels capturés",
+      "applyConfirm": "Appliquer les listes aux appels déjà capturés supprime tous ceux qu’elles refusent désormais. Cette action est irréversible.",
+      "applyConfirmOk": "Appliquer et supprimer",
+      "deduce": "Déduire les routes",
+      "deduceWhileRecording": "Arrêtez l’enregistrement avant de déduire les routes.",
+      "deduceUnavailable": "La déduction des routes n’est pas encore disponible.",
+      "deduceLocked": "La déduction des routes est disponible à partir de l’offre Pro."
+    },
+    "routes": {
+      "empty": "Aucune route déduite pour le moment. Enregistrez des appels, puis utilisez « Déduire les routes » sous les captures — les requêtes apparaissent ici et sous la ligne Routes de la barre latérale.",
+      "proCallout": "La déduction des routes à partir des appels capturés est disponible à partir de l’offre Pro. L’enregistrement reste ouvert à tous.",
+      "subscribe": "Voir les offres",
+      "count_one": "{{count}} requête déduite",
+      "count_other": "{{count}} requêtes déduites",
+      "hint": "Les requêtes déduites sont des requêtes ordinaires : modifiez-les librement, une nouvelle déduction conserve vos modifications et n’ajoute que les nouvelles routes."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Rétention du journal d’appels MCP",
@@ -2844,6 +2925,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Lister les sessions d'enregistrement",
+    "createRecordingSession": "Créer une session d'enregistrement",
+    "updateRecordingSession": "Modifier une session d'enregistrement",
+    "setRecordingFilters": "Définir les filtres d'url d'une session d'enregistrement",
+    "startRecording": "Démarrer l'enregistrement d'une session",
+    "stopRecording": "Arrêter l'enregistrement d'une session",
+    "getRecordingStatus": "Obtenir l'état d'une session d'enregistrement",
+    "listRecordingCaptures": "Lister les appels capturés d'une session d'enregistrement",
+    "getRecordingCapture": "Obtenir un appel capturé en détail",
+    "deduceRecordingRoutes": "Déduire les routes d'une session d'enregistrement",
     "answerScenarioInput": "Répondre à une entrée de scénario",
     "arrangeScenario": "Réorganiser le scénario",
     "cancelRequest": "Annuler une requête",
@@ -3204,6 +3295,9 @@
       "addedDesign": "Ajout du design « {{name}} »",
       "modifiedDesign": "Modification du design « {{name}} »",
       "deletedDesign": "Suppression du design « {{name}} »",
+      "addedRecording": "Ajout de la session d’enregistrement « {{name}} »",
+      "modifiedRecording": "Modification de la session d’enregistrement « {{name}} »",
+      "deletedRecording": "Suppression de la session d’enregistrement « {{name}} »",
       "addedFolder": "Ajout du dossier « {{name}} »",
       "modifiedFolder": "Modification du dossier « {{name}} »",
       "deletedFolder": "Suppression du dossier « {{name}} »",
@@ -3213,6 +3307,7 @@
       "movedRequest": "Déplacement de la requête « {{name}} »",
       "movedScenario": "Déplacement du scénario « {{name}} »",
       "movedDesign": "Déplacement du design « {{name}} »",
+      "movedRecording": "Déplacement de la session d’enregistrement « {{name}} »",
       "movedFolder": "Déplacement du dossier « {{name}} »",
       "movedEnvironmentFolder": "Déplacement du dossier d'environnement « {{name}} »",
       "reorderedFolder": "Réorganisation des éléments du dossier « {{name}} »",
@@ -3224,6 +3319,7 @@
       "singleRequest": "Mise à jour de la requête « {{name}} »",
       "singleScenario": "Mise à jour du scénario « {{name}} »",
       "singleDesign": "Mise à jour du design « {{name}} »",
+      "singleRecording": "Mise à jour de la session d’enregistrement « {{name}} »",
       "singleFolder": "Mise à jour du dossier « {{name}} »",
       "singleEnvironmentFolder": "Mise à jour du dossier d'environnement « {{name}} »",
       "singleFileFormatVersion": "Passage au format de fichier {{name}}",
@@ -3233,6 +3329,8 @@
       "countScenario_other": "{{count}} scénarios",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} designs",
+      "countRecording_one": "{{count}} session d’enregistrement",
+      "countRecording_other": "{{count}} sessions d’enregistrement",
       "countFolder_one": "{{count}} dossier",
       "countFolder_other": "{{count}} dossiers",
       "countEnvironmentFolder_one": "{{count}} dossier d'environnement",
@@ -3326,6 +3424,9 @@
     "crashReportsDescription": "Envoie un rapport anonymisé lorsque Restorm plante, afin que la panne puisse être corrigée. Les rapports sont expurgés des URL, jetons, corps de requête et données personnelles avant de quitter votre machine. Inclus dans l'offre gratuite ; une offre payante permet de le désactiver. Détails complets : https://restorm.app/privacy",
     "telemetryTitle": "Envoyer les statistiques d'utilisation",
     "telemetryDescription": "Envoie des statistiques anonymes sur les fonctionnalités utilisées, pour orienter les développements à venir. Désactivé par défaut et jamais activé sans votre consentement explicite. Ne contient aucune donnée de requête, aucune URL et aucune donnée personnelle. Détails complets : https://restorm.app/privacy",
+    "geolocationTitle": "Partager votre position avec le navigateur intégré",
+    "geolocationDescription": "Obtient votre position approximative (depuis le service de localisation du système, ou à défaut depuis votre adresse IP) et la transmet uniquement au mini-navigateur intégré, pour que les sites qui géolocalisent fonctionnent dans une session d'enregistrement. Rien n'est envoyé à Restorm.",
+    "geolocationConsent": {"title": "Partager votre position avec le navigateur intégré ?", "body": "Restorm demandera votre position au service de localisation de votre système (et, s'il n'en a pas, l'estimera depuis votre adresse IP via un service tiers) pour la transmettre uniquement aux pages ouvertes dans le mini-navigateur intégré. Votre position ne quitte votre ordinateur en aucun autre cas et est oubliée dès que vous désactivez cette option.", "accept": "Autoriser", "decline": "Pas maintenant"},
     "crashReportsLockedLabel": "Modifiable à partir de l'offre Pro. Sur l'offre gratuite, les rapports de plantage sont nécessaires au maintien de la qualité.",
     "consentToast": {
       "title": "Aidez-nous à améliorer Restorm",

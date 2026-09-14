@@ -70,6 +70,12 @@ const designShellTestDir = defineBddConfig({
   outputDir: '.features-gen/design-shell'
 })
 
+const recordingShellTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/recording-shell/features/**/*.feature',
+  steps: ['tests/e2e/bdd/recording-shell/steps/**/*.ts', 'tests/e2e/bdd/fixtures/recording-shell.fixture.ts'],
+  outputDir: '.features-gen/recording-shell'
+})
+
 const designModelsTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/design-models/features/**/*.feature',
   steps: ['tests/e2e/bdd/design-models/steps/**/*.ts', 'tests/e2e/bdd/fixtures/design-models.fixture.ts'],
@@ -734,6 +740,10 @@ export default defineConfig({
     {
       name: 'design-models',
       testDir: designModelsTestDir
+    },
+    {
+      name: 'recording-shell',
+      testDir: recordingShellTestDir
     },
     {
       name: 'design-routes',

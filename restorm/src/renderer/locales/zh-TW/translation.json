@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API 設計"
+        "design": "API 設計",
+        "recording": "錄製工作階段"
       },
       "cut": "剪下",
       "copy": "複製",
@@ -443,6 +444,7 @@
         "requestBodyFile": "檔案"
       },
       "loading": "正在傳送請求...",
+      "body": { "download": "下載", "binary": "二進位內容（{{type}}）— 請使用「下載」儲存", "unknownType": "未知類型" },
       "noResponseBody": "無回應內容 — 詳情請見 Infos",
       "noResponse": "點擊「傳送」以執行請求",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "設定",
       "tag": "標籤",
       "scenario": "情境",
-      "design": "API 設計"
+      "design": "API 設計",
+      "recording": "錄製工作階段"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "每個歷史記錄保留的項目數",
     "maxEntriesDescription": "請求的呼叫歷史記錄和情境的執行歷史記錄各自保留的項目數。已釘選的項目一律保留，與此值無關。主畫面的近期活動清單不受影響。"
   },
+  "recording": {
+    "title": "錄製工作階段",
+    "maxCapturesTitle": "每個工作階段保留的已擷取呼叫數",
+    "maxCapturesDescription": "錄製工作階段在記憶體中保留的已擷取呼叫數量。達到上限後，最早的呼叫會優先被捨棄。擷取內容永遠不會儲存到專案檔中。",
+    "newSessionName": "新增錄製工作階段",
+    "node": {
+      "browser": "瀏覽器",
+      "captures": "擷取",
+      "routes": "路由"
+    },
+    "tab": {
+      "browserTitle": "瀏覽器：{{name}}",
+      "capturesTitle": "擷取：{{name}}",
+      "routesTitle": "路由：{{name}}"
+    },
+    "placeholder": {
+      "config": "工作階段設定（頁面 URL、通訊協定、白名單與黑名單）將顯示於此。",
+      "browser": "錄製瀏覽器將顯示於此。",
+      "captures": "尚未擷取任何呼叫。請在工作階段設定中開始錄製，頁面的呼叫便會顯示於此。",
+      "routes": "尚未推導出任何路由。請先錄製一些呼叫，再從擷取中推導路由。"
+    },
+    "config": {
+      "subtitle": "在 Restorm 監聽頁面 API 呼叫的同時瀏覽該頁面。隨專案儲存的只有以下設定，擷取的呼叫永不儲存。",
+      "url": "要監聽的頁面",
+      "urlPlaceholder": "https://example.com、http://localhost:3000 或 file:///path/page.html",
+      "urlInvalid": "請輸入 http(s) 或 file 網址。",
+      "urlRequired": "請輸入頁面網址以啟用錄製。",
+      "record": "開始錄製",
+      "stop": "停止錄製",
+      "protocols": "要擷取的通訊協定",
+      "whitelist": "白名單",
+      "blacklist": "黑名單",
+      "addPattern": "新增模式",
+      "removePattern": "移除此模式",
+      "invalidPattern": "此模式不是有效的正規表示式。",
+      "patternPlaceholder": "正規表示式，例如 ^https://api\\.example\\.com/",
+      "noPattern": "沒有模式——全部通過。",
+      "filtersHint": "當呼叫至少符合白名單中的一項（或白名單為空）且不符合黑名單中的任何一項時予以保留。變更將套用於後續呼叫。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "暫停錄製",
+      "resume": "繼續錄製",
+      "stop": "停止錄製"
+    },
+    "captures": {
+      "empty": "尚未擷取任何呼叫。請在工作階段設定中開始錄製，頁面的呼叫便會即時顯示於此。",
+      "filterPlaceholder": "篩選呼叫（正規表示式）",
+      "live": "進行中",
+      "clearRun": "刪除此次錄製的呼叫",
+      "selectOne": "選取一個呼叫以檢視其回應。",
+      "loadingDetail": "正在載入呼叫…",
+      "addToWhitelist": "新增至白名單…",
+      "addToBlacklist": "新增至黑名單…",
+      "patternLabel": "模式（正規表示式）",
+      "add": "新增",
+      "addAndApply": "新增並套用至已擷取的呼叫",
+      "applyConfirm": "將名單套用至已擷取的呼叫會移除其中所有現已被拒絕的呼叫。此操作無法復原。",
+      "applyConfirmOk": "套用並移除",
+      "deduce": "推導路由",
+      "deduceWhileRecording": "請先停止錄製再推導路由。",
+      "deduceUnavailable": "路由推導尚未提供。",
+      "deduceLocked": "推導路由需要 Pro 以上方案。"
+    },
+    "routes": {
+      "empty": "尚未推導出任何路由。請先錄製呼叫，再使用擷取下方的「推導路由」——請求會顯示於此以及側邊欄的「路由」列下方。",
+      "proCallout": "從擷取的呼叫推導路由需要 Pro 以上方案。錄製功能對所有人開放。",
+      "subscribe": "查看方案",
+      "count_one": "{{count}} 個推導出的請求",
+      "count_other": "{{count}} 個推導出的請求",
+      "hint": "推導出的請求是一般請求：可自由編輯；再次推導會保留您的修改，只新增新的路由。"
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 呼叫記錄保留",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "列出錄製工作階段",
+    "createRecordingSession": "建立錄製工作階段",
+    "updateRecordingSession": "更新錄製工作階段",
+    "setRecordingFilters": "設定錄製工作階段的 URL 篩選器",
+    "startRecording": "開始錄製工作階段",
+    "stopRecording": "停止錄製工作階段",
+    "getRecordingStatus": "取得錄製工作階段的狀態",
+    "listRecordingCaptures": "列出錄製工作階段擷取的呼叫",
+    "getRecordingCapture": "取得一次擷取呼叫的完整內容",
+    "deduceRecordingRoutes": "推斷錄製工作階段的路由",
     "answerScenarioInput": "回答情境輸入",
     "arrangeScenario": "自動排列情境",
     "cancelRequest": "取消請求",
@@ -3209,6 +3300,9 @@
       "addedDesign": "已新增設計 \"{{name}}\"",
       "modifiedDesign": "已修改設計 \"{{name}}\"",
       "deletedDesign": "已刪除設計 \"{{name}}\"",
+      "addedRecording": "已新增錄製工作階段\"{{name}}\"",
+      "modifiedRecording": "已修改錄製工作階段\"{{name}}\"",
+      "deletedRecording": "已刪除錄製工作階段\"{{name}}\"",
       "addedFolder": "已新增資料夾 \"{{name}}\"",
       "modifiedFolder": "已修改資料夾 \"{{name}}\"",
       "deletedFolder": "已刪除資料夾 \"{{name}}\"",
@@ -3218,6 +3312,7 @@
       "movedRequest": "已移動請求「{{name}}」",
       "movedScenario": "已移動場景「{{name}}」",
       "movedDesign": "已移動設計「{{name}}」",
+      "movedRecording": "已移動錄製工作階段\"{{name}}\"",
       "movedFolder": "已移動資料夾「{{name}}」",
       "movedEnvironmentFolder": "已移動環境資料夾「{{name}}」",
       "reorderedFolder": "已重新排序資料夾「{{name}}」中的項目",
@@ -3229,6 +3324,7 @@
       "singleRequest": "更新請求 \"{{name}}\"",
       "singleScenario": "更新情境 \"{{name}}\"",
       "singleDesign": "更新設計 \"{{name}}\"",
+      "singleRecording": "錄製工作階段\"{{name}}\"的更新",
       "singleFolder": "更新資料夾 \"{{name}}\"",
       "singleEnvironmentFolder": "更新環境資料夾 \"{{name}}\"",
       "singleFileFormatVersion": "遷移至檔案格式 {{name}}",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "{{count}} 個情境",
       "countDesign_one": "{{count}} 個設計",
       "countDesign_other": "{{count}} 個設計",
+      "countRecording_one": "{{count}} 個錄製工作階段",
+      "countRecording_other": "{{count}} 個錄製工作階段",
       "countFolder_one": "{{count}} 個資料夾",
       "countFolder_other": "{{count}} 個資料夾",
       "countEnvironmentFolder_one": "{{count}} 個環境資料夾",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "在 Restorm 當機時傳送匿名化報告，以便修復故障。報告在離開您的裝置前會清除 URL、權杖、請求內容與個人資料。免費方案包含此功能；付費方案可將其關閉。 完整說明：https://restorm.app/privacy",
     "telemetryTitle": "傳送使用統計",
     "telemetryDescription": "傳送關於使用了哪些功能的匿名統計，用於引導後續開發。預設關閉，未經您明確同意絕不啟用。不含任何請求資料、URL 或個人資料。 完整說明：https://restorm.app/privacy",
+    "geolocationTitle": "與內嵌瀏覽器分享您的位置",
+    "geolocationDescription": "取得您的大致位置（來自系統定位服務，無法取得時則依您的 IP 位址推算），並僅傳遞給內嵌的迷你網頁瀏覽器，讓需要定位的網站能在錄製工作階段中正常運作。不會向 Restorm 傳送任何內容。",
+    "geolocationConsent": {"title": "與內嵌瀏覽器分享您的位置?", "body": "Restorm 將向您系統的定位服務要求您的位置（若無法取得，則透過第三方查詢服務依您的 IP 位址推算），並僅傳遞給在內嵌迷你網頁瀏覽器中開啟的頁面。除此之外，您的位置絕不會離開您的電腦，並會在您關閉此選項後立即被清除。", "accept": "允許", "decline": "暫時不要"},
     "crashReportsLockedLabel": "自 Pro 方案起可變更。在免費方案中，當機報告是維持品質所必需的。",
     "consentToast": {
       "title": "協助我們改進 Restorm",

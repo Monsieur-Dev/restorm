@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Enregistrez une page web, récupérez son API en requêtes.**
+
+- **Sessions d'enregistrement.** Un nouveau type d'élément de la barre latérale ouvre une page web dans le mini-navigateur intégré et capture chaque appel d'API qu'elle effectue — REST, GraphQL, gRPC-web et WebSocket — en direct, avec des listes blanche et noire en expressions régulières, Pause et Arrêter sur la ligne d'adresse, et un halo animé autour de la session pendant l'enregistrement. Chaque appel capturé se lit exactement comme la réponse d'une requête (corps, informations, cookies, graphe) ; le menu contextuel d'un appel ajoute son url à une liste, avec la possibilité d'élaguer ce qui a déjà été capturé. Les captures restent en mémoire, plafonnées par un nouveau paramètre de l'application, et ne touchent jamais votre fichier projet.
+- **Déduire les routes (Pro).** Un bouton transforme les captures en une arborescence de vraies requêtes rejouables : les segments de chemin qui varient deviennent des paramètres `{{param}}`, les dossiers suivent les préfixes statiques, les appels gRPC-web sont rangés par service, et chaque requête est préremplie à partir du dernier appel réussi, avec les appels capturés dans son historique de réponses. Relancer la déduction fusionne — vos modifications sont conservées.
+- **Pilotez-la depuis votre assistant IA.** Dix outils MCP créent et configurent les sessions, démarrent et arrêtent un enregistrement, lisent les captures et déduisent les routes.
+- **Partagez votre position avec le mini-navigateur (sur demande).** Un nouveau réglage Confidentialité, désactivé par défaut, permet aux pages ouvertes dans le navigateur intégré — pendant un enregistrement ou non — de lire votre position approximative, comme le ferait la fonction de localisation du site dans un navigateur ordinaire. L'activer demande d'abord votre accord ; la position vient du service de localisation du système (GeoClue sous Linux), sinon d'une estimation à l'échelle de la ville d'après votre adresse IP. La désactiver l'oublie aussitôt.
+- **Onglet Réponse enrichi.** Les images s'affichent désormais en ligne, les vidéos et l'audio se lisent, le Markdown est rendu et l'éditeur de code choisit le langage d'après le Content-Type — avec un bouton Télécharger traduit, toujours à portée. Une réponse binaire rejouée depuis l'historique n'affiche plus sa base64.
+- **Import : une spec JSON collée se lit bien.** Un document JSON sur une seule ligne collé dans le champ d'import vide est mis en forme avant de s'ouvrir dans l'éditeur.
+- **Les longues listes restent fluides.** La liste des captures (et la barre latérale au-delà de 400 lignes) ne rend que ce qui est à l'écran.
+- Les fichiers projet contenant une session d'enregistrement sont enregistrés au format 1.2 ; les versions antérieures de Restorm vous demandent de mettre à jour avant de les ouvrir.
+
 ## v1.1.4
 
 **Brancher votre assistant IA sur macOS — désormais fiable.**

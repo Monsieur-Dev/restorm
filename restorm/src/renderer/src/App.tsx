@@ -52,6 +52,12 @@ import { Folder as FolderClass } from '../../shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../shared/models/EnvironmentFolder'
 import { Environment as EnvironmentClass } from '../../shared/models/Environment'
 import { ApiDesign as ApiDesignClass } from '../../shared/models/ApiDesign'
+import { RecordingSession as RecordingSessionClass } from '../../shared/models/RecordingSession'
+import { recordingTabId, recordingNodeRowId, parseRecordingNodeRowId } from '../../shared/recording/recordingSections'
+import { deduceRoutes, flattenRoutes } from '../../shared/recording/routeDeduction'
+import { materializeDeducedTree } from '../../shared/recording/deducedItems'
+import type { RecordedCallDetail } from '../../shared/types/recordingCapture'
+import { requestRecordingStart, clearPendingRecordingStart } from './services/recordingIntent'
 
 /**
  * Resolve the concrete class of a document node by its `type`
@@ -104,7 +110,7 @@ function cancelScenarioSaveTimer(): void {
   latestSaveAll = null
 }
 
-const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design', doc: Record<string, unknown>): object => {
+const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design' | 'recording', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
     if (t === 'soap') return SoapRequest
@@ -116,6 +122,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment' | 'design',
   }
   if (type === 'environment') return EnvironmentClass
   if (type === 'design') return ApiDesignClass
+  if (type === 'recording') return RecordingSessionClass
   // Distinguish env folders from regular folders — the decomposer
   // lifts different child arrays depending on which of the two we're
   // looking at (`environments` + `items` vs `items` only). The bridge
@@ -152,6 +159,7 @@ import { ScenarioToastBody, ScenarioToastTitle } from './components/ScenarioToas
 import { useMcpEnabled } from './hooks/useMcpEnabled'
 import { useMcpActiveStateBridge } from './hooks/useMcpActiveStateBridge'
 import { useMcpNavigation } from './hooks/useMcpNavigation'
+import { useMcpRecordingBridge } from './hooks/useMcpRecordingBridge'
 import { useExternalFileChange } from './hooks/useExternalFileChange'
 import { useGitMergeInProgressToast } from 'electron-core-ui/renderer'
 import { useGitFolder } from './hooks/useGitFolder'
@@ -196,7 +204,7 @@ import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findScenarioById,
-  findDesignById,
+  findDesignById, findRecordingSessionById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
@@ -241,7 +249,7 @@ import {
 import { useFavoritesAndOpenItems } from './hooks/useFavoritesAndOpenItems'
 import { useFileManagement } from './hooks/useFileManagement'
 import { useImport } from './hooks/useImport'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from './types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, makeReactiveRecordingSession } from './types/reactive'
 import { designFromDocumentation } from '../../shared/design/designFromDocumentation'
 import { cloneForEventBus } from './utils/cloneForEventBus'
 import { searchIndexService } from './services/SearchIndexService'
@@ -257,6 +265,7 @@ import {
   isRequest,
   isScenario,
   isApiDesign,
+  isRecordingSession,
   isEnvironmentFolder,
   isAnyFolder,
   isFolder,
@@ -1329,6 +1338,7 @@ const App: React.FC = () => {
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     promoteTemporaryTab,
@@ -1503,7 +1513,11 @@ const App: React.FC = () => {
       return null
     }
     const legacyMatch = /^(folder|env-folder|request|scenario|design)-(?:id:)?(.+)$/.exec(tabId)
-    return legacyMatch?.[2] ?? null
+    if (legacyMatch?.[2]) return legacyMatch[2]
+    // A recording session's tabs (`recording-id:<id>` / `recording-node-id:<id>:<node>`)
+    // all belong to the session item.
+    const recordingMatch = /^recording-(?:node-)?id:([^:]+)/.exec(tabId)
+    return recordingMatch?.[1] ?? null
   }, [rootItems])
 
   // Resolve the active tab's unit id and delegate to `handleMenuSaveUnit`,
@@ -1556,6 +1570,14 @@ const App: React.FC = () => {
     if (!itemId) return null
     const item = findItemById(rootItems, itemId)
     return item !== null && isApiDesign(item) ? itemId : null
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+  const activeRecordingId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isRecordingSession(item) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
@@ -1775,6 +1797,7 @@ const App: React.FC = () => {
     openEnvironmentFolderTab,
     openAnyRequestTab,
     openDesignTab,
+    openRecordingTab,
     projectUuid,
     // A moved SCENARIO has no save-unit document of its own, so nothing
     // marks it unsaved. Route it through the same debounced whole-file
@@ -2041,8 +2064,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? null,
-    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? activeDesignId ?? activeRecordingId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : activeDesignId ? 'design' : activeRecordingId ? 'recording' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on
@@ -2062,6 +2085,7 @@ const App: React.FC = () => {
     openAnyRequestTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
@@ -2210,6 +2234,7 @@ const App: React.FC = () => {
     const typeOf = (it: FolderItem): string => {
       if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
       if ((it as { type?: unknown }).type === 'design') return 'design'
+      if ((it as { type?: unknown }).type === 'recording') return 'recording'
       if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
       if ('items' in it) return 'folder'
       return 'request'
@@ -2355,6 +2380,97 @@ const App: React.FC = () => {
       return { ...prev, groups }
     })
   }, [])
+  // Close ONE tab by its tab id (a session's browser tab, which shares its
+  // item id with the session's other tabs).
+  const handleCloseTabByTabId = useCallback((tabId: string): void => {
+    setWorkbenchTree((prev) => {
+      const filterGroup = (g: GroupNode): GroupNode => {
+        if (isContainerNode(g)) {
+          return { ...g, groups: g.groups.map(filterGroup).filter((c) => !isTabGroupNode(c) || c.tabs.length > 0) }
+        }
+        if (!g.tabs.some((t) => t.id === tabId)) return g
+        const tabs = g.tabs.filter((t) => t.id !== tabId)
+        const activeTabId = g.activeTabId === tabId ? tabs[0]?.id ?? '' : g.activeTabId ?? ''
+        return { ...g, tabs, activeTabId }
+      }
+      const groups = prev.groups.map(filterGroup).filter((g) => !isTabGroupNode(g) || g.tabs.length > 0)
+      return { ...prev, groups }
+    })
+  }, [])
+
+  // The record button of a session's config tab. Start: stage the intent,
+  // expand the session (the browser row appears with the live status), open
+  // the browser tab STABLE — its mini-browser view, once created, starts the
+  // engine. Stop: stop the engine, close the browser tab (the row follows).
+  const handleStartRecordingSession = useCallback((sessionId: string): void => {
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
+    if (!item || !isRecordingSession(item)) return
+    requestRecordingStart(sessionId)
+    setExpandedIds((prev) => Array.from(new Set([...prev, sessionId])))
+    openRecordingTab(item, 'browser', breadcrumbs, { temporary: false })
+  }, [rootItems, openRecordingTab, setExpandedIds])
+
+  const handleStopRecordingSession = useCallback((sessionId: string): void => {
+    clearPendingRecordingStart(sessionId)
+    void window.restorm?.recording.stop(sessionId)
+    handleCloseTabByTabId(recordingTabId(sessionId, 'browser'))
+  }, [handleCloseTabByTabId])
+
+  // MCP `start_recording` / `stop_recording` run the same two flows.
+  useMcpRecordingBridge({
+    enabled: mcpEnabled,
+    rootItemsRef,
+    startRecording: handleStartRecordingSession,
+    stopRecording: handleStopRecordingSession
+  })
+
+  // "Deduce the routes": the captured calls become a tree of folders + real
+  // requests under the session's Routes node — merged with a previous
+  // deduction (the user's edits win, only new routes are added), each new
+  // request prefilled from its last successful call and given the calls as
+  // its response history (the reference one pinned). Then the Routes node
+  // opens on the result.
+  const deducingSessionsRef = useRef(new Set<string>())
+  const handleDeduceRecordingRoutes = useCallback((sessionId: string): void => {
+    const api = window.restorm?.recording
+    if (!api) return
+    // One deduction at a time per session: a second click while the first
+    // is still reading captures would merge twice over the same items.
+    if (deducingSessionsRef.current.has(sessionId)) return
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, sessionId)
+    if (!item || !isRecordingSession(item)) return
+    const session = item
+    deducingSessionsRef.current.add(sessionId)
+    void (async () => {
+      const captures = await api.list(sessionId)
+      const tree = deduceRoutes(captures)
+      const referenceIds = new Set(flattenRoutes(tree).map((route) => route.lastSuccessCaptureId).filter((id): id is string => id !== null))
+      const references = new Map<string, RecordedCallDetail>()
+      for (const id of referenceIds) {
+        const detail = await api.get(sessionId, id)
+        if (detail) references.set(id, detail)
+      }
+      const result = materializeDeducedTree(
+        tree, references, session.items, generateUniqueId,
+        (item, parentId) => makeReactiveFolderItem(item, parentId ?? session.id)
+      )
+      if (result.created.length === 0) {
+        logger.info('[App] Route deduction found nothing new', { sessionId, routes: result.summary.routes })
+      } else {
+        session.items = result.items
+        for (const { item: created, parentId } of result.created) emitClonedSubtreeCreated(created, parentId ?? session.id)
+        setRootItems((prev) => [...prev])
+        void api.materializeHistory(sessionId, result.history).catch((error: unknown) => {
+          logger.warn('[App] Could not write the deduced requests history', { sessionId, error: String(error) })
+        })
+      }
+      setExpandedIds((prev) => Array.from(new Set([...prev, sessionId, recordingNodeRowId(sessionId, 'routes')])))
+      openRecordingTab(session, 'routes', breadcrumbs, { temporary: false })
+    })().catch((error: unknown) => {
+      logger.error('[App] Route deduction failed', { sessionId, error: String(error) })
+    }).finally(() => { deducingSessionsRef.current.delete(sessionId) })
+  }, [rootItems, setRootItems, setExpandedIds, openRecordingTab])
+
   // Patch the forward-reference ref consumed by `useMcpNavigation` (above).
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
   // Let the transient-clients store close the tabs its requests opened when a
@@ -3168,6 +3284,7 @@ const App: React.FC = () => {
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
   const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
   const getDesignByIdCb = useCallback((id: string) => findDesignById(rootItems, id), [rootItems])
+  const getRecordingSessionByIdCb = useCallback((id: string) => findRecordingSessionById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -3271,7 +3388,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : isRecordingSession(item) ? makeReactiveRecordingSession(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -3285,6 +3402,8 @@ const App: React.FC = () => {
               // A design indexes itself + its models/enums/routes as
               // sub-entries of the design category.
               await searchIndexService.indexDesign(rootItem)
+            } else if (isRecordingSession(rootItem)) {
+              await searchIndexService.indexRecordingTree(rootItem)
             } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
@@ -3470,7 +3589,7 @@ const App: React.FC = () => {
     // `commitIfDraftMatches` actually matches when the node hasn't
     // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
-    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design'): 'folder' | 'file' =>
+    const kindForType = (type: 'folder' | 'request' | 'environment' | 'design' | 'recording'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
 
     // Per-id debounce for the save-unit draft IPC. Typing in a
@@ -3617,18 +3736,22 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleFolderOrRequestUpdated),
+      eventBus.subscribe(DocumentEvents.RECORDING_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvironmentUpdated),
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.DESIGN_UPDATED, handleUpsert),
+      eventBus.subscribe(DocumentEvents.RECORDING_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleUpsert),
       eventBus.subscribe(DocumentEvents.FOLDER_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.REQUEST_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.DESIGN_CREATED, handleUpsertImmediate),
+      eventBus.subscribe(DocumentEvents.RECORDING_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.DESIGN_DELETED, handleDelete),
+      eventBus.subscribe(DocumentEvents.RECORDING_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
       // Bump tab contentVersion so request tabs re-derive their live
       // env list when the env tree mutates — see comment above.
@@ -3677,6 +3800,7 @@ const App: React.FC = () => {
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     selectedItemId,
@@ -3743,9 +3867,9 @@ const App: React.FC = () => {
     const itemId = event.dataTransfer?.getData('text/plain')
     if (!itemId) return
     // Only open items that exist in the tree (request / folder / env-folder
-    // / scenario). Unknown ids (a foreign drag that happened to carry our
-    // marker MIME) are ignored.
-    if (!resolveBoundItem(itemId)) return
+    // / scenario…) or a recording session's node rows. Unknown ids (a foreign
+    // drag that happened to carry our marker MIME) are ignored.
+    if (!resolveBoundItem(itemId) && parseRecordingNodeRowId(itemId) === null) return
     openItemAtSplit(itemId, targetGroupId, direction)
   }, [resolveBoundItem, openItemAtSplit])
 
@@ -4009,6 +4133,10 @@ const App: React.FC = () => {
               getFolderById={getFolderByIdCb}
               getScenarioById={getScenarioByIdCb}
               getDesignById={getDesignByIdCb}
+              getRecordingSessionById={getRecordingSessionByIdCb}
+              onStartRecordingSession={handleStartRecordingSession}
+              onStopRecordingSession={handleStopRecordingSession}
+              onDeduceRecordingRoutes={handleDeduceRecordingRoutes}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -4099,6 +4227,10 @@ const App: React.FC = () => {
             getFolderById={(id) => findFolderById(rootItems, id)}
             getScenarioById={(id) => findScenarioById(rootItems, id)}
             getDesignById={(id) => findDesignById(rootItems, id)}
+            getRecordingSessionById={(id) => findRecordingSessionById(rootItems, id)}
+            onStartRecordingSession={handleStartRecordingSession}
+            onStopRecordingSession={handleStopRecordingSession}
+            onDeduceRecordingRoutes={handleDeduceRecordingRoutes}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

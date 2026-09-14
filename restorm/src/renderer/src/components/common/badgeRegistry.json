@@ -360,6 +360,7 @@
     "color": "var(--badge-scenario-background)",
     "icon": "circuit-board"
   },
+  "recording": { "color": "var(--recording-on-air-background)", "icon": "record" },
   "design": {
     "color": "var(--badge-design-background)",
     "icon": "symbol-color"

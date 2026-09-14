@@ -318,6 +318,17 @@ variables:
     value: "#3b82f6"
     description: "API design badge background (blue)"
 
+  # ── Recording session "on air" ──────────────────────────────────────────────
+  # The session badge + its recording border-beam. A dedicated red: "we are
+  # recording", not "danger" — deliberately apart from the error / delete reds.
+  - id: recording-on-air-background
+    value: "#e11d48"
+    description: "Recording session badge + on-air beam (rose red — not the danger red)"
+
+  - id: recording-on-air-beam-tail
+    value: "#fb7185"
+    description: "Recording on-air beam trail tail (lighter rose)"
+
   # ── Server-mode capsule glyph ────────────────────────────────────────────────
   - id: badge-capsule-glyph-background
     value: "#6b21a8"

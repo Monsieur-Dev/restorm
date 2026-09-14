@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import type { RecordedCallDetail, RecordedCallSummary, RecordingFilterConfig, RecordingRun, RecordingStatus, RecordingHistoryPlanEntry } from '../../shared/types/recordingCapture'
 import { cloneForEventBus } from '../../shared/utils/cloneForEventBus'
 // Import from core-ui preload modules using relative paths
 // This works in both dev and prod because:
@@ -815,6 +816,81 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Clear all context data (when file is closed) */
     clearAll: async (): Promise<void> => {
       await ipcRenderer.invoke('context:clear-all')
+    }
+  },
+  recording: {
+    /** Start capturing the network traffic of a Mini-Browser tab for a
+     * recording session. The tab's view must exist (`miniBrowser.create`). */
+    start: async (sessionId: string, tabId: string, url: string, config: RecordingFilterConfig): Promise<{ ok: true; status: RecordingStatus } | { ok: false; error: string }> => {
+      return await ipcRenderer.invoke('recording:start', sessionId, tabId, url, config) as { ok: true; status: RecordingStatus } | { ok: false; error: string }
+    },
+    stop: async (sessionId: string): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:stop', sessionId) as RecordingStatus
+    },
+    /** Pause = keep listening, store nothing; resume picks up instantly. */
+    setPaused: async (sessionId: string, paused: boolean): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:set-paused', sessionId, paused) as RecordingStatus
+    },
+    status: async (sessionId: string): Promise<RecordingStatus> => {
+      return await ipcRenderer.invoke('recording:status', sessionId) as RecordingStatus
+    },
+    /** Light rows only — headers, bodies and frames come with `get`. */
+    list: async (sessionId: string): Promise<RecordedCallSummary[]> => {
+      return await ipcRenderer.invoke('recording:list', sessionId) as RecordedCallSummary[]
+    },
+    runs: async (sessionId: string): Promise<RecordingRun[]> => {
+      return await ipcRenderer.invoke('recording:runs', sessionId) as RecordingRun[]
+    },
+    get: async (sessionId: string, captureId: string): Promise<RecordedCallDetail | null> => {
+      return await ipcRenderer.invoke('recording:get', sessionId, captureId) as RecordedCallDetail | null
+    },
+    clearRun: async (sessionId: string, runId: string): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:clear-run', sessionId, runId) as { removed: string[] }
+    },
+    remove: async (sessionId: string, ids: string[]): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:remove', sessionId, ids) as { removed: string[] }
+    },
+    /** Live update of the gate for the NEXT calls. */
+    setFilters: async (sessionId: string, config: RecordingFilterConfig): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('recording:set-filters', sessionId, config) as { ok: boolean }
+    },
+    /** Destructive: drop the stored calls the current lists would refuse. */
+    applyFilters: async (sessionId: string): Promise<{ removed: string[] }> => {
+      return await ipcRenderer.invoke('recording:apply-filters', sessionId) as { removed: string[] }
+    },
+    /** Write the captured calls behind each deduced request into its response history. */
+    materializeHistory: async (sessionId: string, plan: RecordingHistoryPlanEntry[]): Promise<{ stored: number }> => {
+      return await ipcRenderer.invoke('recording:materialize-history', sessionId, plan) as { stored: number }
+    },
+    onCaptureAdded: (callback: (summary: RecordedCallSummary) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, summary: RecordedCallSummary): void => { callback(summary) }
+      ipcRenderer.on('recording:capture-added', handler)
+      return () => { ipcRenderer.removeListener('recording:capture-added', handler) }
+    },
+    onCaptureUpdated: (callback: (summary: RecordedCallSummary) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, summary: RecordedCallSummary): void => { callback(summary) }
+      ipcRenderer.on('recording:capture-updated', handler)
+      return () => { ipcRenderer.removeListener('recording:capture-updated', handler) }
+    },
+    onCapturesRemoved: (callback: (payload: { sessionId: string; ids: string[] }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { sessionId: string; ids: string[] }): void => { callback(payload) }
+      ipcRenderer.on('recording:captures-removed', handler)
+      return () => { ipcRenderer.removeListener('recording:captures-removed', handler) }
+    },
+    onRunChanged: (callback: (run: RecordingRun) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, run: RecordingRun): void => { callback(run) }
+      ipcRenderer.on('recording:run-changed', handler)
+      return () => { ipcRenderer.removeListener('recording:run-changed', handler) }
+    },
+    onRunRemoved: (callback: (payload: { sessionId: string; runId: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { sessionId: string; runId: string }): void => { callback(payload) }
+      ipcRenderer.on('recording:run-removed', handler)
+      return () => { ipcRenderer.removeListener('recording:run-removed', handler) }
+    },
+    onStatusChanged: (callback: (status: RecordingStatus) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, status: RecordingStatus): void => { callback(status) }
+      ipcRenderer.on('recording:status-changed', handler)
+      return () => { ipcRenderer.removeListener('recording:status-changed', handler) }
     }
   },
   miniBrowser: {
@@ -2304,7 +2380,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -2395,7 +2471,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
@@ -2405,8 +2481,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * (which awaits an ack, see `replyMcpOpenTab`) and absent for the other
      * internal senders (e.g. `run_request`'s tab-open side effect), which
      * stay fire-and-forget. */
-    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpOpenTab: (callback: (payload: { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId?: string; itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
@@ -2419,9 +2495,32 @@ contextBridge.exposeInMainWorld('restorm', {
     replyMcpOpenTab: (payload: { requestId: string; opened: boolean }): void => {
       ipcRenderer.send('mcp:open-tab-result', payload)
     },
+    /** Subscribe to MCP `start_recording` requests. Payload `{requestId, sessionId}`:
+     * the renderer runs the record button's flow (stage the intent, open the
+     * browser tab) and acks whether it found the session (`replyMcpStartRecording`).
+     * Main then watches the capture engine's status — the ack only says the
+     * flow was started, not that the engine attached. */
+    onMcpStartRecording: (callback: (payload: { requestId: string; sessionId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId: string; sessionId: string }) }
+      ipcRenderer.on('mcp:start-recording', handler)
+      return () => { ipcRenderer.off('mcp:start-recording', handler) }
+    },
+    /** Ack an `mcp:start-recording` request. `accepted` = this window holds
+     * the session and launched the start flow. */
+    replyMcpStartRecording: (payload: { requestId: string; accepted: boolean }): void => {
+      ipcRenderer.send('mcp:start-recording-result', payload)
+    },
+    /** Subscribe to MCP `stop_recording` requests. Payload `{sessionId}`. Main
+     * has already stopped the engine; the renderer closes the browser tab and
+     * clears any staged start intent. */
+    onMcpStopRecording: (callback: (payload: { sessionId: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { sessionId: string }) }
+      ipcRenderer.on('mcp:stop-recording', handler)
+      return () => { ipcRenderer.off('mcp:stop-recording', handler) }
+    },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -2436,8 +2535,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

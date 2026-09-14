@@ -36,14 +36,16 @@ import type {
   Environment,
   Request,
   Scenario,
-  ApiDesign
+  ApiDesign,
+  RecordingSession
 } from '../../../shared/types/collections'
 import {
   isRequest,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario,
-  isApiDesign
+  isApiDesign,
+  isRecordingSession
 } from '../../../shared/types/collections'
 import { protocolSpec, requestTabTitle, isRequestType } from '../../../shared/protocolRegistry'
 import type {
@@ -52,6 +54,7 @@ import type {
   EnvironmentFolderTab,
   ScenarioEditorTab,
   DesignTab,
+  RecordingTab,
   ConsoleTab,
   FirewallTab,
   SettingsTab,
@@ -59,6 +62,8 @@ import type {
   BreadcrumbItem
 } from '../../../shared/types/editor'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, COOKIE_JAR_TAB_ID, type MiniBrowserTab, type CookieJarTab } from '../../../shared/types/editor'
+import { recordingTabId, parseRecordingTabId, type RecordingTabNode } from '../../../shared/recording/recordingSections'
+import { recordingTabTitle } from '../utils/recordingTabTitle'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: FolderItem[]
@@ -174,10 +179,12 @@ export interface UseWorkbenchTabsReturn {
   workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
   hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
-  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design', id: string) => string
+  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design' | 'recording', id: string) => string
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openDesignTab: (design: ApiDesign, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  /** Open one of a recording session's tabs — its config, or a node (browser / captures / routes). */
+  openRecordingTab: (session: RecordingSession, node: RecordingTabNode, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   /** Promote the preview tab for `itemId` to a permanent tab (clears the
@@ -259,7 +266,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
    * compat with already-persisted workbench state; new tabs are
    * always emitted as `request-id:<uuid>`.
    */
-  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design', id: string): string => {
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design' | 'recording', id: string): string => {
     return `${prefix}-id:${id}`
   }, [])
 
@@ -495,6 +502,31 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
+  // Open a recording session's tab — the session row opens its config, each
+  // virtual node row (browser / captures / routes) opens its own tab.
+  const openRecordingTab = useCallback((session: RecordingSession, node: RecordingTabNode, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
+    const tabId = recordingTabId(session.id, node)
+    if (node === 'config') {
+      setTimeout(() => {
+        registerTabDirtyState(session.id, computeChecksumSnapshot(session))
+      }, 500)
+    }
+    const title = recordingTabTitle(session, node)
+    setWorkbenchTree((prev) => {
+      const newTab: RecordingTab = {
+        id: tabId,
+        tabType: 'recording',
+        title,
+        titleString: title,
+        session,
+        node,
+        breadcrumbs,
+        allowFullscreen: true
+      }
+      return addTabToTree(prev, tabId, newTab, options, session.id)
+    })
+  }, [registerTabDirtyState, setWorkbenchTree, addTabToTree])
+
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
     const tabId = buildTabId('env-folder', folder.id)
@@ -602,11 +634,11 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     })
   }, [setWorkbenchTree])
 
-  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design'; itemId: string } | null => {
-    const match = /^(folder|env-folder|request|scenario|design)-id:(.+)$/.exec(tabId)
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario' | 'design' | 'recording'; itemId: string } | null => {
+    const match = /^(folder|env-folder|request|scenario|design|recording)-id:(.+)$/.exec(tabId)
     if (match?.[1] && match[2]) {
       return {
-        type: match[1] as 'folder' | 'env-folder' | 'request' | 'scenario' | 'design',
+        type: match[1] as 'folder' | 'env-folder' | 'request' | 'scenario' | 'design' | 'recording',
         itemId: match[2]
       }
     }
@@ -690,6 +722,30 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         titleString: 'Cookie jar',
         allowFullscreen: true
       } as CookieJarTab
+    }
+    // Recording session tabs: the config tab and the per-node tabs (browser /
+    // captures / routes) rebuild from the live session item.
+    const recordingTab = parseRecordingTabId(tabId)
+    if (recordingTab !== null) {
+      // The browser tab exists only while a recording runs — a recording is
+      // never restored across a relaunch, so the tab is not rebuilt either.
+      if (recordingTab.node === 'browser') return null
+      const item = findItemById(rootItems, recordingTab.sessionId)
+      if (item && isRecordingSession(item)) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+        const title = recordingTabTitle(item, recordingTab.node)
+        return {
+          id: tabId,
+          tabType: 'recording',
+          title,
+          titleString: title,
+          session: item,
+          node: recordingTab.node,
+          breadcrumbs,
+          allowFullscreen: true
+        } as RecordingTab
+      }
+      return null
     }
     const parsed = parseTabId(tabId)
     if (!parsed) return null
@@ -856,6 +912,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     openFolderTab,
     openScenarioEditorTab,
     openDesignTab,
+    openRecordingTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     promoteTemporaryTab,

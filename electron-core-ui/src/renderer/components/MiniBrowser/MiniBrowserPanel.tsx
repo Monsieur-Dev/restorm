@@ -73,6 +73,10 @@ export interface MiniBrowserPanelProps {
   onUrlChange: (url: string) => void
   /** Host-provided lifecycle bridge — see `MiniBrowserDriver`. */
   driver: MiniBrowserDriver
+  /** Extra controls rendered at the right end of the address line (a host
+   * app's pause / stop buttons, for instance). Purely presentational: the
+   * panel neither reads nor wires them. */
+  toolbarActions?: React.ReactNode
 }
 
 /**
@@ -88,7 +92,7 @@ export interface MiniBrowserPanelProps {
  * panel free to be moved / re-rendered / re-portalled by the
  * workbench without disturbing the embedded page.
  */
-export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initialUrl, onUrlChange, driver }) => {
+export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initialUrl, onUrlChange, driver, toolbarActions }) => {
   const { t } = useTranslation()
   const [addressBar, setAddressBar] = useState(initialUrl ?? '')
   const [committedUrl, setCommittedUrl] = useState(initialUrl ?? '')
@@ -508,6 +512,11 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
             data-testid="mini-browser-button-go"
           />
         </ControlGroup>
+        {toolbarActions !== undefined && toolbarActions !== null && (
+          <div className="mini-browser-panel__toolbar-actions" data-testid="mini-browser-toolbar-actions">
+            {toolbarActions}
+          </div>
+        )}
       </div>
       <div className="mini-browser-panel__frame">
         {/* Placeholder slot — the host's content view is positioned over

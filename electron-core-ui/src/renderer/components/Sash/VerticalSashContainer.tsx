@@ -15,6 +15,7 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
   RightWhenResizing,
   initialWidth = 200,
   initialLeftRatio,
+  keepRatio = false,
   minLeftWidth = 50,
   minRightWidth = 240,
   storageKey,
@@ -81,6 +82,36 @@ export const VerticalSashContainer: React.FC<VerticalSashContainerProps> = ({
     )
     setWidth(target)
   }, [containerWidth, initialLeftRatio, storageKey, minLeftWidth, minRightWidth, setWidth])
+
+  // Proportional resize: remember the share the left panel has (updated by
+  // the user's drags and by the ratio seed above), and re-derive the pixel
+  // width from it whenever the container's width changes. The width this
+  // effect sets itself is flagged so a clamp at a min width does not drift
+  // the remembered share.
+  const ratioRef = useRef<number | null>(null)
+  const lastContainerWidthRef = useRef(0)
+  const selfSetWidthRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (!keepRatio || containerWidth <= 0) return
+    const previous = lastContainerWidthRef.current
+    lastContainerWidthRef.current = containerWidth
+    if (previous === containerWidth || previous === 0) {
+      // Same container: the width changed by a drag (or the seed) — unless
+      // it is the value this effect just set.
+      if (selfSetWidthRef.current !== width) ratioRef.current = width / containerWidth
+      selfSetWidthRef.current = null
+      return
+    }
+    const ratio = ratioRef.current ?? width / previous
+    const target = Math.max(
+      minLeftWidth,
+      Math.min(containerWidth - minRightWidth, Math.round(containerWidth * ratio))
+    )
+    if (target !== width) {
+      selfSetWidthRef.current = target
+      setWidth(target)
+    }
+  }, [keepRatio, containerWidth, width, minLeftWidth, minRightWidth, setWidth])
 
   const [actualMinLeftWidth, setActualMinLeftWidth] = useState(minLeftWidth)
   const [actualMinRightWidth, setActualMinRightWidth] = useState(minRightWidth)

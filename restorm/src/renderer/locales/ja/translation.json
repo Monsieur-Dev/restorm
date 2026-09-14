@@ -316,7 +316,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API デザイン"
+        "design": "API デザイン",
+        "recording": "記録セッション"
       },
       "cut": "切り取り",
       "copy": "コピー",
@@ -443,6 +444,7 @@
         "requestBodyFile": "ファイル"
       },
       "loading": "リクエストを送信しています...",
+      "body": { "download": "ダウンロード", "binary": "バイナリコンテンツ（{{type}}）— 保存するには「ダウンロード」を使用してください", "unknownType": "不明なタイプ" },
       "noResponseBody": "レスポンス本文がありません — 詳細は Infos を参照してください",
       "noResponse": "「送信」をクリックしてリクエストを実行してください",
       "history": {
@@ -751,7 +753,8 @@
       "settings": "設定",
       "tag": "タグ",
       "scenario": "シナリオ",
-      "design": "APIデザイン"
+      "design": "APIデザイン",
+      "recording": "記録セッション"
     },
     "tooltip": {
       "noDetails": "詳細はありません",
@@ -2809,6 +2812,84 @@
     "maxEntriesTitle": "履歴ごとに保持するエントリ数",
     "maxEntriesDescription": "リクエストの呼び出し履歴とシナリオの実行履歴がそれぞれ保持するエントリ数です。ピン留めしたエントリは、この値にかかわらず常に保持されます。ホーム画面の最近のアクティビティ一覧には影響しません。"
   },
+  "recording": {
+    "title": "記録セッション",
+    "maxCapturesTitle": "セッションごとに保持する記録済み呼び出し数",
+    "maxCapturesDescription": "記録セッションがメモリに保持する記録済み呼び出しの数です。上限に達すると、最も古い呼び出しから削除されます。記録内容がプロジェクトファイルに保存されることはありません。",
+    "newSessionName": "新しい記録セッション",
+    "node": {
+      "browser": "ブラウザー",
+      "captures": "キャプチャ",
+      "routes": "ルート"
+    },
+    "tab": {
+      "browserTitle": "ブラウザー: {{name}}",
+      "capturesTitle": "キャプチャ: {{name}}",
+      "routesTitle": "ルート: {{name}}"
+    },
+    "placeholder": {
+      "config": "セッションの設定（ページのURL、プロトコル、ホワイトリストとブラックリスト）がここに表示されます。",
+      "browser": "記録用ブラウザーがここに表示されます。",
+      "captures": "まだ呼び出しは記録されていません。セッションの設定から記録を開始すると、ページの呼び出しがここに表示されます。",
+      "routes": "まだルートは推定されていません。呼び出しを記録してから、キャプチャからルートを推定してください。"
+    },
+    "config": {
+      "subtitle": "Restorm がページの API 呼び出しを監視している間、ページを操作してください。プロジェクトに保存されるのは以下の設定のみで、記録された呼び出しは保存されません。",
+      "url": "監視するページ",
+      "urlPlaceholder": "https://example.com、http://localhost:3000、または file:///path/page.html",
+      "urlInvalid": "http(s) または file の URL を入力してください。",
+      "urlRequired": "記録を有効にするにはページの URL を入力してください。",
+      "record": "記録を開始",
+      "stop": "記録を停止",
+      "protocols": "記録するプロトコル",
+      "whitelist": "ホワイトリスト",
+      "blacklist": "ブラックリスト",
+      "addPattern": "パターンを追加",
+      "removePattern": "このパターンを削除",
+      "invalidPattern": "このパターンは有効な正規表現ではありません。",
+      "patternPlaceholder": "正規表現（例: ^https://api\\.example\\.com/）",
+      "noPattern": "パターンなし — すべて通過します。",
+      "filtersHint": "呼び出しは、ホワイトリストの少なくとも1つの項目に一致し（またはリストが空で）、ブラックリストのどの項目にも一致しない場合に保持されます。変更は以降の呼び出しに適用されます。"
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "記録を一時停止",
+      "resume": "記録を再開",
+      "stop": "記録を停止"
+    },
+    "captures": {
+      "empty": "まだ呼び出しは記録されていません。セッションの設定から記録を開始すると、ページの呼び出しがリアルタイムでここに表示されます。",
+      "filterPlaceholder": "呼び出しを絞り込む（正規表現）",
+      "live": "記録中",
+      "clearRun": "この記録の呼び出しを削除",
+      "selectOne": "呼び出しを選択すると、そのレスポンスが表示されます。",
+      "loadingDetail": "呼び出しを読み込んでいます…",
+      "addToWhitelist": "ホワイトリストに追加…",
+      "addToBlacklist": "ブラックリストに追加…",
+      "patternLabel": "パターン（正規表現）",
+      "add": "追加",
+      "addAndApply": "追加して記録済みの呼び出しに適用",
+      "applyConfirm": "記録済みの呼び出しにリストを適用すると、リストが拒否する呼び出しはすべて削除されます。この操作は取り消せません。",
+      "applyConfirmOk": "適用して削除",
+      "deduce": "ルートを推定",
+      "deduceWhileRecording": "ルートを推定する前に記録を停止してください。",
+      "deduceUnavailable": "ルートの推定はまだ利用できません。",
+      "deduceLocked": "ルートの推定は Pro プラン以上で利用できます。"
+    },
+    "routes": {
+      "empty": "まだルートは推定されていません。呼び出しを記録し、キャプチャの下にある「ルートを推定」を使用してください。リクエストはここと、サイドバーの「ルート」行の下に表示されます。",
+      "proCallout": "記録した呼び出しからのルート推定は Pro プラン以上で利用できます。記録自体はすべての方に開放されています。",
+      "subscribe": "プランを見る",
+      "count_one": "推定されたリクエスト {{count}} 件",
+      "count_other": "推定されたリクエスト {{count}} 件",
+      "hint": "推定されたリクエストは通常のリクエストです。自由に編集してください。再度推定しても変更は保持され、新しいルートのみが追加されます。"
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP 呼び出しログの保持数",
@@ -2849,6 +2930,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "録画セッションを一覧表示",
+    "createRecordingSession": "録画セッションを作成",
+    "updateRecordingSession": "録画セッションを更新",
+    "setRecordingFilters": "録画セッションの URL フィルターを設定",
+    "startRecording": "セッションの録画を開始",
+    "stopRecording": "セッションの録画を停止",
+    "getRecordingStatus": "録画セッションの状態を取得",
+    "listRecordingCaptures": "録画セッションでキャプチャした呼び出しを一覧表示",
+    "getRecordingCapture": "キャプチャした呼び出しの詳細を取得",
+    "deduceRecordingRoutes": "録画セッションからルートを推定",
     "answerScenarioInput": "シナリオ入力に応答",
     "arrangeScenario": "シナリオを自動整列",
     "cancelRequest": "リクエストをキャンセル",
@@ -3209,6 +3300,9 @@
       "addedDesign": "デザイン「{{name}}」を追加",
       "modifiedDesign": "デザイン「{{name}}」を変更",
       "deletedDesign": "デザイン「{{name}}」を削除",
+      "addedRecording": "記録セッション「{{name}}」を追加",
+      "modifiedRecording": "記録セッション「{{name}}」を変更",
+      "deletedRecording": "記録セッション「{{name}}」を削除",
       "addedFolder": "フォルダー「{{name}}」を追加",
       "modifiedFolder": "フォルダー「{{name}}」を変更",
       "deletedFolder": "フォルダー「{{name}}」を削除",
@@ -3218,6 +3312,7 @@
       "movedRequest": "リクエスト「{{name}}」を移動",
       "movedScenario": "シナリオ「{{name}}」を移動",
       "movedDesign": "デザイン「{{name}}」を移動",
+      "movedRecording": "記録セッション「{{name}}」を移動",
       "movedFolder": "フォルダー「{{name}}」を移動",
       "movedEnvironmentFolder": "環境フォルダー「{{name}}」を移動",
       "reorderedFolder": "フォルダー「{{name}}」内の項目を並べ替えました",
@@ -3229,6 +3324,7 @@
       "singleRequest": "リクエスト「{{name}}」の更新",
       "singleScenario": "シナリオ「{{name}}」の更新",
       "singleDesign": "デザイン「{{name}}」の更新",
+      "singleRecording": "記録セッション「{{name}}」の更新",
       "singleFolder": "フォルダー「{{name}}」の更新",
       "singleEnvironmentFolder": "環境フォルダー「{{name}}」の更新",
       "singleFileFormatVersion": "ファイル形式 {{name}} への移行",
@@ -3238,6 +3334,8 @@
       "countScenario_other": "シナリオ{{count}}件",
       "countDesign_one": "デザイン{{count}}件",
       "countDesign_other": "デザイン{{count}}件",
+      "countRecording_one": "記録セッション{{count}}件",
+      "countRecording_other": "記録セッション{{count}}件",
       "countFolder_one": "フォルダー{{count}}件",
       "countFolder_other": "フォルダー{{count}}件",
       "countEnvironmentFolder_one": "環境フォルダー{{count}}件",
@@ -3331,6 +3429,9 @@
     "crashReportsDescription": "Restorm がクラッシュしたときに匿名化されたレポートを送信し、不具合を修正できるようにします。レポートは端末を離れる前に URL、トークン、リクエスト本文、個人データが除去されます。無料プランに含まれます。有料プランでは無効にできます。 詳細: https://restorm.app/privacy",
     "telemetryTitle": "利用状況の統計を送信",
     "telemetryDescription": "どの機能が使われているかの匿名統計を送信し、今後の開発方針に役立てます。既定ではオフで、明示的な同意なしに有効になることはありません。リクエストデータ、URL、個人データは一切含みません。 詳細: https://restorm.app/privacy",
+    "geolocationTitle": "埋め込みブラウザと位置情報を共有する",
+    "geolocationDescription": "おおよその位置情報を取得し（システムの位置情報サービスから、取得できない場合は IP アドレスから推定）、埋め込みのミニ Web ブラウザにのみ渡します。これにより、位置情報を利用するサイトが記録セッションで動作します。Restorm には何も送信されません。",
+    "geolocationConsent": {"title": "埋め込みブラウザと位置情報を共有しますか?", "body": "Restorm はシステムの位置情報サービスに現在位置を問い合わせ（取得できない場合は、第三者のサービスを通じて IP アドレスから推定し）、埋め込みのミニ Web ブラウザで開いたページにのみ渡します。それ以外の場合に位置情報がお使いのコンピューターの外に出ることはなく、このオプションをオフにすると直ちに破棄されます。", "accept": "許可する", "decline": "今はしない"},
     "crashReportsLockedLabel": "Pro プラン以上で変更できます。無料プランでは、品質を保つためにクラッシュレポートが必要です。",
     "consentToast": {
       "title": "Restorm の改善にご協力ください",

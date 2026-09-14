@@ -59,7 +59,38 @@ function sc(
   } as unknown as FolderItem
 }
 
+function rec(id: string, name: string, items: FolderItem[] = []): FolderItem {
+  return { type: 'recording', id, name, url: 'http://localhost/', protocols: ['http'], whitelist: [], blacklist: [], items } as unknown as FolderItem
+}
+
 describe('mcp/tree', () => {
+  describe('recording sessions', () => {
+    it('flattenTree descends into a recording session without listing it as a folder', () => {
+      const tree = [ef('root', 'root', [rec('rec', 'Recording', [f('api', 'api', [r('ping', 'GET /api/ping', 'http', 'GET')])])])]
+      const { folders, requests } = flattenTree(tree)
+      expect(folders).toEqual([
+        { id: 'root', name: 'root', kind: 'env-folder', parentId: null },
+        { id: 'api', name: 'api', kind: 'folder', parentId: 'rec' }
+      ])
+      expect(requests).toEqual([{ id: 'ping', name: 'GET /api/ping', protocol: 'http', method: 'GET', parentId: 'api' }])
+    })
+
+    it('listChildren lists the deduced routes directly under the session', () => {
+      const session = rec('rec', 'Recording', [f('api', 'api'), r('root-req', 'root-req', 'http', 'GET')])
+      const { folders, requests } = listChildren(session as never)
+      expect(folders.map((x) => x.id)).toEqual(['api'])
+      expect(requests.map((x) => x.id)).toEqual(['root-req'])
+    })
+
+    it('buildTree emits a recording node with its children', () => {
+      const [node] = buildTree([rec('rec', 'Recording', [f('api', 'api', [r('ping', 'ping', 'http', 'GET')])])])
+      expect(node).toEqual({
+        id: 'rec', name: 'Recording', kind: 'recording',
+        children: [{ id: 'api', name: 'api', kind: 'folder', children: [{ id: 'ping', name: 'ping', kind: 'request', protocol: 'http' }] }]
+      })
+    })
+  })
+
   describe('folderKind', () => {
     it('returns "folder" for a plain folder', () => {
       expect(folderKind(f('a', 'A'))).toBe('folder')

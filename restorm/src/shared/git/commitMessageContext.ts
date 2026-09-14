@@ -5,6 +5,7 @@ const DIFF_KEYS: Record<GitEntityKind, Record<'added' | 'modified' | 'moved' | '
   request: { added: 'git.diff.addedRequest', modified: 'git.diff.modifiedRequest', moved: 'git.diff.movedRequest', deleted: 'git.diff.deletedRequest', reordered: 'git.diff.reorderedFolder' },
   scenario: { added: 'git.diff.addedScenario', modified: 'git.diff.modifiedScenario', moved: 'git.diff.movedScenario', deleted: 'git.diff.deletedScenario', reordered: 'git.diff.reorderedFolder' },
   design: { added: 'git.diff.addedDesign', modified: 'git.diff.modifiedDesign', moved: 'git.diff.movedDesign', deleted: 'git.diff.deletedDesign', reordered: 'git.diff.reorderedFolder' },
+  recording: { added: 'git.diff.addedRecording', modified: 'git.diff.modifiedRecording', moved: 'git.diff.movedRecording', deleted: 'git.diff.deletedRecording', reordered: 'git.diff.reorderedFolder' },
   folder: { added: 'git.diff.addedFolder', modified: 'git.diff.modifiedFolder', moved: 'git.diff.movedFolder', deleted: 'git.diff.deletedFolder', reordered: 'git.diff.reorderedFolder' },
   environmentFolder: {
     added: 'git.diff.addedEnvironmentFolder',
@@ -30,6 +31,7 @@ const SINGLE_TITLE_KEYS: Record<GitEntityKind, string> = {
   request: 'git.commitTitle.singleRequest',
   scenario: 'git.commitTitle.singleScenario',
   design: 'git.commitTitle.singleDesign',
+  recording: 'git.commitTitle.singleRecording',
   folder: 'git.commitTitle.singleFolder',
   environmentFolder: 'git.commitTitle.singleEnvironmentFolder',
   document: 'git.commitTitle.singleFileFormatVersion'
@@ -39,6 +41,7 @@ const COUNT_KEYS: Record<GitEntityKind, string> = {
   request: 'git.commitTitle.countRequest',
   scenario: 'git.commitTitle.countScenario',
   design: 'git.commitTitle.countDesign',
+  recording: 'git.commitTitle.countRecording',
   folder: 'git.commitTitle.countFolder',
   environmentFolder: 'git.commitTitle.countEnvironmentFolder',
   document: 'git.commitTitle.countFileFormatVersion'
@@ -48,7 +51,7 @@ const COUNT_KEYS: Record<GitEntityKind, string> = {
 // then scenarios — matches the diff-line sort order in `gitCommitDiff`.
 // `document` leads: a format change explains why everything else in the
 // file may read differently, so it belongs at the front of the summary.
-const KIND_ORDER: GitEntityKind[] = ['document', 'folder', 'environmentFolder', 'request', 'scenario', 'design']
+const KIND_ORDER: GitEntityKind[] = ['document', 'folder', 'environmentFolder', 'request', 'scenario', 'design', 'recording']
 
 // Extends `Record<string, unknown>` (rather than a plain interface) so it
 // slots straight into `renderCommitMessage`'s generic Handlebars context

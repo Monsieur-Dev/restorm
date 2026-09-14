@@ -24,6 +24,13 @@ import type { MiniBrowserPanelProps, MiniBrowserBridgeApi } from 'electron-core-
   initialUrl={tab.url}
   onUrlChange={(url) => persistUrlOnTab(tab.id, url)}
 />
+
+// With extra controls on the address line (e.g. a recording's Pause / Stop):
+<MiniBrowserPanel
+  initialUrl={session.url}
+  onUrlChange={() => {}}
+  toolbarActions={<RecordingBrowserControls sessionId={session.id} onStop={stop} />}
+/>
 ```
 
 ### Props
@@ -32,6 +39,7 @@ import type { MiniBrowserPanelProps, MiniBrowserBridgeApi } from 'electron-core-
 |---|---|---|
 | `initialUrl` | `string \| undefined` | URL the webview loads on mount. Omit for the empty "enter an address" placeholder. |
 | `onUrlChange` | `(url: string) => void` | Called after a committed navigation — manual address-bar submit, link click, SPA route change (`history.pushState`), refresh, or back. **Not** called on every keystroke. Use it to persist the page on the host's tab. |
+| `toolbarActions` | `React.ReactNode \| undefined` | Extra controls rendered at the right end of the address line, after the navigation buttons — e.g. the recording session's Pause / Stop buttons. Omit for the plain toolbar. |
 
 ### Behaviour notes
 

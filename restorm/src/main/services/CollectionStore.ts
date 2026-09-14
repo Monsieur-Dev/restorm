@@ -13,16 +13,23 @@ import {
   EnvironmentFolder,
   Scenario,
   ApiDesign,
+  RecordingSession,
   Environment,
   KeyValue,
   isEnvironmentFolder,
   isAnyFolder,
   isScenario,
   isApiDesign,
+  isRecordingSession,
   type FolderItem,
   type Request
 } from '../../shared/models'
 import { createRequestFromPlain, getRequestConstructor as resolveRequestConstructor } from '../../shared/models/requests/requestFactory'
+
+/** Every tree item that holds child items. */
+type Container = Folder | EnvironmentFolder | Scenario | RecordingSession
+/** Item kinds `moveItem` reports back. */
+type MovedKind = 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' | 'recording'
 
 // ============================================================================
 // PubSub Topics
@@ -173,7 +180,7 @@ class CollectionStore {
   /**
    * Find parent folder of an item
    */
-  findParentFolder(itemId: string): Folder | EnvironmentFolder | Scenario | null {
+  findParentFolder(itemId: string): Container | null {
     for (const collection of this.collections) {
       // A root request has no children to descend into.
       if (!this.isContainer(collection)) continue
@@ -450,6 +457,77 @@ class CollectionStore {
   }
 
   // ==========================================================================
+  // Mutations - recording sessions
+  // ==========================================================================
+
+  /**
+   * Create a recording session under `parentId` (any container) or at the
+   * ROOT when `null`. Emits the recording-typed created event so search
+   * indexes it and the save-unit bridge learns about the new document.
+   */
+  createRecording(parentId: string | null, data: Partial<RecordingSession> & { name: string }): RecordingSession {
+    const session = RecordingSession.fromPlain({
+      ...data,
+      id: data.id ?? this.generateId(),
+      name: data.name
+    })
+    if (parentId === null) {
+      this.collections.push(session)
+    } else {
+      const parent = this.findById(parentId)
+      if (parent && this.isContainer(parent)) {
+        this.childItemsForWrite(parent).push(session)
+      }
+    }
+    this.emitRecordingCreated(session, parentId)
+    logger.debug('[CollectionStore] Recording session created', { id: session.id, name: session.name, parentId })
+    return session
+  }
+
+  /**
+   * Patch a recording session's own fields (name / notes / url / protocols /
+   * lists) in place — never its `items`, which the deduction owns — and emit
+   * the recording-typed updated event.
+   */
+  updateRecording(id: string, updates: Partial<RecordingSession>): RecordingSession | null {
+    const session = this.findById(id)
+    if (!session || !isRecordingSession(session)) return null
+    Object.assign(session, sanitizeUpdatePatch(updates, ['items']))
+    this.emitRecordingUpdated(session)
+    return session
+  }
+
+  /**
+   * Emit RECORDING_UPDATED for a session a caller mutated in place while
+   * holding the store's object (the MCP deduction replaces `items`).
+   */
+  notifyRecordingUpdated(session: RecordingSession): void {
+    this.emitRecordingUpdated(session)
+  }
+
+  /** Delete a recording session by id (root or nested). Emits the
+   * recording-typed deleted event — the capture engine / store listen to it
+   * to drop the live recording and its captures. */
+  deleteRecording(id: string): boolean {
+    const session = this.findById(id)
+    if (!session || !isRecordingSession(session)) return false
+    const parent = this.findParentFolder(id)
+    if (!parent) {
+      const index = this.collections.findIndex((c) => c.id === id)
+      if (index === -1) return false
+      this.collections.splice(index, 1)
+    } else {
+      const siblings = this.childItemsForWrite(parent)
+      const index = siblings.findIndex((item) => item.id === id)
+      if (index === -1) return false
+      siblings.splice(index, 1)
+    }
+    this.emitRecordingDeleted(id)
+    logger.debug('[CollectionStore] Recording session deleted', { id })
+    return true
+  }
+
+  // ==========================================================================
   // Mutations - API designs
   // ==========================================================================
 
@@ -703,17 +781,18 @@ class CollectionStore {
     id: string,
     newParentId: string | undefined,
     index: number | undefined
-  ): { ok: true; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design'; parentId: string | null; index: number } | { ok: false; error: string } {
+  ): { ok: true; kind: MovedKind; parentId: string | null; index: number } | { ok: false; error: string } {
     const item = this.findById(id)
     if (!item) return { ok: false, error: `No item with id ${id}` }
 
     // A design must NOT fall through to 'request': emitting it with a
     // request-typed update would make the renderer cleanse the draft
     // against the HTTP-request shape and drop every design section.
-    const kind: 'request' | 'folder' | 'env-folder' | 'scenario' | 'design' =
+    const kind: MovedKind =
       isScenario(item) ? 'scenario'
         : isApiDesign(item) ? 'design'
-          : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
+          : isRecordingSession(item) ? 'recording'
+            : isEnvironmentFolder(item) ? 'env-folder' : isAnyFolder(item) ? 'folder' : 'request'
     const explicitParent = newParentId !== undefined && newParentId.length > 0
     const currentParent = this.findParentFolder(id)
     const isRootItem = currentParent === null && this.collections.some((c) => c.id === id)
@@ -731,6 +810,7 @@ class CollectionStore {
       this.collections.splice(target, 0, removed)
       if (kind === 'request') this.emitRequestUpdated(removed as unknown as Request)
       else if (kind === 'design') this.emitDesignUpdated(removed as unknown as ApiDesign)
+      else if (kind === 'recording') this.emitRecordingUpdated(removed as unknown as RecordingSession)
       else this.emitFolderUpdated(removed as Folder | EnvironmentFolder)
       return { ok: true, kind, parentId: null, index: target }
     }
@@ -739,17 +819,17 @@ class CollectionStore {
     if (destId === undefined) return { ok: false, error: `${id} is a root item; pass newParentId to move it into a container` }
     const dest = this.findById(destId)
     if (!dest) return { ok: false, error: `No item with id ${destId}` }
-    if (!this.isContainer(dest)) return { ok: false, error: `${destId} is not a container (folder, env-folder or scenario)` }
+    if (!this.isContainer(dest)) return { ok: false, error: `${destId} is not a container (folder, env-folder, scenario or recording session)` }
 
     // Cycle guard: the destination must not be the item itself, nor any of its
     // descendants (walk the destination's ancestor chain looking for `id`).
-    for (let p: Folder | EnvironmentFolder | Scenario | null = dest; p !== null; p = this.findParentFolder(p.id)) {
+    for (let p: Container | null = dest; p !== null; p = this.findParentFolder(p.id)) {
       if (p.id === id) return { ok: false, error: 'cannot move an item into itself or its own descendant' }
     }
 
     // env-folder placement rule: no env-folder or scenario anywhere up the chain.
     if (kind === 'env-folder') {
-      for (let p: Folder | EnvironmentFolder | Scenario | null = dest; p !== null; p = this.findParentFolder(p.id)) {
+      for (let p: Container | null = dest; p !== null; p = this.findParentFolder(p.id)) {
         if (isEnvironmentFolder(p)) return { ok: false, error: 'an env-folder cannot be nested inside another env-folder' }
         if (isScenario(p)) return { ok: false, error: 'an env-folder cannot be placed inside a scenario' }
       }
@@ -877,24 +957,27 @@ class CollectionStore {
   // Private Helpers
   // ==========================================================================
 
-  /** A folder-like container: a folder, env-folder, OR a scenario (which holds
-   * child items just like a folder). */
-  private isContainer(item: FolderItem): item is Folder | EnvironmentFolder | Scenario {
-    return isAnyFolder(item) || isScenario(item)
+  /** A folder-like container: a folder, env-folder, a scenario, OR a
+   * recording session (both hold child items just like a folder — a
+   * recording's `items` are its deduced routes). */
+  private isContainer(item: FolderItem): item is Container {
+    return isAnyFolder(item) || isScenario(item) || isRecordingSession(item)
   }
 
-  /** Live child-items array of a container (a scenario's `items` is optional —
-   * read as empty when absent). */
-  private childItems(item: Folder | EnvironmentFolder | Scenario): FolderItem[] {
-    if (isScenario(item)) return item.items ?? []
-    return item.items
+  /** Live child-items array of a container (a scenario's / recording's
+   * `items` is optional — read as empty when absent). */
+  private childItems(item: Container): FolderItem[] {
+    // Container children are declared with the base item shape; the store
+    // reifies them into model instances, so read them as such.
+    if (isScenario(item) || isRecordingSession(item)) return (item.items ?? []) as unknown as FolderItem[]
+    return item.items as unknown as FolderItem[]
   }
 
-  /** Live child-items array of a container, initialising a scenario's `items`
-   * to `[]` when absent so callers can push into it. */
-  private childItemsForWrite(item: Folder | EnvironmentFolder | Scenario): FolderItem[] {
-    if (isScenario(item)) return (item.items ??= [])
-    return item.items
+  /** Live child-items array of a container, initialising a scenario's /
+   * recording's `items` to `[]` when absent so callers can push into it. */
+  private childItemsForWrite(item: Container): FolderItem[] {
+    if (isScenario(item) || isRecordingSession(item)) return (item.items ??= []) as unknown as FolderItem[]
+    return item.items as unknown as FolderItem[]
   }
 
   private findInItems(items: FolderItem[], id: string): FolderItem | null {
@@ -935,7 +1018,7 @@ class CollectionStore {
     return null
   }
 
-  private findParentInFolder(folder: Folder | EnvironmentFolder | Scenario, itemId: string): Folder | EnvironmentFolder | Scenario | null {
+  private findParentInFolder(folder: Container, itemId: string): Container | null {
     for (const item of this.childItems(folder)) {
       if (item.id === itemId) return folder
       if (this.isContainer(item)) {
@@ -1035,11 +1118,26 @@ class CollectionStore {
       return item
     }
     if (item instanceof ApiDesign) return item
+    if (item instanceof RecordingSession) {
+      // A recording session is a container too: its deduced routes are
+      // ordinary items that must come back as class instances.
+      if (item.items) item.items = item.items.map((c) => this.reifyItem(c))
+      return item
+    }
     const rec = item as unknown as Record<string, unknown>
     // Design leaf (plain object). Same reason as the scenario branch
     // below: it carries a `type` the request factory would mangle.
     if (rec['type'] === 'design') {
       return ApiDesign.fromPlain(rec as Parameters<typeof ApiDesign.fromPlain>[0])
+    }
+    // Recording session (plain object): `type`-bearing like a scenario, with
+    // its deduced routes under `items` — reify them like scenario children.
+    if (rec['type'] === 'recording') {
+      const session = RecordingSession.fromPlain(rec as Parameters<typeof RecordingSession.fromPlain>[0])
+      if (Array.isArray(rec['items'])) {
+        session.items = (rec['items'] as FolderItem[]).map((c) => this.reifyItem(c))
+      }
+      return session
     }
     // Scenario leaf (plain object). Checked before the generic
     // `type`-bearing request branch — a scenario also carries a `type`,
@@ -1155,6 +1253,32 @@ class CollectionStore {
     void eventBusService.emit(DocumentEvents.REQUEST_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.REQUEST_UPDATED, request)
     logger.debug('[CollectionStore] Request updated', { id: request.id, name: request.name })
+  }
+
+  private emitRecordingCreated(session: RecordingSession, parentId: string | null): void {
+    const payload: DocumentChangedPayload = {
+      id: session.id,
+      type: 'recording',
+      document: session.toPlainObject(),
+      ...(parentId !== null ? { parentFolderId: parentId } : {})
+    }
+    void eventBusService.emit(DocumentEvents.RECORDING_CREATED, payload)
+  }
+
+  private emitRecordingUpdated(session: RecordingSession): void {
+    const parent = this.findParentFolder(session.id)
+    const payload: DocumentChangedPayload = {
+      id: session.id,
+      type: 'recording',
+      document: session.toPlainObject(),
+      ...(parent ? { parentFolderId: parent.id } : {})
+    }
+    void eventBusService.emit(DocumentEvents.RECORDING_UPDATED, payload)
+  }
+
+  private emitRecordingDeleted(id: string): void {
+    const payload: DocumentDeletedPayload = { id, type: 'recording' }
+    void eventBusService.emit(DocumentEvents.RECORDING_DELETED, payload)
   }
 
   private emitDesignCreated(design: ApiDesign, parentId: string | null): void {

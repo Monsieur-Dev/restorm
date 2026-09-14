@@ -5,12 +5,12 @@
 import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, makeReactiveRecordingSession } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
 import { reidentifyForest } from '../../../shared/utils/reidentifyTree'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
-import { isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
   rootItems: FolderItem[]
@@ -115,7 +115,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           }
         }
         for (const child of folder.items) {
-          if ('items' in child && !isScenario(child)) emitNestedEnvironments(child)
+          if ('items' in child && !isScenario(child) && !isRecordingSession(child)) emitNestedEnvironments(child)
         }
       }
 
@@ -131,7 +131,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // a full-tree save right after, so crash recovery kicks in off
       // the persisted file, not off per-node drafts.
       const emitTopLevelCreated = (item: FolderItem): void => {
-        if ('items' in item && !isScenario(item)) {
+        if ('items' in item && !isScenario(item) && !isRecordingSession(item)) {
           const folder = item
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: folder.id,
@@ -142,6 +142,15 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             document: cloneForEventBus(folder)
           })
           emitNestedEnvironments(folder)
+        } else if (isRecordingSession(item)) {
+          // A recording session (from a .restorm import) is its own
+          // save-unit document kind, like a design; its deduced routes are
+          // indexed by the main-side walk like a folder's descendants.
+          eventBus.emitSync(DocumentEvents.RECORDING_CREATED, {
+            id: item.id,
+            type: 'recording',
+            document: cloneForEventBus(item)
+          })
         } else if (isApiDesign(item)) {
           // A design has its own save-unit document kind — announcing it
           // as 'request' would cleanse its draft against the wrong shape.
@@ -248,7 +257,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        isScenario(item) ? item : isApiDesign(item) ? makeReactiveApiDesign(item) : isRecordingSession(item) ? makeReactiveRecordingSession(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

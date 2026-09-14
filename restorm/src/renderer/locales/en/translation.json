@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API design"
+        "design": "API design",
+        "recording": "Recording session"
       },
       "cut": "Cut",
       "copy": "Copy",
@@ -444,6 +445,7 @@
         "requestBodyFile": "File"
       },
       "loading": "Sending request...",
+      "body": { "download": "Download", "binary": "Binary content ({{type}}) — use Download to save it", "unknownType": "unknown type" },
       "noResponseBody": "No response body — see Infos for details",
       "noResponse": "Click Send to execute the request",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Settings",
       "tag": "Tags",
       "scenario": "Scenarios",
-      "design": "API designs"
+      "design": "API designs",
+      "recording": "Recording sessions"
     },
     "tooltip": {
       "noDetails": "No details available",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Entries kept per history",
     "maxEntriesDescription": "How many entries the request call history and the scenario run history each keep. Pinned entries are always kept, whatever this is set to. The home screen's recent-activity lists are not affected."
   },
+  "recording": {
+    "title": "Recording sessions",
+    "maxCapturesTitle": "Captured calls kept per session",
+    "maxCapturesDescription": "How many captured calls a recording session keeps in memory. Once the cap is reached, the oldest calls are dropped first. Captures are never saved in the project file.",
+    "newSessionName": "New recording session",
+    "node": {
+      "browser": "Browser",
+      "captures": "Captures",
+      "routes": "Routes"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Captures: {{name}}",
+      "routesTitle": "Routes: {{name}}"
+    },
+    "placeholder": {
+      "config": "The session settings (page url, protocols, white and black lists) will appear here.",
+      "browser": "The recording browser will appear here.",
+      "captures": "No call captured yet. Start a recording from the session settings to see the calls of the page appear here.",
+      "routes": "No route deduced yet. Record some calls, then deduce the routes from the captures."
+    },
+    "config": {
+      "subtitle": "Browse the page while Restorm listens to its API calls. Only the settings below are saved with the project — never the captured calls.",
+      "url": "Page to listen on",
+      "urlPlaceholder": "https://example.com, http://localhost:3000 or file:///path/page.html",
+      "urlInvalid": "Enter an http(s) or file url.",
+      "urlRequired": "Enter the page url to enable recording.",
+      "record": "Start recording",
+      "stop": "Stop recording",
+      "protocols": "Protocols to capture",
+      "whitelist": "White list",
+      "blacklist": "Black list",
+      "addPattern": "Add a pattern",
+      "removePattern": "Remove this pattern",
+      "invalidPattern": "This pattern is not a valid regular expression.",
+      "patternPlaceholder": "Regular expression, e.g. ^https://api\\.example\\.com/",
+      "noPattern": "No pattern — everything passes.",
+      "filtersHint": "A call is kept when it matches at least one white-list entry (or the list is empty) and no black-list entry. Changes apply to the next calls."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pause the recording",
+      "resume": "Resume the recording",
+      "stop": "Stop the recording"
+    },
+    "captures": {
+      "empty": "No call captured yet. Start a recording from the session settings to see the calls of the page appear here as they happen.",
+      "filterPlaceholder": "Filter the calls (regular expression)",
+      "live": "recording",
+      "clearRun": "Delete the calls of this run",
+      "selectOne": "Select a call to see its response.",
+      "loadingDetail": "Loading the call…",
+      "addToWhitelist": "Add to the white list…",
+      "addToBlacklist": "Add to the black list…",
+      "patternLabel": "Pattern (regular expression)",
+      "add": "Add",
+      "addAndApply": "Add and apply to the captured calls",
+      "applyConfirm": "Applying the lists to the calls already captured removes every call they now refuse. This cannot be undone.",
+      "applyConfirmOk": "Apply and remove",
+      "deduce": "Deduce the routes",
+      "deduceWhileRecording": "Stop the recording before deducing the routes.",
+      "deduceUnavailable": "Route deduction is not available yet.",
+      "deduceLocked": "Deducing the routes is available from the Pro plan."
+    },
+    "routes": {
+      "empty": "No route deduced yet. Record calls, then use “Deduce the routes” under the captures — the requests appear here and under the Routes row in the sidebar.",
+      "proCallout": "Deducing routes from the captured calls is available from the Pro plan. Recording stays open to everyone.",
+      "subscribe": "See the plans",
+      "count_one": "{{count}} deduced request",
+      "count_other": "{{count}} deduced requests",
+      "hint": "The deduced requests are ordinary requests: edit them freely, deducing again keeps your changes and adds the new routes only."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP call-log retention",
@@ -2844,6 +2925,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "List recording sessions",
+    "createRecordingSession": "Create a recording session",
+    "updateRecordingSession": "Update a recording session",
+    "setRecordingFilters": "Set the url filters of a recording session",
+    "startRecording": "Start recording a session",
+    "stopRecording": "Stop recording a session",
+    "getRecordingStatus": "Get the status of a recording session",
+    "listRecordingCaptures": "List the captured calls of a recording session",
+    "getRecordingCapture": "Get one captured call in full",
+    "deduceRecordingRoutes": "Deduce the routes of a recording session",
     "answerScenarioInput": "Answer a scenario input",
     "arrangeScenario": "Auto-arrange the scenario",
     "cancelRequest": "Cancel a request",
@@ -3204,6 +3295,9 @@
       "addedDesign": "Added the design \"{{name}}\"",
       "modifiedDesign": "Modified the design \"{{name}}\"",
       "deletedDesign": "Deleted the design \"{{name}}\"",
+      "addedRecording": "Added the recording session \"{{name}}\"",
+      "modifiedRecording": "Modified the recording session \"{{name}}\"",
+      "deletedRecording": "Deleted the recording session \"{{name}}\"",
       "addedFolder": "Added the folder \"{{name}}\"",
       "modifiedFolder": "Modified the folder \"{{name}}\"",
       "deletedFolder": "Deleted the folder \"{{name}}\"",
@@ -3213,6 +3307,7 @@
       "movedRequest": "Moved the request \"{{name}}\"",
       "movedScenario": "Moved the scenario \"{{name}}\"",
       "movedDesign": "Moved the design \"{{name}}\"",
+      "movedRecording": "Moved the recording session \"{{name}}\"",
       "movedFolder": "Moved the folder \"{{name}}\"",
       "movedEnvironmentFolder": "Moved the environment folder \"{{name}}\"",
       "reorderedFolder": "Reordered items in the folder \"{{name}}\"",
@@ -3224,6 +3319,7 @@
       "singleRequest": "Update to the request \"{{name}}\"",
       "singleScenario": "Update to the scenario \"{{name}}\"",
       "singleDesign": "Update to the design \"{{name}}\"",
+      "singleRecording": "Update to the recording session \"{{name}}\"",
       "singleFolder": "Update to the folder \"{{name}}\"",
       "singleEnvironmentFolder": "Update to the environment folder \"{{name}}\"",
       "singleFileFormatVersion": "Move to file format {{name}}",
@@ -3233,6 +3329,8 @@
       "countScenario_other": "{{count}} scenarios",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} designs",
+      "countRecording_one": "{{count}} recording session",
+      "countRecording_other": "{{count}} recording sessions",
       "countFolder_one": "{{count}} folder",
       "countFolder_other": "{{count}} folders",
       "countEnvironmentFolder_one": "{{count}} environment folder",
@@ -3326,6 +3424,9 @@
     "crashReportsDescription": "Send an anonymised report when Restorm crashes, so the failure can be fixed. Reports are scrubbed of URLs, tokens, request bodies and personal data before leaving your machine. Included with the free plan; a paid plan can turn it off. Full details: https://restorm.app/privacy",
     "telemetryTitle": "Send usage analytics",
     "telemetryDescription": "Send anonymous statistics on which features are used, to guide what gets built next. Off by default and never enabled without your explicit consent. Contains no request data, no URLs and no personal data. Full details: https://restorm.app/privacy",
+    "geolocationTitle": "Share your location with the embedded browser",
+    "geolocationDescription": "Obtain your approximate position (from the system's location service, or from your IP address as a fallback) and pass it only to the embedded mini browser, so sites that geolocate work in a recording session. Nothing is sent to Restorm.",
+    "geolocationConsent": {"title": "Share your location with the embedded browser?", "body": "Restorm will ask your system's location service for your position (and, if it has none, estimate it from your IP address through a third-party lookup) and hand it only to the pages opened in the embedded mini browser. Your position never leaves your computer otherwise and is forgotten as soon as you turn this off.", "accept": "Allow", "decline": "Not now"},
     "crashReportsLockedLabel": "Changeable from the Pro plan. On the free plan, crash reports are what keep quality up.",
     "consentToast": {
       "title": "Help us improve Restorm",

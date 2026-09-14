@@ -14,9 +14,10 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request, ApiDesign } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario, isApiDesign } from '../../../shared/types/collections'
+import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, SseRequest, ODataRequest, AuthenticationRequest, Request, ApiDesign, RecordingSession } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isSseRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import { DESIGN_CODICON } from '../../../shared/design/designSections'
+import { RECORDING_CODICON } from '../../../shared/recording/recordingSections'
 import { composeRoutePath, groupChainBasePath } from '../../../shared/design/apiDesignDoc'
 
 /** Search categories configuration for Restorm */
@@ -25,9 +26,10 @@ const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
   scenario: { label: 'search.categories.scenario', icon: 'circuit-board', order: 3 },
   design: { label: 'search.categories.design', icon: DESIGN_CODICON, order: 4 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 5 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 6 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 7 }
+  recording: { label: 'search.categories.recording', icon: RECORDING_CODICON, order: 5 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 6 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 7 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 8 }
 }
 
 /** Metadata structure for search documents in restorm */
@@ -126,6 +128,27 @@ function scenarioToSearchDocument(scenario: Scenario, parentPath: string[] = [],
     metadata: {
       tags: scenario.tags,
       ...(scenario.notes ? { notes: scenario.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
+/** A recording session as one search document: its name + the page url. */
+function recordingSessionToSearchDocument(session: RecordingSession, parentPath: string[] = [], parentNames: string[] = []): ReturnType<typeof scenarioToSearchDocument> {
+  return {
+    id: session.id,
+    title: session.name,
+    ...(session.url !== '' ? { description: session.url } : {}),
+    category: 'recording',
+    icon: RECORDING_CODICON,
+    keywords: [session.url, ...session.whitelist, ...session.blacklist].filter((s) => s !== '').join(' '),
+    navigation: {
+      type: 'recording',
+      recordingId: session.id,
+      path: [...parentPath, session.id]
+    },
+    metadata: {
+      ...(session.notes ? { notes: session.notes } : {}),
       ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
@@ -799,6 +822,8 @@ function collectFolderDocuments(
       documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
     } else if (isApiDesign(item)) {
       documents.push(...designToSearchDocuments(item, currentPath, currentNames))
+    } else if (isRecordingSession(item)) {
+      documents.push(...collectRecordingDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
@@ -831,8 +856,38 @@ function collectScenarioDocuments(
       documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
     } else if (isApiDesign(item)) {
       documents.push(...designToSearchDocuments(item, currentPath, currentNames))
+    } else if (isRecordingSession(item)) {
+      documents.push(...collectRecordingDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, scenario.id, currentPath, currentNames))
+    }
+  }
+  return documents
+}
+
+/** A recording session's documents: the session itself, then its deduced
+ * routes (folders + requests) like a scenario's children. */
+function collectRecordingDocuments(
+  session: RecordingSession,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): ReturnType<typeof collectFolderDocuments> {
+  const currentPath = [...parentPath, session.id]
+  const currentNames = [...parentNames, session.name]
+  const documents: ReturnType<typeof collectFolderDocuments> = [
+    recordingSessionToSearchDocument(session, parentPath, parentNames)
+  ]
+  for (const item of session.items ?? []) {
+    if (isFolder(item)) {
+      documents.push(...collectFolderDocuments(item, currentPath, currentNames))
+    } else if (isScenario(item)) {
+      documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
+    } else if (isApiDesign(item)) {
+      documents.push(...designToSearchDocuments(item, currentPath, currentNames))
+    } else if (isRecordingSession(item)) {
+      documents.push(...collectRecordingDocuments(item, currentPath, currentNames))
+    } else if (isRequest(item)) {
+      documents.push(requestToSearchDocument(item, session.id, currentPath, currentNames))
     }
   }
   return documents
@@ -887,6 +942,17 @@ class SearchIndexService {
       await searchService.indexDocuments(plainDocuments)
     } catch (error) {
       logger.error('[SearchIndexService] Error indexing scenario tree', { error: String(error), scenarioId: scenario.id })
+    }
+  }
+
+  /** Index a root-level recording session: the session + its deduced routes. */
+  async indexRecordingTree(session: RecordingSession): Promise<void> {
+    try {
+      const documents = collectRecordingDocuments(session)
+      const plainDocuments = JSON.parse(JSON.stringify(documents)) as typeof documents
+      await searchService.indexDocuments(plainDocuments)
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing recording tree', { error: String(error), recordingId: session.id })
     }
   }
 

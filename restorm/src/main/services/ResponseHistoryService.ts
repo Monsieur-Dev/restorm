@@ -414,6 +414,53 @@ class ResponseHistoryService {
     return built
   }
 
+  /**
+   * Append ready-made details — the calls a recording session captured for
+   * a request deduced from them — in ONE archive write, each under the
+   * request's cap (pinned entries exempt, as everywhere). Returns how many
+   * were written. Mirrors {@link storeExecutionResult}'s write closure.
+   */
+  async storeCapturedCalls(details: readonly ResponseHistoryDetail[]): Promise<number> {
+    if (details.length === 0) return 0
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) {
+      logger.debug('[ResponseHistoryService] No archive path, skipping captured-calls history')
+      return 0
+    }
+    await queueHistoryWrite(async () => {
+      const { index, entriesData } = await readHistoryArchive(archivePath)
+      let currentIndex = index
+      let keptGuids = new Set<string>()
+      for (const detail of details) {
+        const result = this.addEntryAndPrune(currentIndex, detail)
+        currentIndex = result.updatedIndex
+        keptGuids = result.keptGuids
+      }
+      const nextEntriesData = new Map<string, string>()
+      for (const [entryName, entryText] of entriesData.entries()) {
+        if (entryName === INDEX_FILE_NAME) continue
+        if (entryName.startsWith(`${RESPONSES_FOLDER}/`) && entryName.endsWith('.json')) {
+          const entryGuid = entryName.slice(`${RESPONSES_FOLDER}/`.length, -'.json'.length)
+          if (keptGuids.has(entryGuid)) nextEntriesData.set(entryName, entryText)
+        } else {
+          nextEntriesData.set(entryName, entryText)
+        }
+      }
+      for (const detail of details) {
+        if (keptGuids.has(detail.guid)) nextEntriesData.set(this.getDetailEntryName(detail.guid), JSON.stringify(detail))
+      }
+      await writeHistoryArchive(archivePath, currentIndex, nextEntriesData)
+      const touched = new Set(details.map((d) => d.requestId))
+      for (const requestId of touched) {
+        const own = details.filter((d) => d.requestId === requestId)
+        const last = own[own.length - 1]
+        if (last) this.notifyStored(requestId, last.guid)
+        this.broadcastChanged(requestId)
+      }
+    })
+    return details.length
+  }
+
   async list(requestId: string): Promise<ResponseHistoryEntry[]> {
     const archivePath = getHistoryArchivePath()
     if (!archivePath) return []
@@ -654,6 +701,7 @@ class ResponseHistoryService {
       statusText: result.statusText ?? '',
       responseHeaders,
       responseBody,
+      ...(result.bodyIsBase64 ? { bodyIsBase64: true } : {}),
       ...(contentType ? { contentType } : {}),
       ...(contentLength !== undefined && !isNaN(contentLength) ? { contentLength } : {}),
       ...(sentCookiesKv.length > 0 ? { sentCookies: sentCookiesKv } : {}),

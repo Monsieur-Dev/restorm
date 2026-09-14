@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-suunnittelu"
+        "design": "API-suunnittelu",
+        "recording": "Tallennusistunto"
       },
       "cut": "Leikkaa",
       "copy": "Kopioi",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Tiedosto"
       },
       "loading": "Lähetetään pyyntöä...",
+      "body": { "download": "Lataa", "binary": "Binäärisisältö ({{type}}) — tallentakaa se Lataa-painikkeella", "unknownType": "tuntematon tyyppi" },
       "noResponseBody": "Ei vastausrunkoa — katso tiedot Infos-välilehdeltä",
       "noResponse": "Suorittakaa pyyntö napsauttamalla Lähetä",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Asetukset",
       "tag": "Tagit",
       "scenario": "Skenaariot",
-      "design": "API-suunnitelmat"
+      "design": "API-suunnitelmat",
+      "recording": "Tallennusistunnot"
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Säilytettävät merkinnät historiaa kohden",
     "maxEntriesDescription": "Kuinka monta merkintää pyynnön kutsuhistoria ja skenaarion suoritushistoria kumpikin säilyttävät. Kiinnitetyt merkinnät säilytetään aina tästä arvosta riippumatta. Aloitusnäytön viimeaikaisen toiminnan luettelot eivät muutu."
   },
+  "recording": {
+    "title": "Tallennusistunnot",
+    "maxCapturesTitle": "Istuntoa kohden säilytettävät kaapatut kutsut",
+    "maxCapturesDescription": "Kuinka monta kaapattua kutsua tallennusistunto säilyttää muistissa. Kun raja on saavutettu, vanhimmat kutsut poistetaan ensin. Kaappauksia ei koskaan tallenneta projektitiedostoon.",
+    "newSessionName": "Uusi tallennusistunto",
+    "node": {
+      "browser": "Selain",
+      "captures": "Kaappaukset",
+      "routes": "Reitit"
+    },
+    "tab": {
+      "browserTitle": "Selain: {{name}}",
+      "capturesTitle": "Kaappaukset: {{name}}",
+      "routesTitle": "Reitit: {{name}}"
+    },
+    "placeholder": {
+      "config": "Istunnon asetukset (sivun URL, protokollat, sallittujen ja estettyjen luettelot) näkyvät tässä.",
+      "browser": "Tallennusselain näkyy tässä.",
+      "captures": "Kutsuja ei ole vielä kaapattu. Aloittakaa tallennus istunnon asetuksista, jotta sivun kutsut näkyvät tässä.",
+      "routes": "Reittejä ei ole vielä päätelty. Tallentakaa kutsuja ja päätelkää sitten reitit kaappauksista."
+    },
+    "config": {
+      "subtitle": "Selatkaa sivua, kun Restorm kuuntelee sen API-kutsuja. Vain alla olevat asetukset tallennetaan projektiin — kaapattuja kutsuja ei koskaan.",
+      "url": "Kuunneltava sivu",
+      "urlPlaceholder": "https://esimerkki.fi, http://localhost:3000 tai file:///polku/sivu.html",
+      "urlInvalid": "Syöttäkää http(s)- tai file-osoite.",
+      "urlRequired": "Syöttäkää sivun osoite ottaaksenne tallennuksen käyttöön.",
+      "record": "Aloita tallennus",
+      "stop": "Lopeta tallennus",
+      "protocols": "Kaapattavat protokollat",
+      "whitelist": "Sallittujen luettelo",
+      "blacklist": "Estettyjen luettelo",
+      "addPattern": "Lisää kuvio",
+      "removePattern": "Poista tämä kuvio",
+      "invalidPattern": "Tämä kuvio ei ole kelvollinen säännöllinen lauseke.",
+      "patternPlaceholder": "Säännöllinen lauseke, esim. ^https://api\\.esimerkki\\.fi/",
+      "noPattern": "Ei kuvioita — kaikki päästetään läpi.",
+      "filtersHint": "Kutsu säilytetään, jos se vastaa vähintään yhtä sallittujen luettelon kohtaa (tai luettelo on tyhjä) eikä yhtäkään estettyjen luettelon kohtaa. Muutokset koskevat seuraavia kutsuja."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Keskeytä tallennus",
+      "resume": "Jatka tallennusta",
+      "stop": "Lopeta tallennus"
+    },
+    "captures": {
+      "empty": "Kutsuja ei ole vielä kaapattu. Aloittakaa tallennus istunnon asetuksista, jotta sivun kutsut näkyvät tässä sitä mukaa kuin ne tapahtuvat.",
+      "filterPlaceholder": "Suodata kutsuja (säännöllinen lauseke)",
+      "live": "käynnissä",
+      "clearRun": "Poista tämän tallennuksen kutsut",
+      "selectOne": "Valitkaa kutsu nähdäksenne sen vastauksen.",
+      "loadingDetail": "Ladataan kutsua…",
+      "addToWhitelist": "Lisää sallittujen luetteloon…",
+      "addToBlacklist": "Lisää estettyjen luetteloon…",
+      "patternLabel": "Kuvio (säännöllinen lauseke)",
+      "add": "Lisää",
+      "addAndApply": "Lisää ja sovella kaapattuihin kutsuihin",
+      "applyConfirm": "Luetteloiden soveltaminen jo kaapattuihin kutsuihin poistaa kaikki kutsut, jotka ne nyt hylkäävät. Toimintoa ei voi kumota.",
+      "applyConfirmOk": "Sovella ja poista",
+      "deduce": "Päättele reitit",
+      "deduceWhileRecording": "Lopettakaa tallennus ennen reittien päättelyä.",
+      "deduceUnavailable": "Reittien päättely ei ole vielä käytettävissä.",
+      "deduceLocked": "Reittien päättely on käytettävissä Pro-tilauksesta alkaen."
+    },
+    "routes": {
+      "empty": "Reittejä ei ole vielä päätelty. Tallentakaa kutsuja ja käyttäkää sitten kaappausten alla olevaa ”Päättele reitit” -painiketta — pyynnöt näkyvät tässä ja sivupalkin Reitit-rivin alla.",
+      "proCallout": "Reittien päättely kaapatuista kutsuista on käytettävissä Pro-tilauksesta alkaen. Tallennus on kaikkien käytettävissä.",
+      "subscribe": "Katso tilaukset",
+      "count_one": "{{count}} päätelty pyyntö",
+      "count_other": "{{count}} pääteltyä pyyntöä",
+      "hint": "Päätellyt pyynnöt ovat tavallisia pyyntöjä: muokatkaa niitä vapaasti; uusi päättely säilyttää muutoksenne ja lisää vain uudet reitit."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "MCP-kutsulokin säilytys",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Listaa tallennusistunnot",
+    "createRecordingSession": "Luo tallennusistunto",
+    "updateRecordingSession": "Päivitä tallennusistunto",
+    "setRecordingFilters": "Aseta tallennusistunnon URL-suodattimet",
+    "startRecording": "Aloita istunnon tallennus",
+    "stopRecording": "Lopeta istunnon tallennus",
+    "getRecordingStatus": "Hae tallennusistunnon tila",
+    "listRecordingCaptures": "Listaa tallennusistunnon tallennetut kutsut",
+    "getRecordingCapture": "Hae yksi tallennettu kutsu kokonaan",
+    "deduceRecordingRoutes": "Päättele tallennusistunnon reitit",
     "answerScenarioInput": "Vastaa skenaarion syötteeseen",
     "arrangeScenario": "Järjestä skenaario automaattisesti",
     "cancelRequest": "Peruuta pyyntö",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Lisättiin API-suunnitelma \"{{name}}\"",
       "modifiedDesign": "Muutettiin API-suunnitelmaa \"{{name}}\"",
       "deletedDesign": "Poistettiin API-suunnitelma \"{{name}}\"",
+      "addedRecording": "Tallennusistunto \"{{name}}\" lisätty",
+      "modifiedRecording": "Tallennusistuntoa \"{{name}}\" muokattu",
+      "deletedRecording": "Tallennusistunto \"{{name}}\" poistettu",
       "addedFolder": "Lisättiin kansio \"{{name}}\"",
       "modifiedFolder": "Muutettiin kansiota \"{{name}}\"",
       "deletedFolder": "Poistettiin kansio \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Siirrettiin pyyntö \"{{name}}\"",
       "movedScenario": "Siirrettiin skenaario \"{{name}}\"",
       "movedDesign": "Siirrettiin API-suunnitelma \"{{name}}\"",
+      "movedRecording": "Tallennusistunto \"{{name}}\" siirretty",
       "movedFolder": "Siirrettiin kansio \"{{name}}\"",
       "movedEnvironmentFolder": "Siirrettiin ympäristökansio \"{{name}}\"",
       "reorderedFolder": "Kohteiden järjestys muutettu kansiossa ”{{name}}”",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Päivitys pyyntöön \"{{name}}\"",
       "singleScenario": "Päivitys skenaarioon \"{{name}}\"",
       "singleDesign": "Päivitys API-suunnitelmaan \"{{name}}\"",
+      "singleRecording": "Tallennusistunnon \"{{name}}\" päivitys",
       "singleFolder": "Päivitys kansioon \"{{name}}\"",
       "singleEnvironmentFolder": "Päivitys ympäristökansioon \"{{name}}\"",
       "singleFileFormatVersion": "Siirtyminen tiedostomuotoon {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} skenaariota",
       "countDesign_one": "{{count}} API-suunnitelma",
       "countDesign_other": "{{count}} API-suunnitelmaa",
+      "countRecording_one": "{{count}} tallennusistunto",
+      "countRecording_other": "{{count}} tallennusistuntoa",
       "countFolder_one": "{{count}} kansio",
       "countFolder_other": "{{count}} kansiota",
       "countEnvironmentFolder_one": "{{count}} ympäristökansio",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Lähettää anonymisoidun raportin, kun Restorm kaatuu, jotta vika voidaan korjata. Raporteista poistetaan URL-osoitteet, tunnisteet, pyyntöjen sisällöt ja henkilötiedot ennen kuin ne lähtevät koneeltanne. Sisältyy ilmaiseen tilaukseen; maksullisessa tilauksessa sen voi kytkeä pois. Kaikki tiedot: https://restorm.app/privacy",
     "telemetryTitle": "Lähetä käyttötilastot",
     "telemetryDescription": "Lähettää anonyymejä tilastoja siitä, mitä ominaisuuksia käytetään, kehityksen suuntaamiseksi. Oletuksena pois päältä eikä koskaan käytössä ilman nimenomaista suostumustanne. Ei sisällä pyyntödataa, URL-osoitteita eikä henkilötietoja. Kaikki tiedot: https://restorm.app/privacy",
+    "geolocationTitle": "Sijaintinne jakaminen upotetun selaimen kanssa",
+    "geolocationDescription": "Hakee likimääräisen sijaintinne (järjestelmän sijaintipalvelusta tai varalla IP-osoitteestanne) ja välittää sen ainoastaan upotetulle mini-selaimelle, jotta paikannusta käyttävät sivustot toimivat tallennusistunnossa. Restormille ei lähetetä mitään.",
+    "geolocationConsent": {"title": "Jaetaanko sijaintinne upotetun selaimen kanssa?", "body": "Restorm pyytää sijaintianne järjestelmänne sijaintipalvelusta (ja jos sitä ei ole saatavilla, arvioi sen IP-osoitteestanne kolmannen osapuolen palvelun avulla) ja välittää sen ainoastaan upotetussa mini-selaimessa avatuille sivuille. Sijaintinne ei muutoin koskaan poistu tietokoneeltanne, ja se unohdetaan heti, kun poistatte tämän asetuksen käytöstä.", "accept": "Salli", "decline": "Ei nyt"},
     "crashReportsLockedLabel": "Muutettavissa Pro-tilauksesta alkaen. Maksuttomassa tilauksessa kaatumisraportit ovat tarpeen laadun ylläpitämiseksi.",
     "consentToast": {
       "title": "Auttakaa meitä parantamaan Restormia",

@@ -1,6 +1,6 @@
 import { parse as yamlParse } from 'yaml'
 import type { FolderItem } from '../types/folderTypes'
-import { isEnvironmentFolder, isFolder, isScenario, isApiDesign } from '../types/folderTypes'
+import { isEnvironmentFolder, isFolder, isScenario, isApiDesign, isRecordingSession } from '../types/folderTypes'
 import { prepareForSerialization, stripIds } from '../utils/serialization'
 
 /**
@@ -17,7 +17,7 @@ import { prepareForSerialization, stripIds } from '../utils/serialization'
  * moved — which is the whole point of stamping a version in the first
  * place.
  */
-export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario' | 'design' | 'document'
+export type GitEntityKind = 'folder' | 'environmentFolder' | 'request' | 'scenario' | 'design' | 'recording' | 'document'
 export type GitChangeAction = 'added' | 'modified' | 'moved' | 'deleted' | 'reordered'
 
 export interface GitEntityChange {
@@ -94,6 +94,7 @@ export function kindOf(item: FolderItem): GitEntityKind {
   if (isFolder(item)) return 'folder'
   if (isScenario(item)) return 'scenario'
   if (isApiDesign(item)) return 'design'
+  if (isRecordingSession(item)) return 'recording'
   return 'request'
 }
 
@@ -324,7 +325,7 @@ export function diffProjectEntities(
 
   // Deterministic order — the same diff always renders the same commit
   // body, independent of the two Maps' insertion order.
-  const kindOrder: Record<GitEntityKind, number> = { document: -1, folder: 0, environmentFolder: 1, request: 2, scenario: 3, design: 4 }
+  const kindOrder: Record<GitEntityKind, number> = { document: -1, folder: 0, environmentFolder: 1, request: 2, scenario: 3, design: 4, recording: 5 }
   const actionOrder: Record<GitChangeAction, number> = { added: 0, modified: 1, moved: 2, reordered: 3, deleted: 4 }
   changes.sort((a, b) =>
     kindOrder[a.kind] - kindOrder[b.kind] ||

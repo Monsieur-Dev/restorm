@@ -4,6 +4,7 @@ import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
+import { recordingNodeRowId, parseRecordingTabId } from '../../../../../shared/recording/recordingSections'
 import {
   isFolderTab,
   isEnvironmentFolderTab,
@@ -25,6 +26,7 @@ import {
   isAnyRequestTab,
   isScenarioEditorTab,
   isDesignTab,
+  isRecordingTab,
   isConsoleTab,
   isFirewallTab,
   isCookieJarTab,
@@ -41,13 +43,15 @@ import type { SyntheticRequestPreview } from '../../../../../shared/utils/synthe
 import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge, ApiDesign } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge, ApiDesign, RecordingSession } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { CookieJarPanel } from '../../CookieJar/CookieJarPanel'
 import { DocumentEvents } from '../../../services/DocumentEvents'
 import { Badge } from '../../common/Badge'
 import { RegistryBadge } from '../../common/RegistryBadge'
 import { DesignWorkbenchTab } from './DesignWorkbenchTab'
+import { RecordingWorkbenchTab } from './RecordingWorkbenchTab'
+import { RecordingOnAirBadge } from '../../common/RecordingOnAirBadge'
 import { httpBadgeIdFor } from '../../../../../shared/utils/httpMethod'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { ServerListeningBadge } from '../../common/ServerListeningBadge'
@@ -184,6 +188,13 @@ export interface RestormWorkbenchProps {
    * snapshot, so variable/port edits survive a hard refresh + tab restore. */
   getScenarioById?: (id: string) => Scenario | undefined
   getDesignById?: (id: string) => ApiDesign | undefined
+  /** Get the live recording session behind a recording tab (same reason as designs). */
+  getRecordingSessionById?: (id: string) => RecordingSession | undefined
+  /** Record button of a session's config tab: start (opens the browser tab) / stop. */
+  onStartRecordingSession?: ((sessionId: string) => void) | undefined
+  onStopRecordingSession?: ((sessionId: string) => void) | undefined
+  /** Deduce a session's routes from its captures (Pro+). */
+  onDeduceRecordingRoutes?: ((sessionId: string) => void) | undefined
   /** Check if a request is a favorite */
   isItemFavorite?: ((itemId: string) => boolean) | undefined
   /** Toggle favorite status on a request */
@@ -264,6 +275,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getFolderById,
   getScenarioById,
   getDesignById,
+  getRecordingSessionById,
+  onStartRecordingSession,
+  onStopRecordingSession,
+  onDeduceRecordingRoutes,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -397,6 +412,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isDesignTab(tab)) {
       return tab.design.id
     }
+    if (isRecordingTab(tab)) {
+      return tab.session.id
+    }
     if (
       isHTTPRequestTab(tab) ||
       isGraphQLRequestTab(tab) ||
@@ -430,6 +448,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // Drives both the switcher sort and the close-returns-to-previous
   // selection in the workbench.
   const getTabNavKey = useCallback((tab: RestormEditorTab): string | null => {
+    // A recording session's node tabs share the session as item id but are
+    // distinct tabs: key them by their sidebar node row (what activation and
+    // sidebar clicks record), or they would all sort together in Ctrl+Tab.
+    if (isRecordingTab(tab) && tab.node !== 'config') return recordingNodeRowId(tab.session.id, tab.node)
     return getTabItemId(tab) ?? tab.id
   }, [getTabItemId])
 
@@ -485,6 +507,20 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           </ScenarioRunningBadge>
           <span>{restormTab.scenario.name}</span>
           <ItemSecretBadges itemId={restormTab.scenario.id} />
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Recording tab: the session's on-air badge (beamed while it records,
+    // frozen while paused) + the tab title (session name, or "Node: name").
+    if (isRecordingTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <RecordingOnAirBadge sessionId={restormTab.session.id}>
+            <RegistryBadge badgeId="recording" />
+          </RecordingOnAirBadge>
+          <span>{restormTab.titleString ?? restormTab.session.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -889,7 +925,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             const tab = node.tabs.find((t) => t.id === tabId)
             if (tab) {
               found.groupId = node.id
-              found.itemId = getTabItemId(tab as RestormEditorTab)
+              // The MRU key, not the bare item id: a recording node tab
+              // records under its node row (see getTabNavKey).
+              found.itemId = getTabNavKey(tab as RestormEditorTab)
               return { ...node, activeTabId: tabId }
             }
             return node
@@ -912,6 +950,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           : tabId.startsWith('folder') ? 'folder'
           : tabId.startsWith('design') ? 'design'
           : tabId.startsWith('scenario') ? 'scenario-editor'
+          : parseRecordingTabId(tabId) !== null ? 'recording'
           : 'http-request'
         navigationService.navigateTo(found.itemId, 'tab-switcher', { type: tabType })
       }
@@ -1136,6 +1175,28 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...dsgFav}
           />
         </EnvironmentProvider>
+      )
+    }
+
+    // Recording session tabs: the config tab + one tab per node. The live
+    // session is re-fetched from `rootItems` like a design's.
+    if (isRecordingTab(effectiveTab)) {
+      const session = getRecordingSessionById?.(effectiveTab.session.id) ?? effectiveTab.session
+      return (
+        <RecordingWorkbenchTab
+          session={session}
+          node={effectiveTab.node}
+          breadcrumbs={breadcrumbs}
+          onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+          onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
+          tabId={effectiveTab.id}
+          onStartRecording={onStartRecordingSession}
+          onStopRecording={onStopRecordingSession}
+          onDeduceRoutes={onDeduceRecordingRoutes}
+          onOpenRequest={onRequestClick}
+        />
       )
     }
 
@@ -1945,7 +2006,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getDesignById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl, tabReloadEpoch])
+  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getDesignById, getRecordingSessionById, onStartRecordingSession, onStopRecordingSession, onDeduceRecordingRoutes, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, getScenariosUsingQuickConfig, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl, tabReloadEpoch])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

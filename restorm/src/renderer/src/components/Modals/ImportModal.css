@@ -483,7 +483,20 @@
   overflow: hidden;
 }
 /* The CodeEditor wrapper fills the left pane; Monaco owns the scrolling. */
-.import-modal[data-split="true"] > .import-source-section > .import-source-editor {
+/* The paste scope wraps the field / editor (a paste listener needs an
+   element); it is a transparent flex column so the editor still fills the
+   pane in split mode. */
+.import-source-paste-scope {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+.import-modal[data-split="true"] > .import-source-section > .import-source-paste-scope {
+  flex: 1 1 0;
+}
+.import-modal[data-split="true"] .import-source-paste-scope > .import-source-editor {
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;

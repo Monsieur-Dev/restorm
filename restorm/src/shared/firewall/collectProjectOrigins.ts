@@ -1,6 +1,6 @@
 import type { FolderItem, Request } from '../types/collections'
 import {
-  isEnvironmentFolder, isAnyFolder, isScenario, isApiDesign,
+  isEnvironmentFolder, isAnyFolder, isScenario, isApiDesign, isRecordingSession,
   isHTTPRequest, isGraphQLRequest, isSoapRequest, isWebSocketRequest,
   isODataRequest, isAuthenticationRequest, isGrpcRequest
 } from '../types/collections'
@@ -62,6 +62,13 @@ function collectRequests(items: FolderItem[]): Request[] {
     }
     // A design declares contracts, it does not call out — no origin to collect.
     if (isApiDesign(item)) return
+    // A recording session's deduced routes are real requests that DO call
+    // out (they replay what the page called): collect them like a
+    // scenario's children. The session itself has no origin of its own.
+    if (isRecordingSession(item)) {
+      for (const child of item.items ?? []) visit(child)
+      return
+    }
     if (isHTTPRequest(item) || isGraphQLRequest(item) || isSoapRequest(item) || isWebSocketRequest(item) || isODataRequest(item) || isAuthenticationRequest(item) || isGrpcRequest(item)) {
       out.push(item as Request)
     }

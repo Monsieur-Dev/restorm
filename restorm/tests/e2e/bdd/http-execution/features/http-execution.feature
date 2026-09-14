@@ -204,6 +204,7 @@ Feature: HTTP/REST execution end-to-end
     And I click Send
     Then the response status is "200"
     And the response offers a binary download
+    And the response renders the image inline
 
   Scenario: An XML response renders as text
     When I open the "XML response" request tab via MCP

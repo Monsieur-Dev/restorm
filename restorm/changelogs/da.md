@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Optag en webside, og få dens API som anmodninger.**
+
+- **Optagelsessessioner.** En ny slags element i sidepanelet åbner en webside i den indbyggede minibrowser og opsamler hvert API-kald, den foretager — REST, GraphQL, gRPC-web og WebSocket — live, med hvid- og sortlister i regulære udtryk, pause og stop fra adresselinjen og en pulserende glød omkring sessionen, mens den kører. Hvert opsamlet kald læses nøjagtigt som en anmodnings svar (krop, info, cookies, graf); et kalds kontekstmenu føjer dets url til en liste og kan samtidig rydde op i det, der allerede er opsamlet. Optagelserne bliver i hukommelsen, begrænset af en ny app-indstilling, og rører aldrig din projektfil.
+- **Udled ruterne (Pro).** Én knap omdanner optagelserne til et mappetræ af rigtige anmodninger, der kan afspilles igen: varierende stisegmenter bliver til `{{param}}`-stiparametre, mapperne følger de statiske præfikser, gRPC-web-kald sorteres efter service, og hver anmodning udfyldes på forhånd ud fra det seneste vellykkede kald, med de opsamlede kald i dens svarhistorik. Udleder du igen, flettes resultatet — dine redigeringer bevares.
+- **Styr det fra din AI-assistent.** Ti MCP-værktøjer opretter og konfigurerer sessioner, starter og stopper en optagelse, læser optagelserne og udleder ruterne.
+- **Del din placering med minibrowseren (tilvalg).** En ny indstilling under Privatliv, slået fra som standard, lader de sider, der åbnes i den indbyggede browser — under en optagelse eller ej — læse din omtrentlige position, ligesom sitets egen placeringsfunktion ville gøre i en almindelig browser. Når du slår den til, bliver du først bedt om samtykke; positionen kommer fra systemets placeringstjeneste (GeoClue på Linux), og ellers fra et skøn på byniveau baseret på din IP-adresse. Slår du den fra, glemmes positionen straks.
+- **Rigere Svar-fane.** Billeder vises nu direkte, videoer og lyd afspilles, Markdown gengives, og kodeeditoren vælger sprog ud fra Content-Type — med en oversat Download-knap altid lige ved hånden. Et binært svar, der afspilles igen fra historikken, viser ikke længere sin base64.
+- **Import: en indsat JSON-specifikation er let at læse.** Et JSON-dokument på én linje, der indsættes i det tomme importfelt, formateres pænt, før det åbnes i editoren.
+- **Lange lister forbliver hurtige.** Optagelseslisten (og sidepanelet ud over 400 rækker) gengiver kun det, der er på skærmen.
+- Projektfiler, der indeholder en optagelsessession, gemmes i format 1.2; tidligere versioner af Restorm beder dig om at opdatere, før de kan åbnes.
+
 ## v1.1.4
 
 **Forbind din AI-assistent på macOS — nu pålideligt.**

@@ -5,7 +5,7 @@ import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
-import type { Request, Folder, Scenario, EnvironmentFolder, ScenarioNode, ScenarioEdge, ApiDesign } from '../../../../../shared/types/collections'
+import type { Request, Folder, Scenario, EnvironmentFolder, ScenarioNode, ScenarioEdge, ApiDesign, RecordingSession } from '../../../../../shared/types/collections'
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
@@ -78,6 +78,10 @@ export interface RestormWorkbenchContainerProps {
   getFolderById: (id: string) => Folder | undefined
   getScenarioById: (id: string) => Scenario | undefined
   getDesignById: (id: string) => ApiDesign | undefined
+  getRecordingSessionById: (id: string) => RecordingSession | undefined
+  onStartRecordingSession?: ((sessionId: string) => void) | undefined
+  onStopRecordingSession?: ((sessionId: string) => void) | undefined
+  onDeduceRecordingRoutes?: ((sessionId: string) => void) | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
@@ -132,6 +136,10 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   getFolderById,
   getScenarioById,
   getDesignById,
+  getRecordingSessionById,
+  onStartRecordingSession,
+  onStopRecordingSession,
+  onDeduceRecordingRoutes,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -192,6 +200,10 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           getFolderById={getFolderById}
           getScenarioById={getScenarioById}
           getDesignById={getDesignById}
+          getRecordingSessionById={getRecordingSessionById}
+          onStartRecordingSession={onStartRecordingSession}
+          onStopRecordingSession={onStopRecordingSession}
+          onDeduceRecordingRoutes={onDeduceRecordingRoutes}
           getEnvironmentFolderById={getEnvironmentFolderById}
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}

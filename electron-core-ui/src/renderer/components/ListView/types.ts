@@ -283,6 +283,40 @@ export interface ListViewProps {
    * Absent, the empty area is not a drop target (unchanged behaviour).
    */
   onEmptyAreaDrop?: (sources: ListViewItemEventPayload[], originalEvent: React.DragEvent<HTMLElement>) => void
+
+  /**
+   * OPT-IN virtualisation: only the rows inside the viewport (plus `overscan`
+   * rows above and below it) are mounted; two spacers keep the scrollbar
+   * true to the full list. PREREQUISITE — every row must be exactly
+   * `rowHeight` px tall: the window is computed from that height, never
+   * measured (measuring would mean rendering every row once), so a row that
+   * wraps or grows breaks the alignment. Collapsing a node removes its
+   * children from the virtual set, so the total height follows the tree.
+   * Sticky headers are not supported in this mode (a header scrolled out of
+   * the window unmounts). Default `false`: every row is mounted, as before.
+   */
+  virtualized?: boolean
+
+  /**
+   * Fixed row height in px the virtualised window is computed from; the rows
+   * are forced to it. Default 26 (the stylesheet's `min-height`). Ignored
+   * unless `virtualized` is set.
+   */
+  rowHeight?: number
+
+  /**
+   * Rows mounted beyond each edge of the viewport when virtualised, so a
+   * scroll shows content before the window catches up. Default 10.
+   */
+  overscan?: number
+
+  /**
+   * Follow the tail of a growing list (a live log): when the list is
+   * scrolled to the bottom and rows are appended, it scrolls to the new
+   * bottom; once the user scrolls up, it stays put until they come back to
+   * the bottom. Works with or without `virtualized`. Default `false`.
+   */
+  followTail?: boolean
 }
 
 export interface ListViewItemProps {

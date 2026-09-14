@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Rekam sebuah halaman web, dapatkan API-nya sebagai permintaan.**
+
+- **Sesi perekaman.** Jenis item baru di bilah samping membuka sebuah halaman web di mini browser bawaan dan menangkap setiap panggilan API yang dilakukannya — REST, GraphQL, gRPC-web, dan WebSocket — secara langsung, dengan daftar putih dan daftar hitam berbasis regex, jeda dan henti dari baris alamat, serta cahaya berdenyut di sekeliling sesi selama berjalan. Setiap panggilan yang ditangkap dibaca persis seperti respons sebuah permintaan (isi, informasi, cookie, grafik); menu konteks sebuah panggilan menambahkan url-nya ke salah satu daftar, dengan pilihan untuk memangkas apa yang sudah ditangkap. Tangkapan tetap berada di memori, dibatasi oleh pengaturan aplikasi yang baru, dan tidak pernah menyentuh berkas proyek Anda.
+- **Simpulkan rute (Pro).** Satu tombol mengubah tangkapan menjadi pohon folder berisi permintaan sungguhan yang dapat diputar ulang: segmen jalur yang berubah-ubah menjadi parameter jalur `{{param}}`, folder mengikuti prefiks statis, panggilan gRPC-web dikelompokkan per layanan, dan setiap permintaan sudah terisi dari panggilan sukses terakhir, dengan panggilan yang ditangkap di riwayat responsnya. Menyimpulkan lagi akan menggabungkan — perubahan Anda tetap dipertahankan.
+- **Kendalikan dari asisten AI Anda.** Sepuluh alat MCP membuat dan mengonfigurasi sesi, memulai dan menghentikan perekaman, membaca tangkapan, dan menyimpulkan rute.
+- **Bagikan lokasi Anda dengan mini browser (opsional).** Pengaturan Privasi baru, nonaktif secara bawaan, memungkinkan halaman yang dibuka di browser bawaan — selama perekaman atau tidak — membaca perkiraan lokasi Anda, seperti yang dilakukan fitur lokasi situs itu sendiri di browser biasa. Mengaktifkannya terlebih dahulu meminta persetujuan Anda; lokasi berasal dari layanan lokasi sistem (GeoClue di Linux), atau jika tidak tersedia, dari perkiraan setingkat kota berdasarkan alamat IP Anda. Menonaktifkannya segera melupakan lokasi tersebut.
+- **Tab Respons yang lebih kaya.** Gambar kini ditampilkan langsung, video dan audio dapat diputar, Markdown dirender, dan editor kode memilih bahasa dari Content-Type — dengan tombol Unduh yang sudah diterjemahkan dan selalu tersedia. Respons biner yang diputar ulang dari riwayat tidak lagi menampilkan base64-nya.
+- **Impor: spesifikasi JSON yang ditempel mudah dibaca.** Dokumen JSON satu baris yang ditempel ke kolom impor yang kosong dirapikan formatnya sebelum dibuka di editor.
+- **Daftar panjang tetap gesit.** Daftar tangkapan (dan bilah samping di atas 400 baris) hanya merender apa yang tampak di layar.
+- Berkas proyek yang berisi sesi perekaman disimpan dalam format 1.2; versi Restorm yang lebih lama meminta Anda memperbarui sebelum membukanya.
+
 ## v1.1.4
 
 **Hubungkan asisten AI Anda di macOS — kini andal.**

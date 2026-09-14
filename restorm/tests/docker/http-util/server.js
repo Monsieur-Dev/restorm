@@ -25,9 +25,9 @@
  *                               states what it set (?name=&value=).
  *   GET        /cookie/echo   → JSON echo of the received Cookie header
  *                               (proves the jar stored + re-sent it).
- *   GET        /binary        → a deterministic binary payload
- *                               (image/png magic bytes) for the
- *                               binary-response-preservation case.
+ *   GET        /binary        → a deterministic binary payload (a real
+ *                               1x1 PNG) for the binary-response
+ *                               preservation + inline-image cases.
  *   GET        /xml           → an application/xml document.
  *   GET        /html          → a text/html document.
  *   GET        /multi-header  → two `X-Multi` response headers (a
@@ -120,9 +120,10 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
-  // /binary — a deterministic binary payload (PNG magic bytes + data).
+  // /binary — a deterministic binary payload: a real 1x1 transparent PNG
+  // (68 bytes), so the response viewer can also render it inline.
   if (path === '/binary') {
-    const buf = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd])
+    const buf = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=', 'base64')
     res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': String(buf.length) })
     res.end(buf)
     return

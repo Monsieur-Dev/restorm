@@ -20,6 +20,7 @@ import { EnvironmentFolder as EnvironmentFolderClass } from '../../../shared/mod
 import { Environment as EnvironmentClass } from '../../../shared/models/Environment'
 import { KeyValue as KeyValueClass } from '../../../shared/models/KeyValue'
 import { ApiDesign as ApiDesignClass } from '../../../shared/models/ApiDesign'
+import { RecordingSession as RecordingSessionClass } from '../../../shared/models/RecordingSession'
 import { HTTPRequest } from '../../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../../shared/models/requests/GrpcRequest'
@@ -61,6 +62,9 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
   // cleansed) as a Folder — a shape the save-unit bridge never produces,
   // so its drafts would never match and the unit would stay dirty.
   if (type === 'design') return ApiDesignClass
+  // A recording session is its own save unit too (its deduced routes are
+  // ordinary child units, walked like a scenario's).
+  if (type === 'recording') return RecordingSessionClass
   // Everything without a `type` discriminator is a folder-like node.
   // Descendants of an EnvironmentFolder are regular Folders; everything
   // under a Folder stays a Folder.
@@ -69,7 +73,7 @@ const restormClassResolver = (item: Record<string, unknown>, parentClass: object
 }
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { searchIndexService } from '../services/SearchIndexService'
-import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, emitEnvironmentUpdated } from '../types/reactive'
+import { makeReactiveFolder, makeReactiveRequest, makeReactiveApiDesign, makeReactiveRecordingSession, emitEnvironmentUpdated } from '../types/reactive'
 import {
   prepareForSerialization,
   processAfterDeserialization,
@@ -84,7 +88,7 @@ import {
   resolveFileFormatVersion,
 } from '../../../shared/config/fileFormatVersion'
 import type { EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isScenario, isApiDesign } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isScenario, isApiDesign, isRecordingSession } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
 import { envSecretsDigestOf, findNodeByRuntimeId } from '../services/envSecretsDigest'
@@ -753,7 +757,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         // Designs go through `makeReactiveApiDesign` so their edits emit
         // `DESIGN_UPDATED` into the same pipeline.
         const reactiveItems = collectionsWithIds.map((item) =>
-          isApiDesign(item) ? makeReactiveApiDesign(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isApiDesign(item) ? makeReactiveApiDesign(item) : isRecordingSession(item) ? makeReactiveRecordingSession(item) : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
 
@@ -832,6 +836,8 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             // A design indexes itself + its models/enums/routes as
             // sub-entries of the design category.
             await searchIndexService.indexDesign(rootItem)
+          } else if (isRecordingSession(rootItem)) {
+            await searchIndexService.indexRecordingTree(rootItem)
           } else if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
           } else {

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-design"
+        "design": "API-design",
+        "recording": "Inspelningssession"
       },
       "cut": "Klipp ut",
       "copy": "Kopiera",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Fil"
       },
       "loading": "Skickar förfrågan...",
+      "body": { "download": "Ladda ner", "binary": "Binärt innehåll ({{type}}) — använd Ladda ner för att spara det", "unknownType": "okänd typ" },
       "noResponseBody": "Ingen svarstext — se Infos för detaljer",
       "noResponse": "Klicka på Skicka för att köra förfrågan",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Inställningar",
       "tag": "Taggar",
       "scenario": "Scenarier",
-      "design": "API-designer"
+      "design": "API-designer",
+      "recording": "Inspelningssessioner"
     },
     "tooltip": {
       "noDetails": "Inga detaljer tillgängliga",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Poster som sparas per historik",
     "maxEntriesDescription": "Hur många poster anropshistoriken för en begäran och körhistoriken för ett scenario var för sig sparar. Fästa poster sparas alltid, oavsett detta värde. Listorna över senaste aktivitet på startskärmen påverkas inte."
   },
+  "recording": {
+    "title": "Inspelningssessioner",
+    "maxCapturesTitle": "Infångade anrop som behålls per session",
+    "maxCapturesDescription": "Hur många infångade anrop en inspelningssession behåller i minnet. När gränsen nås tas de äldsta anropen bort först. Inspelningar sparas aldrig i projektfilen.",
+    "newSessionName": "Ny inspelningssession",
+    "node": {
+      "browser": "Webbläsare",
+      "captures": "Inspelningar",
+      "routes": "Rutter"
+    },
+    "tab": {
+      "browserTitle": "Webbläsare: {{name}}",
+      "capturesTitle": "Inspelningar: {{name}}",
+      "routesTitle": "Rutter: {{name}}"
+    },
+    "placeholder": {
+      "config": "Sessionens inställningar (sidans URL, protokoll, vit- och svartlista) visas här.",
+      "browser": "Inspelningswebbläsaren visas här.",
+      "captures": "Inga anrop har fångats ännu. Starta en inspelning från sessionens inställningar för att se sidans anrop här.",
+      "routes": "Inga rutter har härletts ännu. Spela in några anrop och härled sedan rutterna från inspelningarna."
+    },
+    "config": {
+      "subtitle": "Surfa på sidan medan Restorm lyssnar på dess API-anrop. Bara inställningarna nedan sparas med projektet — aldrig de infångade anropen.",
+      "url": "Sida att lyssna på",
+      "urlPlaceholder": "https://exempel.se, http://localhost:3000 eller file:///sokvag/sida.html",
+      "urlInvalid": "Ange en http(s)- eller file-URL.",
+      "urlRequired": "Ange sidans URL för att kunna spela in.",
+      "record": "Starta inspelning",
+      "stop": "Stoppa inspelning",
+      "protocols": "Protokoll att fånga",
+      "whitelist": "Vitlista",
+      "blacklist": "Svartlista",
+      "addPattern": "Lägg till ett mönster",
+      "removePattern": "Ta bort det här mönstret",
+      "invalidPattern": "Det här mönstret är inte ett giltigt reguljärt uttryck.",
+      "patternPlaceholder": "Reguljärt uttryck, t.ex. ^https://api\\.exempel\\.se/",
+      "noPattern": "Inga mönster — allt släpps igenom.",
+      "filtersHint": "Ett anrop behålls om det matchar minst en post i vitlistan (eller om listan är tom) och ingen post i svartlistan. Ändringar gäller de kommande anropen."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Pausa inspelningen",
+      "resume": "Återuppta inspelningen",
+      "stop": "Stoppa inspelningen"
+    },
+    "captures": {
+      "empty": "Inga anrop har fångats ännu. Starta en inspelning från sessionens inställningar för att se sidans anrop dyka upp här i realtid.",
+      "filterPlaceholder": "Filtrera anropen (reguljärt uttryck)",
+      "live": "pågår",
+      "clearRun": "Ta bort anropen från den här inspelningen",
+      "selectOne": "Välj ett anrop för att se dess svar.",
+      "loadingDetail": "Läser in anropet…",
+      "addToWhitelist": "Lägg till i vitlistan…",
+      "addToBlacklist": "Lägg till i svartlistan…",
+      "patternLabel": "Mönster (reguljärt uttryck)",
+      "add": "Lägg till",
+      "addAndApply": "Lägg till och tillämpa på de infångade anropen",
+      "applyConfirm": "Att tillämpa listorna på de redan infångade anropen tar bort alla som de nu avvisar. Detta kan inte ångras.",
+      "applyConfirmOk": "Tillämpa och ta bort",
+      "deduce": "Härled rutterna",
+      "deduceWhileRecording": "Stoppa inspelningen innan rutterna härleds.",
+      "deduceUnavailable": "Härledning av rutter är inte tillgänglig ännu.",
+      "deduceLocked": "Härledning av rutter är tillgänglig från Pro-planen."
+    },
+    "routes": {
+      "empty": "Inga rutter har härletts ännu. Spela in anrop och använd sedan ”Härled rutterna” under inspelningarna — förfrågningarna visas här och under raden Rutter i sidopanelen.",
+      "proCallout": "Att härleda rutter från de infångade anropen är tillgängligt från Pro-planen. Inspelning är fortsatt öppen för alla.",
+      "subscribe": "Se planerna",
+      "count_one": "{{count}} härledd förfrågan",
+      "count_other": "{{count}} härledda förfrågningar",
+      "hint": "De härledda förfrågningarna är vanliga förfrågningar: redigera dem fritt; en ny härledning behåller dina ändringar och lägger bara till nya rutter."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Lagring av MCP-anropslogg",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Visa inspelningssessioner",
+    "createRecordingSession": "Skapa en inspelningssession",
+    "updateRecordingSession": "Uppdatera en inspelningssession",
+    "setRecordingFilters": "Ange URL-filter för en inspelningssession",
+    "startRecording": "Starta inspelning av en session",
+    "stopRecording": "Stoppa inspelning av en session",
+    "getRecordingStatus": "Hämta status för en inspelningssession",
+    "listRecordingCaptures": "Visa de inspelade anropen i en inspelningssession",
+    "getRecordingCapture": "Hämta ett inspelat anrop i sin helhet",
+    "deduceRecordingRoutes": "Härled rutterna i en inspelningssession",
     "answerScenarioInput": "Besvara en scenarioinmatning",
     "arrangeScenario": "Ordna scenariot automatiskt",
     "cancelRequest": "Avbryt en begäran",
@@ -3210,6 +3301,9 @@
       "addedDesign": "La till designen \"{{name}}\"",
       "modifiedDesign": "Ändrade designen \"{{name}}\"",
       "deletedDesign": "Tog bort designen \"{{name}}\"",
+      "addedRecording": "Inspelningssessionen \"{{name}}\" har lagts till",
+      "modifiedRecording": "Inspelningssessionen \"{{name}}\" har ändrats",
+      "deletedRecording": "Inspelningssessionen \"{{name}}\" har tagits bort",
       "addedFolder": "La till mappen \"{{name}}\"",
       "modifiedFolder": "Ändrade mappen \"{{name}}\"",
       "deletedFolder": "Tog bort mappen \"{{name}}\"",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Flyttade begäran \"{{name}}\"",
       "movedScenario": "Flyttade scenariot \"{{name}}\"",
       "movedDesign": "Flyttade designen \"{{name}}\"",
+      "movedRecording": "Inspelningssessionen \"{{name}}\" har flyttats",
       "movedFolder": "Flyttade mappen \"{{name}}\"",
       "movedEnvironmentFolder": "Flyttade miljömappen \"{{name}}\"",
       "reorderedFolder": "Objekt omordnade i mappen ”{{name}}”",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Uppdatering av förfrågan \"{{name}}\"",
       "singleScenario": "Uppdatering av scenariot \"{{name}}\"",
       "singleDesign": "Uppdatering av designen \"{{name}}\"",
+      "singleRecording": "Uppdatering av inspelningssessionen \"{{name}}\"",
       "singleFolder": "Uppdatering av mappen \"{{name}}\"",
       "singleEnvironmentFolder": "Uppdatering av miljömappen \"{{name}}\"",
       "singleFileFormatVersion": "Byte till filformat {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} scenarier",
       "countDesign_one": "{{count}} design",
       "countDesign_other": "{{count}} designer",
+      "countRecording_one": "{{count}} inspelningssession",
+      "countRecording_other": "{{count}} inspelningssessioner",
       "countFolder_one": "{{count}} mapp",
       "countFolder_other": "{{count}} mappar",
       "countEnvironmentFolder_one": "{{count}} miljömapp",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Skickar en anonymiserad rapport när Restorm kraschar, så att felet kan åtgärdas. Rapporter rensas från URL:er, tokens, förfrågningsinnehåll och personuppgifter innan de lämnar din dator. Ingår i gratisplanen; en betald plan låter dig stänga av det. Fullständiga uppgifter: https://restorm.app/privacy",
     "telemetryTitle": "Skicka användningsstatistik",
     "telemetryDescription": "Skickar anonym statistik om vilka funktioner som används, för att styra vad som byggs härnäst. Av som standard och aldrig påslaget utan ditt uttryckliga samtycke. Innehåller inga förfrågningsdata, inga URL:er och inga personuppgifter. Fullständiga uppgifter: https://restorm.app/privacy",
+    "geolocationTitle": "Dela din plats med den inbyggda webbläsaren",
+    "geolocationDescription": "Hämtar din ungefärliga position (från systemets platstjänst, eller från din IP-adress som reserv) och lämnar den bara vidare till den inbyggda minibrowsern, så att webbplatser som använder platsinformation fungerar i en inspelningssession. Ingenting skickas till Restorm.",
+    "geolocationConsent": {"title": "Dela din plats med den inbyggda webbläsaren?", "body": "Restorm frågar systemets platstjänst efter din position (och om den saknas uppskattas den utifrån din IP-adress via en tredjepartstjänst) och lämnar den bara vidare till sidorna som öppnas i den inbyggda minibrowsern. Din position lämnar annars aldrig din dator och glöms bort så snart du stänger av detta.", "accept": "Tillåt", "decline": "Inte nu"},
     "crashReportsLockedLabel": "Kan ändras från Pro-abonnemanget. I gratisabonnemanget behövs kraschrapporter för att upprätthålla kvaliteten.",
     "consentToast": {
       "title": "Hjälp oss att förbättra Restorm",

@@ -317,7 +317,8 @@
           "sse": "SSE",
           "trpc": "tRPC"
         },
-        "design": "API-Design"
+        "design": "API-Design",
+        "recording": "Aufnahmesitzung"
       },
       "cut": "Ausschneiden",
       "copy": "Kopieren",
@@ -444,6 +445,7 @@
         "requestBodyFile": "Datei"
       },
       "loading": "Anfrage wird gesendet...",
+      "body": { "download": "Herunterladen", "binary": "Binärer Inhalt ({{type}}) — verwenden Sie Herunterladen, um ihn zu speichern", "unknownType": "unbekannter Typ" },
       "noResponseBody": "Kein Antworttext — Details siehe Infos",
       "noResponse": "Klicken Sie auf Senden, um die Anfrage auszuführen",
       "history": {
@@ -752,7 +754,8 @@
       "settings": "Einstellungen",
       "tag": "Tags",
       "scenario": "Szenarien",
-      "design": "API-Designs"
+      "design": "API-Designs",
+      "recording": "Aufnahmesitzungen"
     },
     "tooltip": {
       "noDetails": "Keine Details verfügbar",
@@ -2810,6 +2813,84 @@
     "maxEntriesTitle": "Pro Verlauf aufbewahrte Einträge",
     "maxEntriesDescription": "Wie viele Einträge der Aufrufverlauf einer Anfrage und der Ausführungsverlauf eines Szenarios jeweils behalten. Angeheftete Einträge bleiben unabhängig von diesem Wert immer erhalten. Die Listen der letzten Aktivitäten auf der Startseite sind nicht betroffen."
   },
+  "recording": {
+    "title": "Aufnahmesitzungen",
+    "maxCapturesTitle": "Erfasste Aufrufe pro Sitzung",
+    "maxCapturesDescription": "Wie viele erfasste Aufrufe eine Aufnahmesitzung im Speicher behält. Ist die Obergrenze erreicht, werden die ältesten Aufrufe zuerst verworfen. Aufzeichnungen werden nie in der Projektdatei gespeichert.",
+    "newSessionName": "Neue Aufnahmesitzung",
+    "node": {
+      "browser": "Browser",
+      "captures": "Aufzeichnungen",
+      "routes": "Routen"
+    },
+    "tab": {
+      "browserTitle": "Browser: {{name}}",
+      "capturesTitle": "Aufzeichnungen: {{name}}",
+      "routesTitle": "Routen: {{name}}"
+    },
+    "placeholder": {
+      "config": "Die Einstellungen der Sitzung (Seiten-URL, Protokolle, Positiv- und Negativliste) erscheinen hier.",
+      "browser": "Der Aufnahme-Browser erscheint hier.",
+      "captures": "Noch kein Aufruf erfasst. Starten Sie eine Aufnahme in den Sitzungseinstellungen, damit die Aufrufe der Seite hier erscheinen.",
+      "routes": "Noch keine Route abgeleitet. Erfassen Sie Aufrufe und leiten Sie anschließend die Routen aus den Aufzeichnungen ab."
+    },
+    "config": {
+      "subtitle": "Navigieren Sie auf der Seite, während Restorm ihre API-Aufrufe mithört. Nur die Einstellungen unten werden mit dem Projekt gespeichert — niemals die erfassten Aufrufe.",
+      "url": "Zu überwachende Seite",
+      "urlPlaceholder": "https://beispiel.de, http://localhost:3000 oder file:///pfad/seite.html",
+      "urlInvalid": "Geben Sie eine http(s)- oder file-URL ein.",
+      "urlRequired": "Geben Sie die URL der Seite ein, um die Aufnahme zu aktivieren.",
+      "record": "Aufnahme starten",
+      "stop": "Aufnahme beenden",
+      "protocols": "Zu erfassende Protokolle",
+      "whitelist": "Positivliste",
+      "blacklist": "Negativliste",
+      "addPattern": "Muster hinzufügen",
+      "removePattern": "Dieses Muster entfernen",
+      "invalidPattern": "Dieses Muster ist kein gültiger regulärer Ausdruck.",
+      "patternPlaceholder": "Regulärer Ausdruck, z. B. ^https://api\\.beispiel\\.de/",
+      "noPattern": "Kein Muster — alles wird durchgelassen.",
+      "filtersHint": "Ein Aufruf wird behalten, wenn er mindestens einem Eintrag der Positivliste entspricht (oder diese leer ist) und keinem Eintrag der Negativliste. Änderungen gelten für die nächsten Aufrufe."
+    },
+    "protocol": {
+      "http": "HTTP",
+      "websocket": "WebSocket",
+      "graphql": "GraphQL",
+      "grpcWeb": "gRPC-web"
+    },
+    "browser": {
+      "pause": "Aufnahme pausieren",
+      "resume": "Aufnahme fortsetzen",
+      "stop": "Aufnahme beenden"
+    },
+    "captures": {
+      "empty": "Noch kein Aufruf erfasst. Starten Sie eine Aufnahme in den Sitzungseinstellungen, damit die Aufrufe der Seite hier live erscheinen.",
+      "filterPlaceholder": "Aufrufe filtern (regulärer Ausdruck)",
+      "live": "läuft",
+      "clearRun": "Die Aufrufe dieser Aufnahme löschen",
+      "selectOne": "Wählen Sie einen Aufruf, um seine Antwort zu sehen.",
+      "loadingDetail": "Aufruf wird geladen…",
+      "addToWhitelist": "Zur Positivliste hinzufügen…",
+      "addToBlacklist": "Zur Negativliste hinzufügen…",
+      "patternLabel": "Muster (regulärer Ausdruck)",
+      "add": "Hinzufügen",
+      "addAndApply": "Hinzufügen und auf die erfassten Aufrufe anwenden",
+      "applyConfirm": "Das Anwenden der Listen auf die bereits erfassten Aufrufe entfernt alle, die sie nun ablehnen. Dies kann nicht rückgängig gemacht werden.",
+      "applyConfirmOk": "Anwenden und entfernen",
+      "deduce": "Routen ableiten",
+      "deduceWhileRecording": "Beenden Sie die Aufnahme, bevor Sie die Routen ableiten.",
+      "deduceUnavailable": "Die Routenableitung ist noch nicht verfügbar.",
+      "deduceLocked": "Das Ableiten der Routen ist ab dem Pro-Tarif verfügbar."
+    },
+    "routes": {
+      "empty": "Noch keine Route abgeleitet. Erfassen Sie Aufrufe und verwenden Sie dann „Routen ableiten“ unter den Aufzeichnungen — die Anfragen erscheinen hier und unter der Zeile „Routen“ in der Seitenleiste.",
+      "proCallout": "Das Ableiten von Routen aus den erfassten Aufrufen ist ab dem Pro-Tarif verfügbar. Die Aufnahme bleibt für alle offen.",
+      "subscribe": "Tarife ansehen",
+      "count_one": "{{count}} abgeleitete Anfrage",
+      "count_other": "{{count}} abgeleitete Anfragen",
+      "hint": "Die abgeleiteten Anfragen sind gewöhnliche Anfragen: Bearbeiten Sie sie frei; eine erneute Ableitung behält Ihre Änderungen und fügt nur neue Routen hinzu."
+    }
+  },
   "mcp": {
     "title": "MCP",
     "logsRetentionCap": "Aufbewahrung des MCP-Aufrufprotokolls",
@@ -2850,6 +2931,16 @@
     }
   },
   "mcpToolTitles": {
+    "listRecordingSessions": "Aufzeichnungssitzungen auflisten",
+    "createRecordingSession": "Eine Aufzeichnungssitzung erstellen",
+    "updateRecordingSession": "Eine Aufzeichnungssitzung aktualisieren",
+    "setRecordingFilters": "Die URL-Filter einer Aufzeichnungssitzung festlegen",
+    "startRecording": "Die Aufzeichnung einer Sitzung starten",
+    "stopRecording": "Die Aufzeichnung einer Sitzung stoppen",
+    "getRecordingStatus": "Den Status einer Aufzeichnungssitzung abrufen",
+    "listRecordingCaptures": "Die erfassten Aufrufe einer Aufzeichnungssitzung auflisten",
+    "getRecordingCapture": "Einen erfassten Aufruf vollständig abrufen",
+    "deduceRecordingRoutes": "Die Routen einer Aufzeichnungssitzung ableiten",
     "answerScenarioInput": "Szenario-Eingabe beantworten",
     "arrangeScenario": "Szenario automatisch anordnen",
     "cancelRequest": "Anfrage abbrechen",
@@ -3210,6 +3301,9 @@
       "addedDesign": "Design „{{name}}“ hinzugefügt",
       "modifiedDesign": "Design „{{name}}“ geändert",
       "deletedDesign": "Design „{{name}}“ gelöscht",
+      "addedRecording": "Aufnahmesitzung „{{name}}“ hinzugefügt",
+      "modifiedRecording": "Aufnahmesitzung „{{name}}“ geändert",
+      "deletedRecording": "Aufnahmesitzung „{{name}}“ gelöscht",
       "addedFolder": "Ordner „{{name}}“ hinzugefügt",
       "modifiedFolder": "Ordner „{{name}}“ geändert",
       "deletedFolder": "Ordner „{{name}}“ gelöscht",
@@ -3219,6 +3313,7 @@
       "movedRequest": "Anfrage \"{{name}}\" verschoben",
       "movedScenario": "Szenario \"{{name}}\" verschoben",
       "movedDesign": "Design \"{{name}}\" verschoben",
+      "movedRecording": "Aufnahmesitzung „{{name}}“ verschoben",
       "movedFolder": "Ordner \"{{name}}\" verschoben",
       "movedEnvironmentFolder": "Umgebungsordner \"{{name}}\" verschoben",
       "reorderedFolder": "Elemente im Ordner „{{name}}“ neu angeordnet",
@@ -3230,6 +3325,7 @@
       "singleRequest": "Aktualisierung der Anfrage „{{name}}“",
       "singleScenario": "Aktualisierung des Szenarios „{{name}}“",
       "singleDesign": "Aktualisierung des Designs „{{name}}“",
+      "singleRecording": "Aktualisierung der Aufnahmesitzung „{{name}}“",
       "singleFolder": "Aktualisierung des Ordners „{{name}}“",
       "singleEnvironmentFolder": "Aktualisierung des Umgebungsordners „{{name}}“",
       "singleFileFormatVersion": "Wechsel zum Dateiformat {{name}}",
@@ -3239,6 +3335,8 @@
       "countScenario_other": "{{count}} Szenarien",
       "countDesign_one": "{{count}} Design",
       "countDesign_other": "{{count}} Designs",
+      "countRecording_one": "{{count}} Aufnahmesitzung",
+      "countRecording_other": "{{count}} Aufnahmesitzungen",
       "countFolder_one": "{{count}} Ordner",
       "countFolder_other": "{{count}} Ordner",
       "countEnvironmentFolder_one": "{{count}} Umgebungsordner",
@@ -3332,6 +3430,9 @@
     "crashReportsDescription": "Sendet einen anonymisierten Bericht, wenn Restorm abstürzt, damit der Fehler behoben werden kann. Berichte werden vor dem Verlassen Ihres Rechners von URLs, Tokens, Anfrage-Inhalten und personenbezogenen Daten bereinigt. Im kostenlosen Tarif enthalten; ein kostenpflichtiger Tarif erlaubt das Abschalten. Alle Einzelheiten: https://restorm.app/privacy",
     "telemetryTitle": "Nutzungsstatistiken senden",
     "telemetryDescription": "Sendet anonyme Statistiken darüber, welche Funktionen genutzt werden, um die Weiterentwicklung zu steuern. Standardmäßig aus und niemals ohne Ihre ausdrückliche Einwilligung aktiv. Enthält keine Anfragedaten, keine URLs und keine personenbezogenen Daten. Alle Einzelheiten: https://restorm.app/privacy",
+    "geolocationTitle": "Ihren Standort mit dem eingebetteten Browser teilen",
+    "geolocationDescription": "Ermittelt Ihre ungefähre Position (über den Standortdienst des Systems oder ersatzweise anhand Ihrer IP-Adresse) und gibt sie ausschließlich an den eingebetteten Mini-Browser weiter, damit Websites mit Geolokalisierung in einer Aufnahmesitzung funktionieren. An Restorm wird nichts gesendet.",
+    "geolocationConsent": {"title": "Ihren Standort mit dem eingebetteten Browser teilen?", "body": "Restorm fragt den Standortdienst Ihres Systems nach Ihrer Position (und schätzt sie, falls dort keine vorliegt, über einen Drittanbieterdienst anhand Ihrer IP-Adresse) und gibt sie ausschließlich an die im eingebetteten Mini-Browser geöffneten Seiten weiter. Ihre Position verlässt Ihren Computer ansonsten nie und wird vergessen, sobald Sie diese Option deaktivieren.", "accept": "Erlauben", "decline": "Jetzt nicht"},
     "crashReportsLockedLabel": "Ab dem Pro-Tarif änderbar. Im kostenlosen Tarif sind Absturzberichte nötig, um die Qualität zu sichern.",
     "consentToast": {
       "title": "Helfen Sie uns, Restorm zu verbessern",

@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0
+
+**Registri una pagina web, ottenga la sua API in forma di richieste.**
+
+- **Sessioni di registrazione.** Un nuovo tipo di elemento della barra laterale apre una pagina web nel mini browser integrato e acquisisce ogni chiamata API che effettua — REST, GraphQL, gRPC-web e WebSocket — in tempo reale, con liste bianca e nera in espressioni regolari, pausa e interruzione dalla barra dell'indirizzo e un alone pulsante attorno alla sessione finché è in corso. Ogni chiamata acquisita si legge esattamente come la risposta di una richiesta (corpo, informazioni, cookie, grafico); il menu contestuale di una chiamata aggiunge il suo url a una lista, con la possibilità di sfoltire ciò che era già stato acquisito. Le acquisizioni restano in memoria, limitate da una nuova impostazione dell'app, e non toccano mai il file di progetto.
+- **Deduci le route (Pro).** Un pulsante trasforma le acquisizioni in un albero di cartelle di vere richieste rieseguibili: i segmenti di percorso variabili diventano parametri di percorso `{{param}}`, le cartelle seguono i prefissi statici, le chiamate gRPC-web vengono ordinate per servizio e ogni richiesta è precompilata a partire dall'ultima chiamata riuscita, con le chiamate acquisite nella sua cronologia delle risposte. Dedurre di nuovo fonde i risultati — le Sue modifiche vengono conservate.
+- **La piloti dal Suo assistente IA.** Dieci strumenti MCP creano e configurano le sessioni, avviano e interrompono una registrazione, leggono le acquisizioni e deducono le route.
+- **Condivida la Sua posizione con il mini browser (su richiesta).** Una nuova impostazione Privacy, disattivata per impostazione predefinita, consente alle pagine aperte nel browser integrato — durante una registrazione o meno — di leggere la Sua posizione approssimativa, come farebbe la funzione di localizzazione del sito in un browser normale. Attivarla chiede prima il Suo consenso; la posizione proviene dal servizio di localizzazione del sistema (GeoClue su Linux), altrimenti da una stima a livello di città basata sul Suo indirizzo IP. Disattivarla dimentica subito la posizione.
+- **Scheda Risposta più ricca.** Le immagini ora si mostrano in linea, video e audio si riproducono, il Markdown viene renderizzato e l'editor di codice sceglie il linguaggio dal Content-Type — con un pulsante Scarica tradotto, sempre a portata di mano. Una risposta binaria rieseguita dalla cronologia non mostra più il suo base64.
+- **Importazione: una specifica JSON incollata si legge bene.** Un documento JSON su una sola riga incollato nel campo di importazione vuoto viene formattato in modo leggibile prima di aprirsi nell'editor.
+- **Gli elenchi lunghi restano veloci.** L'elenco delle acquisizioni (e la barra laterale oltre le 400 righe) renderizza soltanto ciò che è sullo schermo.
+- I file di progetto che contengono una sessione di registrazione vengono salvati nel formato 1.2; le versioni precedenti di Restorm Le chiedono di aggiornare prima di aprirli.
+
 ## v1.1.4
 
 **Colleghi il suo assistente IA su macOS — ora in modo affidabile.**
