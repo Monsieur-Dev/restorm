@@ -198,6 +198,22 @@ jobs:
           # (mac-notary-wait on Linux, mac-staple-publish on a short mac runner).
           # So no notarize flag.
           NOTARIZE_FLAG=""
+          # Windows code signing via Azure Trusted Signing. electron-builder 26
+          # signs the app executables + the NSIS installer inline when
+          # win.azureSignOptions is set (it self-installs the TrustedSigning
+          # PowerShell module and calls Invoke-TrustedSigning, authenticating
+          # with the AZURE_TENANT_ID/CLIENT_ID/CLIENT_SECRET env below via
+          # EnvironmentCredential). We inject the options ONLY here, and ONLY
+          # when the Azure credentials are present, so package.json stays
+          # unsigned by default: an uncredentialed build (or another workflow)
+          # must not carry azureSignOptions, or electron-builder would try to
+          # sign and fail. The account/profile were created under MonsieurDev
+          # (North Europe endpoint).
+          WIN_SIGN_FLAGS=""
+          if [ "${{ matrix.platform }}" = "windows" ] && [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_CLIENT_SECRET" ] && [ -n "$AZURE_TENANT_ID" ]; then
+            WIN_SIGN_FLAGS="-c.win.azureSignOptions.publisherName=MonsieurDev -c.win.azureSignOptions.endpoint=https://neu.codesigning.azure.net/ -c.win.azureSignOptions.codeSigningAccountName=restormsigning -c.win.azureSignOptions.certificateProfileName=restorm-public-trust"
+            echo "Windows build → signing via Azure Trusted Signing (account restormsigning, profile restorm-public-trust)."
+          fi
           # A tag-triggered run sets GITHUB_REF_TYPE=tag, which flips
           # electron-builder into implicit publishing — it then tries to push
           # the .snap to the Snap Store, but snapcraft isn't installed on this
@@ -207,7 +223,7 @@ jobs:
           # electron-builder still generates latest*.yml (needed for
           # auto-update) but pushes nothing: the reusable workflow_call path
           # already runs this way (its ref is the caller's branch).
-          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG
+          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG $WIN_SIGN_FLAGS
           # Signed macOS build → submit each .dmg to the notary service WITHOUT
           # waiting and record the submission ids. The .app inside every dmg/zip
           # of one arch shares a single code signature (cdhash), so one
