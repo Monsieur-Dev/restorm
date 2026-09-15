@@ -155,6 +155,15 @@ jobs:
                    SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
             if [ -z "$(printenv "$v")" ]; then unset "$v"; fi
           done
+          # CSC_LINK / CSC_KEY_PASSWORD hold the *macOS* Developer ID cert.
+          # electron-builder treats CSC_LINK as the code-signing cert for the
+          # CURRENT platform, so on Windows it would signtool-sign the artifacts
+          # with that mac cert (a signature Windows does not trust). Windows
+          # signs via Azure Trusted Signing (azureSignOptions, below) instead —
+          # drop the mac cert here so it can't hijack the Windows signing path.
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            unset CSC_LINK CSC_KEY_PASSWORD
+          fi
           # macOS notarization uses an App Store Connect API key. The secret
           # holds the .p8 base64; @electron/notarize wants a file PATH, so
           # materialize it and point APPLE_API_KEY at the file. Absent secret ⇒
@@ -223,7 +232,14 @@ jobs:
           # electron-builder still generates latest*.yml (needed for
           # auto-update) but pushes nothing: the reusable workflow_call path
           # already runs this way (its ref is the caller's branch).
-          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run dist -- $NOTARIZE_FLAG $WIN_SIGN_FLAGS
+          # Run the two halves of the `dist` script directly rather than
+          # `pnpm run dist -- <flags>`: pnpm forwards a literal `--` ahead of
+          # the appended args, which makes electron-builder's yargs treat the
+          # `-c.win.azureSignOptions.*` overrides as positional (silently
+          # ignored → it would fall back to signtool). Passing the flags straight
+          # to `electron-builder` keeps them parsed as config overrides.
+          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm run build
+          GITHUB_REF_TYPE=branch NODE_OPTIONS="$NODE_HEAP" pnpm exec electron-builder $NOTARIZE_FLAG $WIN_SIGN_FLAGS
           # Signed macOS build → submit each .dmg to the notary service WITHOUT
           # waiting and record the submission ids. The .app inside every dmg/zip
           # of one arch shares a single code signature (cdhash), so one
