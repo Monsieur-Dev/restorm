@@ -655,3 +655,21 @@ jobs:
     with:
       tag: ${{ inputs.tag || github.ref }}
     secrets: inherit
+
+  microsoft-store:
+    name: Microsoft Store
+    # Build the full-trust MSIX and submit it to Partner Center, in its own
+    # reusable workflow (Windows-only: makeappx). Kept out of the build matrix so
+    # the store-side logic lives in one dedicated file (also runnable by hand via
+    # dispatch). The submit step self-skips while the MS_STORE_* secrets are
+    # absent, so this is safe even before the credentials are configured.
+    needs: [setup, release]
+    # The .appx is produced from the Windows build, so only publish it when
+    # windows was part of this run (a linux/macos-only rebuild must not touch the
+    # store). It resolves + version-pins to the released version the same way
+    # snap-store does (from the ref's package.json), so the tag drives it.
+    if: ${{ contains(needs.setup.outputs.targets, 'windows') }}
+    uses: ./.github/workflows/microsoft-store.yml
+    with:
+      tag: ${{ inputs.tag || github.ref }}
+    secrets: inherit
