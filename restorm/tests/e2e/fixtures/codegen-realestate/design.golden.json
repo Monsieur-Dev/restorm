@@ -7,7 +7,7 @@
       {
         "id": "622fcecf-cecc-4ed1-a136-a23bce9e22c6",
         "label": "REST · TypeScript · Express",
-        "outputDir": "/home/yoann/Bureau/RealEstate-gen/ts",
+        "outputDir": "/tmp/realestate-gen/ts",
         "source": {
           "kind": "repo",
           "repo": "Monsieur-Dev/restorm-template-server-rest-typescript"
@@ -18,7 +18,7 @@
         "label": "Variable Test Template",
         "source": {
           "kind": "local",
-          "path": "/home/yoann/Bureau/Tests restorm/codegen-vars-test-template"
+          "path": "/tmp/restorm-tests/codegen-vars-test-template"
         }
       }
     ]

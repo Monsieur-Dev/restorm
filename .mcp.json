@@ -8,7 +8,7 @@
       "command": "npx",
       "args": ["-y", "backlog.md", "mcp", "start"],
       "env": {
-        "BACKLOG_CWD": "/home/yoann/git/gitable"
+        "BACKLOG_CWD": "${BACKLOG_CWD:-../backlog}"
       }
     }
   }

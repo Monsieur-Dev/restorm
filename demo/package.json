@@ -6,7 +6,7 @@
   "homepage": "https://github.com/oYo-fr/demo",
   "author": {
     "name": "Yoann Diguet",
-    "email": "contact@oyo-fr.com"
+    "email": "contact@restorm.app"
   },
   "license": "MIT",
   "engines": {
@@ -80,7 +80,7 @@
         "rpm"
       ],
       "category": "Development",
-      "maintainer": "Yoann Diguet <contact@oyo-fr.com>",
+      "maintainer": "Yoann Diguet <contact@restorm.app>",
       "executableName": "demo-bin"
     },
     "deb": {
