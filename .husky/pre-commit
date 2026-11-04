@@ -31,6 +31,21 @@ fi
 echo "✅ No forbidden patterns found"
 echo ""
 
+# Secret scan on the staged diff (gitleaks). The CI job in
+# .github/workflows/secret-scan.yml re-scans the full history on every PR.
+echo "🔑 Scanning staged changes for secrets..."
+if command -v gitleaks >/dev/null 2>&1; then
+    gitleaks git --staged --config .gitleaks.toml --redact --no-banner || exit 1
+elif command -v docker >/dev/null 2>&1; then
+    GIT_COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
+    docker run --rm -v "$PWD:$PWD:ro" -v "$GIT_COMMON:$GIT_COMMON:ro" -w "$PWD" \
+        ghcr.io/gitleaks/gitleaks:v8.30.1 git --staged --config .gitleaks.toml --redact --no-banner . || exit 1
+else
+    echo "⚠️  gitleaks is not installed and docker is unavailable — staged secret scan skipped"
+    echo "   Install it: https://github.com/gitleaks/gitleaks#installing"
+fi
+echo ""
+
 # i18n guard: missing-from-en keys + false-tick translations
 echo "🌍 Running i18n guard..."
 node scripts/check-i18n.mjs || exit 1
