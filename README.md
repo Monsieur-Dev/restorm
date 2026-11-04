@@ -47,4 +47,4 @@ non-negotiable repo rules.
 
 ## License
 
-MIT
+Restorm is **source-available, not open source**. The code is published so that anyone can read it, audit its security and privacy properties, and contribute — nothing more. Production use, redistribution, forks and any circumvention of the licensing mechanisms are prohibited. See [LICENSE](LICENSE) for the exact terms.
