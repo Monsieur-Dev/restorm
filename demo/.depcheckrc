@@ -11,6 +11,7 @@
     "electron",
     "electron-builder",
     "electron-builder-squirrel-windows",
+    "dmg-builder",
     "electron-vite",
     "@vitejs/*",
     "vite",
