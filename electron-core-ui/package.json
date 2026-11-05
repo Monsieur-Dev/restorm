@@ -159,7 +159,7 @@
     "simplex-noise": "^4.0.3",
     "unique-names-generator": "^4.7.1",
     "winston": "^3.19.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@milkdown/crepe": "^7.22.0",
