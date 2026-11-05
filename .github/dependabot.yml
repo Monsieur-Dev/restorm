@@ -12,6 +12,14 @@ updates:
     groups:
       workspace-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # electron-builder 26.18 resolves the pnpm workspace root on Windows and
+      # then tries to rebuild `usocket` (Unix-only) there, which fails the
+      # Windows package. Pull requests do not exercise packaging, so hold the
+      # family at the pinned version until that rebuild is excluded on Windows.
+      - dependency-name: "electron-builder"
+      - dependency-name: "electron-builder-squirrel-windows"
+      - dependency-name: "dmg-builder"
     # Major bumps stay as individual pull requests so each one gets its own CI run.
 
   # Standalone packages outside the workspace.
