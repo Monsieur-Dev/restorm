@@ -4,7 +4,7 @@
   "description": "GraphQL test server for Restorm",
   "main": "server.js",
   "dependencies": {
-    "@apollo/server": "^4.10.0",
+    "@apollo/server": "^5.5.0",
     "graphql": "^16.8.1"
   }
 }
