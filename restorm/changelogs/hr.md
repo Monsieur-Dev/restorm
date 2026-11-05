@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Javni izvorni kod, sigurnije ovisnosti.**
+
+- **Kod Restorma sada je javan.** Cijelu aplikaciju možete pregledati na GitHubu — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — pod licencom „source-available”: sami provjerite kako se postupa s vašim podacima, prijavite ranjivost ili doprinesite.
+- **Sigurnosna ažuriranja na svim razinama.** Electron prelazi na 43.8, a biblioteke koje Restorm sadrži dovedene su na ispravljene verzije: HTML sanitizator, mehanizam predložaka, HTTP, gRPC i XML slojevi, čitač arhiva, MCP SDK. Zatvoreno je više od dvjesto poznatih sigurnosnih upozorenja.
+- U vašim se projektima ništa ne mijenja: isti format datoteke, iste postavke.
+
 ## v1.2.0
 
 **Snimite web-stranicu i dobijte njezin API u obliku zahtjeva.**

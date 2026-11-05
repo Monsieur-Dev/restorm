@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Offentlig kildekode, tryggere avhengigheter.**
+
+- **Koden til Restorm er nå offentlig.** Hele programmet kan leses på GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — under en source-available-lisens: se selv hvordan dataene dine håndteres, meld fra om en sårbarhet, eller bidra.
+- **Sikkerhetsoppdateringer over hele linjen.** Electron går til 43.8, og bibliotekene Restorm inneholder, er oppdatert til rettede versjoner: HTML-sanitizeren, malmotoren, HTTP-, gRPC- og XML-lagene, arkivleseren, MCP SDK-et. Mer enn to hundre kjente sikkerhetsvarsler er lukket.
+- Ingenting endres i prosjektene dine: samme filformat, samme innstillinger.
+
 ## v1.2.0
 
 **Ta opp en nettside, få API-et dens som forespørsler.**

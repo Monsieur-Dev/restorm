@@ -10,6 +10,14 @@ release-communication copy, written per release — not generated from tickets. 
 [docs/contributing/release-notes.md](docs/contributing/release-notes.md) for the
 per-release process.
 
+## v1.2.1
+
+**Public source code, safer dependencies.**
+
+- **Restorm's code is now public.** The whole application can be read on GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — under a source-available licence: check for yourself how your data is handled, report a vulnerability, or contribute.
+- **Security updates across the board.** Electron moves to 43.8, and the libraries Restorm embeds are brought to their patched versions: the HTML sanitiser, the template engine, the HTTP, gRPC and XML layers, the archive reader, the MCP SDK. More than two hundred known security advisories are closed.
+- Nothing changes in your projects: same file format, same settings.
+
 ## v1.2.0
 
 **Record a web page, get its API as requests.**

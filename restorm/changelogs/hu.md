@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Nyilvános forráskód, biztonságosabb függőségek.**
+
+- **A Restorm kódja mostantól nyilvános.** A teljes alkalmazás megtekinthető a GitHubon — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — „source-available” licenc alatt: ellenőrizze saját maga, hogyan kezeljük az adatait, jelentsen sebezhetőséget, vagy járuljon hozzá.
+- **Biztonsági frissítések mindenütt.** Az Electron a 43.8-as verzióra lép, és a Restormba épített könyvtárak a javított verziójukra kerültek: a HTML-tisztító, a sablonmotor, a HTTP-, gRPC- és XML-rétegek, az archívumolvasó, az MCP SDK. Több mint kétszáz ismert biztonsági figyelmeztetés lezárult.
+- A projektjeiben semmi sem változik: ugyanaz a fájlformátum, ugyanazok a beállítások.
+
 ## v1.2.0
 
 **Rögzítsen egy weboldalt, és kapja meg az API-ját kérésekként.**
