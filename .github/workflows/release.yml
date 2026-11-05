@@ -331,7 +331,7 @@ jobs:
         # a bundle's symlinks/permissions and would break its signature. The
         # staple job extracts the .app from the zip instead. Ephemeral (1-day).
         if: matrix.platform == 'macos' && env.mac_async == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-dist
           path: |
@@ -448,7 +448,7 @@ jobs:
         with:
           node-version: '26'
       - name: Download the signed macOS dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           name: macos-dist
@@ -486,7 +486,7 @@ jobs:
         # not the built tag. The release VERSION is read from the artifact's feed.
         uses: actions/checkout@v7
       - name: Download the signed macOS dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           name: macos-dist
