@@ -154,7 +154,7 @@
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "simple-git": "^3.36.0",
+    "simple-git": "^4.0.1",
     "simple-icons": "^16.36.0",
     "simplex-noise": "^4.0.3",
     "unique-names-generator": "^4.7.1",
