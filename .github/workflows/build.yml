@@ -180,10 +180,6 @@ jobs:
         image: node:20-alpine
         ports:
           - 4000:4000
-      soap:
-        image: castlemock/castlemock
-        ports:
-          - 8090:8080
       grpc:
         # Native gRPC only (port 9000). Its second port is TLS-secured
         # native gRPC too, not gRPC-Web — the gRPC-Web mock (started
