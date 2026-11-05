@@ -458,7 +458,7 @@ Prefer an official or widely-used image:
 | GraphQL | custom Node 20 server (precedent: `restorm/tests/docker/graphql-server`) |
 | WebSocket / Socket.IO | custom Node 20 server (precedent: `socketio-server`) |
 | MQTT | `eclipse-mosquitto:2` |
-| SOAP | `castlemock/castlemock` |
+| SOAP | custom Node 20 server (precedent: `restorm/tests/docker/soap-server`) |
 | gRPC | `moul/grpcbin` (echo) |
 | Kafka | `confluentinc/cp-kafka` |
 | Redis | `redis:7-alpine` |

@@ -47,11 +47,6 @@ export const SERVICES = {
     name: 'OData v2 PetStore Mock',
     baseUrl: 'http://localhost:5102'
   },
-  soap: {
-    /** Castle Mock — kept for manual local testing; E2E suite uses soapServer below. */
-    name: 'SOAP Server (Castle Mock)',
-    baseUrl: 'http://localhost:8090'
-  },
   soapServer: {
     /** Zero-dependency SOAP mock used by the soap-execution E2E suite. */
     name: 'SOAP mock server',
@@ -176,7 +171,7 @@ export async function waitForServices(): Promise<void> {
       url: `${SERVICES.httpUtil.baseUrl}/health`
     },
     {
-      // The E2E suite targets the soap-server mock (:8091), not Castle Mock.
+      // The SOAP suites target the soap-server mock (:8091).
       // soap-server is a zero-dependency node:http server that starts instantly.
       name: 'SOAP mock server',
       url: `${SERVICES.soapServer.baseUrl}/health`

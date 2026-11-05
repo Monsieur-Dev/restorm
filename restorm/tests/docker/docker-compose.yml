@@ -137,15 +137,6 @@ services:
       retries: 20
       start_period: 20s
 
-  # SOAP - Castle Mock server (kept for manual local testing via the web UI).
-  # The E2E suite targets the soap-server mock below (:8091), which requires
-  # no seeding and starts instantly — Castle Mock is NOT used by the tests.
-  soap:
-    image: castlemock/castlemock
-    container_name: restorm-soap
-    ports:
-      - "8090:8080"
-
   # SOAP mock server — zero-dependency Node server used by the
   # `soap-execution` E2E suite. Dispatches on the SOAPAction header and
   # returns deterministic SOAP 1.1 envelopes: Echo (reflects input),

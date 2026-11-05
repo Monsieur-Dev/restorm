@@ -15,11 +15,9 @@ const SERVICES = [
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
   { name: 'tRPC mock server', url: 'http://localhost:8096/health' },
   { name: 'HTTP util', url: 'http://localhost:8082/health' },
-  // The E2E suite uses the soap-server mock (:8091), not Castle Mock (:8090).
   // soap-server is a zero-dependency node:http server started by the CI
   // manual-start step (no seeding required).
   { name: 'SOAP mock server', url: 'http://localhost:8091/health' },
-  { name: 'SOAP (Castle Mock)', url: 'http://localhost:8090/castlemock/web' },
   { name: 'SSE mock server', url: 'http://localhost:8097/health' },
   // No Socket.IO / WS mock: restorm self-hosts those servers in-instance.
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
