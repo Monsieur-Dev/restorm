@@ -117,7 +117,7 @@
     "socket.io-client": "^4.8.3",
     "tar": "^7.5.22",
     "tough-cookie": "^6.0.2",
-    "undici": "^8.10.0",
+    "undici": "^8.12.2",
     "uuid": "^14.0.1",
     "wasmoon": "^1.16.0",
     "webr": "^0.6.0",
