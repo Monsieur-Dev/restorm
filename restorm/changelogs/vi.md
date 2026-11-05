@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Mã nguồn công khai, phụ thuộc an toàn hơn.**
+
+- **Mã của Restorm nay đã công khai.** Toàn bộ ứng dụng có thể đọc trên GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — theo giấy phép source-available: bạn có thể tự kiểm tra cách dữ liệu của mình được xử lý, báo cáo lỗ hổng hoặc đóng góp.
+- **Cập nhật bảo mật trên diện rộng.** Electron lên bản 43.8, và các thư viện đi kèm Restorm được đưa lên phiên bản đã vá: bộ làm sạch HTML, công cụ template, các lớp HTTP, gRPC và XML, trình đọc tệp nén, MCP SDK. Hơn hai trăm cảnh báo bảo mật đã biết được khắc phục.
+- Không có gì thay đổi trong các dự án của bạn: vẫn định dạng tệp đó, vẫn các thiết lập đó.
+
 ## v1.2.0
 
 **Ghi lại một trang web, nhận API của nó dưới dạng yêu cầu.**

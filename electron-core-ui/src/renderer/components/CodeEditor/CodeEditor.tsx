@@ -291,7 +291,7 @@ export const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function Co
    * synchronously — the state-clearing `setEditorInstance(null)` alone is
    * not enough, because the re-run happens before that update renders.
    */
-  const disposedEditorsRef = useRef(new WeakSet<object>())
+  const disposedEditorsRef = useRef(new WeakSet())
   const lastValueRef = useRef<string | undefined>(props.value)
   const lastEventRef = useRef<monacoEditor.editor.IModelContentChangedEvent | undefined>(undefined)
 

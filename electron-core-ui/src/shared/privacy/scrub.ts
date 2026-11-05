@@ -506,7 +506,7 @@ function classifyString(text: string, options: ScrubOptions): string[] {
  */
 export function scrubPayload(value: unknown, options: ScrubOptions = {}): unknown {
   const maxDepth = options.maxDepth ?? 8
-  return walk(value, options, maxDepth, 0, new WeakSet<object>())
+  return walk(value, options, maxDepth, 0, new WeakSet())
 }
 
 function walk(
@@ -623,7 +623,7 @@ function toJsonOf(value: object): unknown {
  */
 export function findScrubViolations(value: unknown, options: ScrubOptions = {}): ScrubViolation[] {
   const violations: ScrubViolation[] = []
-  inspect(value, options, options.maxDepth ?? 8, 0, '$', new WeakSet<object>(), violations)
+  inspect(value, options, options.maxDepth ?? 8, 0, '$', new WeakSet(), violations)
   return violations
 }
 

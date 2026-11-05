@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Julkinen lähdekoodi, turvallisemmat riippuvuudet.**
+
+- **Restormin koodi on nyt julkinen.** Koko sovellus on luettavissa GitHubissa — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — source-available-lisenssillä: tarkistakaa itse, miten tietojanne käsitellään, ilmoittakaa haavoittuvuudesta tai osallistukaa kehitykseen.
+- **Tietoturvapäivityksiä kautta linjan.** Electron siirtyy versioon 43.8, ja Restormin sisältämät kirjastot on päivitetty korjattuihin versioihinsa: HTML-puhdistin, mallimoottori, HTTP-, gRPC- ja XML-kerrokset, arkistonlukija, MCP SDK. Yli kaksisataa tunnettua tietoturvailmoitusta on suljettu.
+- Projekteissanne ei muutu mikään: sama tiedostomuoto, samat asetukset.
+
 ## v1.2.0
 
 **Tallentakaa verkkosivu ja saakaa sen API pyyntöinä.**

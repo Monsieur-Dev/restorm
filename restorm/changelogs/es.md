@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Código fuente público, dependencias más seguras.**
+
+- **El código de Restorm ya es público.** Toda la aplicación puede consultarse en GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — bajo una licencia «source-available»: compruebe usted mismo cómo se tratan sus datos, informe de una vulnerabilidad o contribuya.
+- **Actualizaciones de seguridad generalizadas.** Electron pasa a la versión 43.8 y las bibliotecas que incorpora Restorm se llevan a sus versiones corregidas: el saneador de HTML, el motor de plantillas, las capas HTTP, gRPC y XML, el lector de archivos comprimidos, el SDK de MCP. Se cierran más de doscientos avisos de seguridad conocidos.
+- Nada cambia en sus proyectos: mismo formato de archivo, mismos ajustes.
+
 ## v1.2.0
 
 **Grabe una página web y obtenga su API en forma de solicitudes.**

@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**源代码公开，依赖更安全。**
+
+- **Restorm 的代码现已公开。** 整个应用的代码可在 GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — 上以 source-available 许可查阅：您可以亲自核实数据的处理方式、报告漏洞或参与贡献。
+- **全面的安全更新。** Electron 升级到 43.8，Restorm 内置的库也更新到已修复的版本：HTML 净化器、模板引擎、HTTP、gRPC 与 XML 层、归档读取器、MCP SDK。两百多项已知安全公告得以关闭。
+- 您的项目不受任何影响：文件格式不变，设置不变。
+
 ## v1.2.0
 
 **录制一个网页，把它的 API 变成请求。**

@@ -10,6 +10,7 @@
     "cross-env",
     "electron",
     "electron-builder",
+    "electron-builder-squirrel-windows",
     "electron-vite",
     "@vitejs/*",
     "vite",

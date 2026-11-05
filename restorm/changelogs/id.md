@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Kode sumber publik, dependensi lebih aman.**
+
+- **Kode Restorm kini terbuka untuk umum.** Seluruh aplikasi dapat dibaca di GitHub — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — dengan lisensi source-available: periksa sendiri bagaimana data Anda ditangani, laporkan kerentanan, atau ikut berkontribusi.
+- **Pembaruan keamanan menyeluruh.** Electron naik ke 43.8, dan pustaka yang disertakan Restorm dibawa ke versi yang telah diperbaiki: pembersih HTML, mesin templat, lapisan HTTP, gRPC, dan XML, pembaca arsip, MCP SDK. Lebih dari dua ratus peringatan keamanan yang diketahui telah ditutup.
+- Tidak ada yang berubah pada proyek Anda: format berkas yang sama, pengaturan yang sama.
+
 ## v1.2.0
 
 **Rekam sebuah halaman web, dapatkan API-nya sebagai permintaan.**

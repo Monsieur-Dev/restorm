@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+**Herkese açık kaynak kodu, daha güvenli bağımlılıklar.**
+
+- **Restorm'un kodu artık herkese açık.** Uygulamanın tamamı GitHub'da — [github.com/Monsieur-Dev/restorm](https://github.com/Monsieur-Dev/restorm) — “source-available” lisansıyla incelenebilir: verilerinizin nasıl işlendiğini kendiniz doğrulayın, bir güvenlik açığı bildirin veya katkıda bulunun.
+- **Kapsamlı güvenlik güncellemeleri.** Electron 43.8 sürümüne geçiyor ve Restorm'un içerdiği kütüphaneler düzeltilmiş sürümlerine getirildi: HTML temizleyici, şablon motoru, HTTP, gRPC ve XML katmanları, arşiv okuyucu, MCP SDK. Bilinen iki yüzden fazla güvenlik bildirimi kapatıldı.
+- Projelerinizde hiçbir şey değişmiyor: aynı dosya biçimi, aynı ayarlar.
+
 ## v1.2.0
 
 **Bir web sayfasını kaydedin, API'sini istekler olarak alın.**
