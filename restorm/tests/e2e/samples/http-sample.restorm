@@ -33,7 +33,7 @@ collections:
             enabled: true
             value:
               type: string
-              value: /home/yoann/git/restorm-master/restorm-wt/task-238/restorm/tests/e2e/samples/fixtures/upload.txt
+              value: ./tests/e2e/samples/fixtures/upload.txt
           - key: hbId
             enabled: true
             value:

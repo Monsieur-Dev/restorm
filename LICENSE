@@ -1,22 +1,98 @@
-Restorm — Proprietary License
+Restorm Source-Available License 1.0
 
 Copyright © 2026 MonsieurDev (Yoann Diguet). All rights reserved.
 
-This repository, including its source code, assets, and documentation, is the
-exclusive property of MonsieurDev. No license is granted to copy, modify,
-distribute, sublicense, publish, or create derivative works from any part of
-its contents, in source or binary form, without prior written permission from
-MonsieurDev.
+This license governs the source code, assets and documentation of Restorm
+(the "Software") published at https://github.com/Monsieur-Dev/restorm and
+https://github.com/Monsieur-Dev/restorm-action. The Software is NOT open
+source. Making the source available does not grant any right that is not
+expressly listed below.
 
-Use of the packaged Restorm application is governed by the Restorm Terms of
-Use (https://restorm.app/terms), which define the free Community edition —
-for individuals and teams of up to ten people — and the paid subscription
-plans for larger organizations.
+1. Permitted uses
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   Subject to this license, the Licensor grants you a limited, non-exclusive,
+   non-transferable, revocable right to:
+
+   a. read and study the source code, for the purpose of understanding,
+      reviewing, auditing or assessing the security and privacy properties
+      of the Software;
+   b. make a copy of the source code on your own machine for that purpose,
+      and build it there for your own private, non-production testing;
+   c. propose changes to the Licensor by submitting a contribution to the
+      official repository, under the terms of section 4.
+
+   Use of the compiled, officially distributed Restorm application remains
+   governed by its End User License Agreement and the Restorm Terms of
+   Service, not by this license.
+
+2. Prohibited uses
+
+   Except as expressly permitted in section 1, you may not:
+
+   a. use the Software, or any build made from it, for any production,
+      commercial, internal business or hosted purpose;
+   b. copy, publish, distribute, sublicense, sell, rent, lease or otherwise
+      make the Software or any build made from it available to any third
+      party, in source or binary form, modified or not;
+   c. create, maintain or publish a fork or derivative work of the Software,
+      other than a private branch intended solely to prepare a contribution
+      under section 4;
+   d. remove, disable, alter, work around or otherwise circumvent any
+      licensing, entitlement, subscription, feature-gating, authentication
+      or telemetry mechanism of the Software, or any public key, certificate
+      or endpoint used by such a mechanism, or build or run a version of the
+      Software in which any of these has been removed or altered;
+   e. use the Software or its source code to build, train or improve a
+      competing product or service, or to extract specifications, formats,
+      protocols or know-how for that purpose;
+   f. remove or alter any copyright, trademark or license notice.
+
+   Any circumvention described in 2.d is also a violation of the applicable
+   anti-circumvention laws (including Article 6 of Directive 2001/29/EC and
+   17 U.S.C. § 1201) and of the Restorm Terms of Service.
+
+3. Trademarks
+
+   "Restorm", the Restorm logo and the MonsieurDev name are trademarks of the
+   Licensor. This license grants no right to use them, except to accurately
+   reference the Software.
+
+4. Contributions
+
+   By submitting a contribution (pull request, patch, issue with code) to the
+   official repository you grant the Licensor a perpetual, worldwide,
+   irrevocable, royalty-free license to use, reproduce, modify, distribute,
+   sublicense and relicense your contribution, in source or binary form,
+   under any terms, including proprietary terms, as part of the Software or
+   otherwise. You confirm that you have the right to grant this license.
+   The Licensor may require a signed Contributor License Agreement before
+   merging any contribution.
+
+5. Termination
+
+   This license terminates automatically, without notice, if you breach any
+   of its terms. Upon termination you must destroy every copy of the Software
+   in your possession. Sections 2, 3, 4, 6 and 7 survive termination.
+
+6. No warranty, no liability
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY ARISING FROM THE SOFTWARE OR THIS LICENSE.
+
+7. Governing law
+
+   This license is governed by French law. Any dispute shall be brought
+   before the competent courts of Bordeaux, France.
+
+8. Third-party components
+
+   Third-party dependencies bundled with the Software remain subject to
+   their own licenses, listed in their respective package manifests.
+
+---
+
+Note on GitHub: by hosting the Software in a public repository, the Licensor
+accepts that GitHub's Terms of Service let visitors view and fork the
+repository on GitHub. That tolerance exists only within GitHub's platform
+and does not extend any permission beyond section 1.

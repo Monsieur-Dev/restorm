@@ -2,7 +2,7 @@
  * Derive 1–2 uppercase initials from a name or email. Names split on
  * whitespace; emails use the local part (before the first `@`) split on `.`,
  * `_`, `-` and `+`. The first and last meaningful tokens contribute one letter
- * each, so "Yoann Diguet" and "yoann.diguet@x.io" both yield "YD".
+ * each, so "Jane Doe" and "jane.doe@x.io" both yield "JD".
  */
 export function deriveInitials(name: string): string {
   const trimmed = name.trim()

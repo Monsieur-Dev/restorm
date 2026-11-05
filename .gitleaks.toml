@@ -1,0 +1,26 @@
+# gitleaks configuration — secret scanning for commits, pushes and CI.
+# The default ruleset is extended; the allowlists below cover the synthetic
+# credentials that tests and fixtures deliberately contain. Keep every entry
+# narrow (a file or an exact fake value), never a whole source tree.
+title = "Restorm secret scanning"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Privacy-scrub unit tests assert on fake Stripe keys, JWTs and API keys"
+paths = [
+  '''electron-core-ui/src/shared/privacy/scrub\.test\.ts$''',
+  '''restorm/src/main/services/crash/sentryScrub\.test\.ts$''',
+]
+
+[[allowlists]]
+description = "Local RabbitMQ docker mock ships the default `guest` user hash"
+paths = ['''restorm/tests/docker/rabbitmq-definitions\.json$''']
+
+[[allowlists]]
+description = "Well-known demo tokens: the jwt.io John Doe JWT and the Insomnia petstore fixture key"
+regexes = [
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ''',
+  '''prod-api-key-123$''',
+]

@@ -7,9 +7,9 @@
   "homepage": "https://github.com/oYo-fr/restorm",
   "author": {
     "name": "Yoann Diguet",
-    "email": "contact@oyo-fr.com"
+    "email": "contact@restorm.app"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=20"
   },
