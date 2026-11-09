@@ -94,7 +94,7 @@
     "electron-updater": "^6.8.11",
     "elkjs": "^0.12.1",
     "esbuild": "^0.28.2",
-    "fast-xml-parser": "^4.5.7",
+    "fast-xml-parser": "^5.12.0",
     "graphql-sse": "^2.6.3",
     "handlebars": "^4.7.10",
     "i18next": "^26.7.1",
