@@ -31,14 +31,14 @@
     "@monaco-editor/react": "^4.7.0",
     "@vscode/codicons": "0.0.46-24",
     "electron-core-ui": "workspace:*",
-    "i18next": "^26.7.1",
-    "monaco-editor": "^0.56.0",
+    "i18next": "^26.7.2",
+    "monaco-editor": "^0.57.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-i18next": "^17.1.12"
+    "react-i18next": "^17.1.13"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -52,13 +52,13 @@
     "eslint": "^9.39.5",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "7.0.1",
-    "eslint-plugin-react-refresh": "0.4.26",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
     "globals": "^17.14.0",
-    "playwright": "^1.64.1",
+    "playwright": "^1.65.0",
     "playwright-bdd": "^9.2.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "8.58.2",
+    "typescript-eslint": "8.72.1",
     "vite": "^7.3.7"
   },
   "build": {
